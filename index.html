@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KDP Tarot Pro Studio | Master Edition</title>
     
+    <!-- Librerie Esterne -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
+    <!-- Regole di Stampa Dinamiche -->
     <style id="dynamicPrintStyle">@media print { @page { size: 8.5in 11in; margin: 0 !important; } .page-text, .page-bleed { width: 8.5in !important; height: 11in !important; overflow: hidden !important; } }</style>
 
     <style>
@@ -38,6 +39,7 @@
         #editorWorkspace { background-color: #111; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 4rem 2rem; flex: 1; scroll-behavior: smooth; }
         #bookPage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3.5rem; outline: none; counter-reset: pdf-page; }
 
+        /* Paginazione Libro */
         .page-text, .page-bleed { background-color: var(--page-bg); box-shadow: 0 10px 25px rgba(0,0,0,0.8); width: var(--page-width-px); height: var(--page-height-px); position: relative; overflow: hidden; color: var(--text-main); box-sizing: border-box; flex-shrink: 0; counter-increment: pdf-page; }
         .page-text { padding: var(--safe-margin-px); display: flex; flex-direction: column; }
         .page-bleed { padding: 0; display: flex; justify-content: center; align-items: center; border: none; counter-increment: none; }
@@ -49,73 +51,60 @@
 
         .doc-title { font-family: 'Cinzel', serif; font-size: calc(3.5rem * var(--font-scale)); text-align: center; color: var(--primary-dark); line-height: 1.1; margin: 0; text-transform: uppercase; }
         .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(2.2rem * var(--font-scale)); text-align: center; color: var(--primary-dark); margin: 0 0 calc(1.5rem * var(--font-scale)) 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
-        .doc-h2 { font-family: 'Cinzel', serif; font-size: calc(1.5rem * var(--font-scale)); color: var(--primary-dark); text-align: center; margin-top: 0; margin-bottom: calc(1.5rem * var(--font-scale)); letter-spacing: 2px; }
         .drop-cap::first-letter { font-family: 'Cinzel', serif; font-size: 3.5em; float: left; margin-top: -0.1em; margin-right: 0.1em; color: var(--gold); line-height: 1; }
 
+        /* Estetica Carta Perfetta (Edge-to-Edge) */
         .tarot-card-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
-        .tarot-master-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; filter: brightness(0.65) contrast(1.2); }
-        .tarot-css-frame-outer { position: absolute; top: 3.5%; bottom: 3.5%; left: 4.5%; right: 4.5%; border: 1px solid rgba(212, 175, 55, 0.4); z-index: 2; pointer-events: none; border-radius: 4px; }
+        .tarot-master-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; filter: brightness(0.7) contrast(1.2); }
+        .tarot-css-frame-outer { position: absolute; top: 3.5%; bottom: 3.5%; left: 4.5%; right: 4.5%; border: 1.5px solid rgba(212, 175, 55, 0.4); z-index: 2; pointer-events: none; border-radius: 4px; }
         
         .tarot-art-window { 
             position: absolute; top: 7%; bottom: 7%; left: 9%; right: 9%; z-index: 3; background: #000; 
-            border: 3px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); 
+            border: 3px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.9); 
             overflow: hidden; border-radius: 2px;
         }
-        .tarot-art-window::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(0,0,0,0.4); z-index: 10; pointer-events: none; }
         
-        .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: transform 0.5s; }
+        .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* New Elegant Overlay for text inside the frame */
-        .tarot-text-overlay { 
-            position: absolute; bottom: 0; left: 0; width: 100%; z-index: 5; 
-            background: linear-gradient(to top, rgba(15, 18, 25, 0.98) 0%, rgba(15, 18, 25, 0.7) 50%, transparent 100%);
-            padding: 50px 10px 15px 10px; /* Extra padding top for smooth gradient */
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; 
-            pointer-events: none; 
+        /* Gradiente Scuro dal basso, NO rettangoli neri netti */
+        .tarot-text-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, transparent 100%);
+            z-index: 4; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 25px; pointer-events: none;
         }
-        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 6px rgba(0,0,0,1); margin: 0 0 2px 0; }
-        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.2rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,1); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
+        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(2rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); margin: 0 0 5px 0; }
+        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.5rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.9); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
 
+        /* Tipografia Scheda Destra */
         .symbol-page { display: flex; flex-direction: column; height: 100%; }
         .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(12pt * var(--font-scale)); line-height: 1.7; color: #1e293b; margin-bottom: calc(2rem * var(--font-scale)); text-align: justify; }
-        .symbol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(2rem * var(--font-scale)); flex-grow: 1; }
+        .symbol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1.5rem * var(--font-scale)); margin-bottom: 2rem; }
         .symbol-item { border-left: 2px solid var(--gold); padding-left: 15px; }
         .symbol-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
         .symbol-title::before { content: '✦'; color: var(--gold); font-size: 14pt; }
         .symbol-desc { font-family: 'Inter', sans-serif; font-size: calc(10pt * var(--font-scale)); color: #475569; line-height: 1.5; margin: 0; }
         
-        .numerology-box { background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid var(--primary-dark); padding: calc(1.2rem * var(--font-scale)); margin-top: auto; }
-        .numerology-title { font-family: 'Cinzel', serif; font-size: calc(10pt * var(--font-scale)); font-weight: 700; letter-spacing: 1px; color: var(--primary-dark); margin-bottom: 8px; text-transform: uppercase; }
-        .numerology-text { font-family: 'Inter', sans-serif; font-size: calc(9.5pt * var(--font-scale)); color: #334155; line-height: 1.5; margin: 0; }
-
-        .oracle-wrapper { display: flex; flex-direction: column; height: 100%; }
-        .reading-slot { display: flex; gap: calc(1.5rem * var(--font-scale)); margin-bottom: calc(1.5rem * var(--font-scale)); border-left: 2px solid var(--gold); padding-left: 15px; align-items: flex-start; }
-        .reading-content { flex: 1; min-width: 0; }
-        .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(13pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); text-transform: uppercase; margin: 0 0 4px 0; }
-        .reading-position { font-family: 'Inter', sans-serif; font-size: calc(8.5pt * var(--font-scale)); font-weight: 600; letter-spacing: 1.5px; color: #94a3b8; text-transform: uppercase; margin: 0 0 8px 0; display: block; }
-        .reading-text { font-family: 'Playfair Display', serif; font-size: calc(11.5pt * var(--font-scale)); line-height: 1.5; color: #334155; margin: 0; }
+        .reading-slot { margin-bottom: calc(1rem * var(--font-scale)); padding-left: 15px; border-left: 2px solid var(--primary-dark); }
+        .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(12pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); margin: 0; }
+        .reading-text { font-family: 'Playfair Display', serif; font-size: calc(11pt * var(--font-scale)); line-height: 1.5; color: #334155; margin: 5px 0 0 0; }
         
-        .mantra-box { margin-top: auto; border-top: 1px solid #cbd5e1; padding-top: calc(1.5rem * var(--font-scale)); text-align: center; position: relative; }
-        .mantra-ornament { color: var(--gold); font-size: calc(14pt * var(--font-scale)); background: var(--page-bg); padding: 0 15px; position: relative; top: calc(-2.3rem * var(--font-scale)); display: inline-block; }
-        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(12.5pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); letter-spacing: 0.5px; margin: 0; line-height: 1.4; }
+        .mantra-box { margin-top: auto; border-top: 1px solid #cbd5e1; padding-top: calc(1rem * var(--font-scale)); text-align: center; }
+        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(12pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); }
 
-        .pnp-sheet { padding: 0 !important; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; }
-        .pnp-container { width: 85%; height: 85%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; }
-        .pnp-card { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
+        /* Print and Play - Formato Universale 2.75x4.75 */
+        .pnp-sheet { padding: 0 !important; display: flex; justify-content: center; align-items: center; background: #fff; }
+        .pnp-container { display: grid; grid-template-columns: repeat(2, 2.75in); grid-template-rows: repeat(2, 4.75in); gap: 0.5in; }
+        .pnp-card { width: 2.75in; height: 4.75in; position: relative; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
         
-        .pnp-card .tarot-text-overlay { padding: 25px 2px 5px 2px; }
-        .pnp-card .tarot-num { font-size: 11px; margin-bottom: 2px; letter-spacing: 2px; }
-        .pnp-card .tarot-name { font-size: 13px; padding: 0 4px; line-height: 1.1; text-align: center; }
+        .pnp-card .tarot-text-overlay { padding-bottom: 10px; height: 50%; }
+        .pnp-card .tarot-num { font-size: 14px; margin-bottom: 2px; }
+        .pnp-card .tarot-name { font-size: 16px; padding: 0 4px; line-height: 1.1; }
 
-        .editable-image-container { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; z-index: 1; }
-        .editable-image-container::after { content: '✎ Rigenera Art'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 20; backdrop-filter: blur(2px); border-radius: inherit; font-family: 'Inter', sans-serif; }
+        /* Overlay di Edit e Modali */
+        .editable-image-container { position: relative; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; }
+        .editable-image-container::after { content: '✎ Rigenera Art'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 20; backdrop-filter: blur(2px); font-family: 'Inter', sans-serif; }
         .editable-image-container:hover::after { opacity: 1; }
         
-        .action-overlay { position: absolute; bottom: -50px; right: 10px; z-index: 100; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; display: flex; gap: 8px; }
-        .page-text:hover .action-overlay, .page-bleed:hover .action-overlay { bottom: 15px; opacity: 1; }
-        .btn-action { background: var(--primary-dark); color: var(--gold); border: 1px solid var(--gold); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-        .btn-action:hover { background: var(--gold); color: var(--primary-dark); transform: translateY(-2px); }
-
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal.show { display: flex; }
         .modal-content { background: var(--secondary-dark); border: 1px solid #334155; border-radius: 12px; width: 95%; max-width: 600px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
@@ -124,18 +113,17 @@
         .toast { background: var(--secondary-dark); border-left: 4px solid var(--gold); color: white; padding: 16px 24px; border-radius: 4px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease-out; display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         
+        /* FIX CRITICO: Distrugge Flexbox per abilitare Paginazione PDF infinita */
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+            header, .w-\[360px\], #toolbar, #toast-container, .modal { display: none !important; }
             
-            /* FIX CRITICO PDF: Neutralizza Flexbox, h-screen e overflow che bloccavano l'impaginazione in Chrome/Edge */
-            body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; position: static !important; }
-            header, .w-\[360px\], #toolbar, #toast-container, .modal, .action-overlay { display: none !important; }
-            
-            /* Sblocchiamo tutti i wrapper principali forzandoli in display: block */
-            #mainContentWrapper, #editorContainer, #editorWorkspace { padding: 0 !important; margin: 0 !important; height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; background: transparent !important; position: static !important; width: 100% !important; flex: none !important; }
-            
-            #bookPage { gap: 0 !important; display: block !important; height: auto !important; overflow: visible !important; }
-            .page-text, .page-bleed { box-shadow: none !important; border: none !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; float: none !important; }
+            body, #editorContainer, #editorWorkspace, #bookPage {
+                display: block !important; height: auto !important; max-height: none !important;
+                overflow: visible !important; background: none !important; padding: 0 !important; margin: 0 !important;
+            }
+            .page-text, .page-bleed { box-shadow: none !important; border: none !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; }
             .editable-image-container::after { display: none !important; }
         }
     </style>
@@ -143,6 +131,7 @@
 
 <body class="h-screen flex flex-col overflow-hidden text-slate-200">
 
+    <!-- HEADER TOP -->
     <header class="bg-[#0f1219] border-b border-[#1a1e29] p-4 flex justify-between items-center z-20 shrink-0 shadow-lg">
         <h1 class="text-xl font-bold font-serif flex items-center gap-3">
             <svg class="w-6 h-6 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -159,7 +148,9 @@
         </div>
     </header>
 
-    <div id="mainContentWrapper" class="flex flex-1 overflow-hidden">
+    <!-- MAIN WRAPPER -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- PANNELLO LATERALE -->
         <div class="w-[360px] bg-[#0f1219] border-r border-[#1a1e29] flex flex-col shrink-0 z-10 shadow-2xl">
             <div class="p-5 overflow-y-auto flex-1 custom-scrollbar">
                 
@@ -168,136 +159,107 @@
                     <input type="password" id="apiKeyInput" class="w-full p-2 bg-[#1a1e29] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]" placeholder="Lascia vuoto per ambiente Immersive">
                 </div>
 
+                <!-- STEP 1: TEXTURE -->
                 <div class="bg-[#1a1e29] rounded-lg p-4 mb-5 border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
-                    <h3 class="text-[#d4af37] font-bold mb-3 flex items-center gap-2 text-xs uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
-                        1. Forgia Texture Maestra
-                    </h3>
+                    <h3 class="text-[#d4af37] font-bold mb-3 flex items-center gap-2 text-xs uppercase tracking-wider" style="font-family: 'Cinzel', serif;">1. Forgia Texture Maestra</h3>
                     <div class="mb-3">
-                        <select id="frameStyle" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]">
-                            <option value="Classic Golden Renaissance, highly ornate gold symmetrical patterns">Rinascimento Dorato</option>
-                            <option value="Dark Gothic, silver thorns and obsidian symmetrical textures">Gotico Oscuro</option>
-                            <option value="Art Nouveau, elegant flowing floral symmetrical patterns">Art Nouveau</option>
-                            <option value="Celestial Astrological, stars and zodiac intricate patterns">Astrologico Celestiale</option>
-                        </select>
+                        <textarea id="frameStyle" class="w-full h-16 p-2 bg-[#0f1219] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37] resize-none" placeholder="Descrivi lo stile dello sfondo... (Es. Fiori gotici d'oro, Geometria sacra)"></textarea>
                     </div>
-                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview">
-                        <span class="text-xs text-slate-500">Nessuna Cornice</span>
-                    </div>
+                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview"></div>
                     <button id="btnGenerateFrame" class="w-full bg-slate-700 hover:bg-slate-600 text-[#d4af37] font-bold py-2 rounded transition-all text-xs flex justify-center items-center gap-2 border border-[#d4af37]/50">
-                        <span id="btnFrameText" class="">Evoca Texture Sfondo</span>
+                        <span id="btnFrameText">Evoca Nuova Texture Sfondo</span>
                         <div id="btnFrameLoader" class="loader hidden"></div>
                     </button>
-                    <p class="text-[9px] text-slate-400 mt-2 text-center leading-tight">L'IA genererà un pattern solido. Il motore CSS intaglierà la finestra per le carte.</p>
                 </div>
 
+                <!-- STEP 2: SETTINGS GRIMORIO -->
                 <div class="bg-[#1a1e29] rounded-lg p-5 mb-4 border border-slate-700/50">
-                    <h3 class="text-slate-300 font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
-                        2. Tarot Settings
-                    </h3>
+                    <h3 class="text-slate-300 font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider" style="font-family: 'Cinzel', serif;">2. Settings Grimorio</h3>
                     <div class="mb-3">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Argomento / Titolo Libro</label>
-                        <input type="text" id="bookTopic" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. The Crystal Tarot">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Titolo Libro</label>
+                        <input type="text" id="bookTopic" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-sm text-slate-200" placeholder="es. The Golden Tarot">
                     </div>
                     <div class="mb-3">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Tema Lettura (Croce Celtica)</label>
-                        <select id="readingTheme" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200">
-                            <option value="Universal Meaning">Significato Generale Universale</option>
-                            <option value="Love and Relationships">Focalizzato su Amore e Relazioni</option>
-                            <option value="Career and Wealth">Focalizzato su Lavoro e Finanze</option>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Tema Lettura</label>
+                        <select id="readingTheme" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-sm text-slate-200">
+                            <option value="Universal Meaning">Significato Universale</option>
+                            <option value="Love and Relationships">Amore e Relazioni</option>
+                            <option value="Career and Wealth">Lavoro e Finanze</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Stile Artistico IA (Es. Manga, Acquerello)</label>
-                        <input type="text" id="visualSetting" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. 'Watercolor style, black cats'">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Stile Artistico IA (Visual Seed)</label>
+                        <input type="text" id="visualSetting" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-sm text-slate-200" value="Epic mystical realism">
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Lista Personalizzata (Opzionale)</label>
-                        <textarea id="customRecipeList" class="w-full h-12 p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-[11px] resize-none text-slate-200" placeholder="Lascia vuoto per i 22 Arcani Maggiori"></textarea>
-                    </div>
-                    
                     <div class="grid grid-cols-2 gap-2 mb-3">
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Lingua Target</label>
                             <select id="bookLanguage" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="English (US)" selected>English (US)</option>
-                                <option value="Italiano">Italiano</option>
+                                <option value="English (US)">English (US)</option>
+                                <option value="Italiano" selected>Italiano</option>
                                 <option value="Deutsch">Deutsch</option>
                                 <option value="Français">Français</option>
                                 <option value="Español">Español</option>
-                                <option value="日本語">日本語</option>
-                                <option value="Polski">Polski</option>
-                                <option value="Português">Português</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia Libro</label>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia PDF</label>
                             <select id="trimSize" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="8.5x11" selected>8.5 x 11 in. (A4 / KDP Large)</option>
-                                <option value="6x9">6 x 9 in. (Standard)</option>
+                                <option value="8.5x11" selected>8.5 x 11 in (A4/L)</option>
+                                <option value="6x9">6 x 9 in (Libro)</option>
                             </select>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Tono Voce Video (TikTok)</label>
-                        <select id="voiceTone" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                            <option value="Mistico e Solenne">Mistico e Solenne</option>
-                            <option value="Intimidatorio e Oscuro">Intimidatorio e Oscuro</option>
-                            <option value="Dolce e Rassicurante">Dolce e Rassicurante</option>
-                        </select>
-                    </div>
+                    
+                    <label class="flex items-center gap-2 cursor-pointer mt-4 p-2 bg-[#0f1219] rounded border border-slate-700 hover:border-[#d4af37] transition">
+                        <input type="checkbox" id="includeMinors" class="w-4 h-4 accent-[#d4af37]" checked>
+                        <span class="text-xs font-medium text-slate-300">Includi 56 Arcani Minori (Mazzo 78)</span>
+                    </label>
                 </div>
 
-                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2 disabled:opacity-50" style="font-family: 'Cinzel', serif;">
-                    <span id="btnStartText" class="flex items-center gap-2">Forgia Grimorio Completo</span>
-                    <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione...</span>
+                <!-- AVVIO E PROGRESSO -->
+                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2">
+                    <span id="btnStartText" style="font-family: 'Cinzel', serif;">Forgia Grimorio</span>
+                    <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> INVOCAZIONE...</span>
                 </button>
                 
-                <button id="btnTranslate" class="w-full bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50 text-xs">
-                    <span id="btnTranslateText" class="flex items-center gap-2">Traduci Testi (Mantieni Arte)</span>
-                    <span id="btnTranslateLoader" class="hidden"><div class="loader"></div></span>
-                </button>
-
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button id="btnSaveProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all text-[11px]">Salva Book</button>
-                    <button id="btnLoadProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all text-[11px]">Carica Book</button>
+                <div class="grid grid-cols-2 gap-2 mb-4 mt-4">
+                    <button id="btnSaveProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2 rounded text-[11px]">Salva Book</button>
+                    <button id="btnLoadProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2 rounded text-[11px]">Carica Book</button>
                     <input type="file" id="fileLoadProject" accept=".kdp" class="hidden">
-                    <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded transition-all text-xs">Azzera Progetto</button>
+                    <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2 rounded text-xs">Azzera Progetto</button>
                 </div>
 
                 <div id="progressSection" class="hidden flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner">
                     <div class="flex justify-between text-xs mb-1 text-slate-400">
-                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Inizializzazione...</span>
+                        <span id="progressStatus" class="truncate font-medium text-[#d4af37]">Inizializzazione...</span>
                         <span id="progressCount" class="font-mono text-[10px]">0/0</span>
                     </div>
                     <div class="w-full bg-[#1a1e29] rounded-full h-1.5 overflow-hidden">
-                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 0%;"></div>
+                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- EDITOR DOCUMENTO -->
         <div id="editorContainer">
             <div id="toolbar">
                 <div class="toolbar-group">
-                    <button class="tool-btn" title="Riduci Font" onclick="adjustFontSize(-1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg></button>
-                    <button class="tool-btn" title="Aumenta Font" onclick="adjustFontSize(1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
+                    <button class="tool-btn" onclick="document.execCommand('bold', false, null)"><b>B</b></button>
+                    <button class="tool-btn" onclick="document.execCommand('italic', false, null)"><i>I</i></button>
                 </div>
-                <div class="toolbar-group">
-                    <button class="tool-btn" title="Grassetto" onclick="document.execCommand('bold', false, null)"><span class="font-bold text-sm">B</span></button>
-                    <button class="tool-btn" title="Corsivo" onclick="document.execCommand('italic', false, null)"><span class="italic text-sm font-serif">I</span></button>
-                </div>
-                <div class="text-xs text-slate-400 font-medium ml-4">Evidenzia il testo per formattare. Clicca un'illustrazione per rigenerarla.</div>
+                <div class="text-xs text-slate-400 ml-4">Clicca su qualsiasi carta generata per evocare una Nuova Visione.</div>
             </div>
 
             <div id="editorWorkspace">
-                <!-- Spazio pulito di partenza: solo copertina -->
                 <div id="bookPage" contenteditable="true" spellcheck="false">
                     <div class="page-text no-page-num" style="padding: 0;">
-                        <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                            <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;"></div>
-                            <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;"></h1>
+                        <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box;">
+                            <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem;">Premium Edition</div>
+                            <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0;">Tarot Pro Studio</h1>
                             <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                            <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;"></p>
+                            <p id="coverSub" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic;">Imposta i parametri a sinistra e Forgia il Grimorio.</p>
                         </div>
                     </div>
                 </div>
@@ -305,10 +267,11 @@
         </div>
     </div>
 
+    <!-- MODALE RIGENERAZIONE -->
     <div id="regenModal" class="modal">
         <div class="modal-content">
-            <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">✎ Modifica Illustrazione</h2>
-            <p class="text-xs text-slate-400">Aggiungi istruzioni (es. "aggiungi un lupo") o lascia vuoto per rimpiazzo casuale.</p>
+            <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">✎ Modifica Visione</h2>
+            <p class="text-xs text-slate-400">Aggiungi un dettaglio specifico o lascia vuoto per sostituzione casuale.</p>
             <textarea id="regenPrompt" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none"></textarea>
             <div class="flex justify-end gap-3 mt-2">
                 <button id="closeRegenModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Annulla</button>
@@ -319,24 +282,11 @@
         </div>
     </div>
 
-    <div id="videoModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">🎬 TikTok Video Studio Pro</h2>
-            <p class="text-xs text-slate-400">Copia questo prompt in Luma o Runway Gen3 assieme all'immagine esportata della carta.</p>
-            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly></textarea>
-            <p class="text-xs text-slate-400 mt-2">Script Vocale (Tono: <span id="videoToneLabel" class="text-white font-bold"></span>)</p>
-            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly></textarea>
-            <div class="flex justify-between items-center mt-2">
-                <button id="btnPlayTTS" class="text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm flex items-center gap-2"> Ascolta Voce </button>
-                <button id="closeVideoModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Chiudi Studio</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- MODALE RESET -->
     <div id="resetConfirmModal" class="modal">
         <div class="modal-content" style="max-width: 400px; text-align: center; border-color: #7f1d1d;">
             <h2 class="text-xl font-serif text-red-400 mb-2 flex justify-center items-center gap-2" style="font-family: 'Cinzel', serif;">Attenzione!</h2>
-            <p class="text-sm text-slate-300 mb-6">Vuoi azzerare l'intero progetto? Tutte le carte generate andranno perse.</p>
+            <p class="text-sm text-slate-300 mb-6">Vuoi azzerare l'intero progetto? Tutte le carte andranno perse.</p>
             <div class="flex justify-center gap-3">
                 <button id="btnCancelReset" class="px-5 py-2.5 text-slate-400 hover:text-white bg-slate-800 rounded transition text-sm">Annulla</button>
                 <button id="btnConfirmReset" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-5 rounded shadow flex items-center gap-2 text-sm">Azzera Tutto</button>
@@ -346,59 +296,54 @@
 
     <div id="toast-container"></div>
 
+    <!-- SCRIPT PRINCIPALE -->
     <script>
         const DOM = {
             btnStart: document.getElementById('btnStartAutoPilot'), btnText: document.getElementById('btnStartText'), btnLoader: document.getElementById('btnStartLoader'),
-            btnTranslate: document.getElementById('btnTranslate'), btnTranslateText: document.getElementById('btnTranslateText'), btnTranslateLoader: document.getElementById('btnTranslateLoader'),
             topicInput: document.getElementById('bookTopic'), readingTheme: document.getElementById('readingTheme'), languageInput: document.getElementById('bookLanguage'), trimSize: document.getElementById('trimSize'),
-            customList: document.getElementById('customRecipeList'), visualSetting: document.getElementById('visualSetting'), voiceTone: document.getElementById('voiceTone'),
-            bookPage: document.getElementById('bookPage'), apiKeyInput: document.getElementById('apiKeyInput'),
+            visualSetting: document.getElementById('visualSetting'), includeMinors: document.getElementById('includeMinors'), bookPage: document.getElementById('bookPage'), apiKeyInput: document.getElementById('apiKeyInput'),
             savePdfBtn: document.getElementById('savePdfBtn'), saveMpcBtn: document.getElementById('saveMpcBtn'),
             btnSaveProject: document.getElementById('btnSaveProject'), btnLoadProject: document.getElementById('btnLoadProject'), fileLoadProject: document.getElementById('fileLoadProject'),
             progressSection: document.getElementById('progressSection'), progressStatus: document.getElementById('progressStatus'), progressCount: document.getElementById('progressCount'), progressBar: document.getElementById('progressBar'),
             toastContainer: document.getElementById('toast-container'),
             regenModal: document.getElementById('regenModal'), closeRegenModal: document.getElementById('closeRegenModal'), btnConfirmRegen: document.getElementById('btnConfirmRegen'), regenPrompt: document.getElementById('regenPrompt'), btnRegenText: document.getElementById('btnRegenText'), btnRegenLoader: document.getElementById('btnRegenLoader'),
-            videoModal: document.getElementById('videoModal'), closeVideoModal: document.getElementById('closeVideoModal'), videoPromptCopy: document.getElementById('videoPromptCopy'), videoScriptCopy: document.getElementById('videoScriptCopy'), btnPlayTTS: document.getElementById('btnPlayTTS'), videoToneLabel: document.getElementById('videoToneLabel'),
             btnGenerateFrame: document.getElementById('btnGenerateFrame'), frameStyle: document.getElementById('frameStyle'), masterFramePreview: document.getElementById('masterFramePreview'), btnFrameText: document.getElementById('btnFrameText'), btnFrameLoader: document.getElementById('btnFrameLoader'),
-            btnResetProject: document.getElementById('btnResetProject'), resetConfirmModal: document.getElementById('resetConfirmModal'), btnCancelReset: document.getElementById('btnCancelReset'), btnConfirmReset: document.getElementById('btnConfirmReset')
+            btnResetProject: document.getElementById('btnResetProject'), resetConfirmModal: document.getElementById('resetConfirmModal'), btnCancelReset: document.getElementById('btnCancelReset'), btnConfirmReset: document.getElementById('btnConfirmReset'),
+            coverTitle: document.getElementById('coverTitle'), coverSub: document.getElementById('coverSub')
         };
 
         const getAPIKey = () => DOM.apiKeyInput.value.trim() || "";
         let masterFrameBase64 = null;
         let generatedCards = [];
-        let globalTocEntries = [];
-        let imageToRegenerate = null, basePromptForRegen = "", currentEditingIdx = null;
-
-        const defaultArcana = ["0 - The Fool", "I - The Magician", "II - The High Priestess", "III - The Empress", "IV - The Emperor", "V - The Hierophant", "VI - The Lovers", "VII - The Chariot", "VIII - Strength", "IX - The Hermit", "X - Wheel of Fortune", "XI - Justice", "XII - The Hanged Man", "XIII - Death", "XIV - Temperance", "XV - The Devil", "XVI - The Tower", "XVII - The Star", "XVIII - The Moon", "XIX - The Sun", "XX - Judgement", "XXI - The World"];
+        let imageToRegenerate = null, basePromptForRegen = "", currentEditingIdx = null, baseNameForRegen = "";
 
         const dictUI = {
-            "English (US)": { ed: "Premium Edition", subHtml: 'Craft, Cut and <span style="color: var(--primary-dark); font-size: inherit;">Read Your Esoteric Deck</span>', sym: "Mystical Symbolism", ora: "Oracle Dynamics", pnp: "Print & Play (Extraction)", tutTitle: "Deck Extraction", tut: "Follow these steps to transform the pages into a physical deck.", step1: "Extract", step1Desc: "Carefully detach the Print & Play pages from the binding.", step2: "Laminate", step2Desc: "Apply clear adhesive film to BOTH sides of the extracted sheets to protect them.", step3: "Cut", step3Desc: "Cut along the margins. The cards will be flexible and perfectly aligned.", toc: "Table of Contents", defTitle: "The Tarot" },
-            "Italiano": { ed: "Edizione Premium", subHtml: 'Crea, Ritaglia e <span style="color: var(--primary-dark); font-size: inherit;">Leggi il tuo Mazzo</span>', sym: "Simbolismo Mistico", ora: "Dinamiche dell'Oracolo", pnp: "Print & Play (Ritagliare)", tutTitle: "Estrazione del Mazzo", tut: "Segui questi passaggi per trasformare le pagine nel tuo grimorio fisico.", step1: "Estrai", step1Desc: "Stacca accuratamente i fogli Print & Play dalla rilegatura.", step2: "Plastifica", step2Desc: "Applica pellicola trasparente adesiva su AMBO I LATI dei fogli per proteggerli.", step3: "Ritaglia", step3Desc: "Ritaglia sui bordi delle carte. Fronte e retro combaceranno perfettamente.", toc: "Indice dei Contenuti", defTitle: "I Tarocchi" },
-            "Deutsch": { ed: "Premium-Ausgabe", subHtml: 'Erstelle, Schneide und <span style="color: var(--primary-dark); font-size: inherit;">Lese dein Deck</span>', sym: "Mystische Symbolik", ora: "Orakel-Dynamik", pnp: "Print & Play (Ausschneiden)", tutTitle: "Deck-Herstellung", tut: "Befolge diese Schritte, um die Seiten in ein echtes Deck zu verwandeln.", step1: "Entfernen", step1Desc: "Löse die Seiten vorsichtig aus der Bindung.", step2: "Laminieren", step2Desc: "Trage auf BEIDEN Seiten eine durchsichtige Klebefolie auf.", step3: "Schneiden", step3Desc: "Schneide entlang der Kanten. Die Karten sind perfekt ausgerichtet.", toc: "Inhaltsverzeichnis", defTitle: "Das Tarot" },
-            "Français": { ed: "Édition Premium", subHtml: 'Créez, Découpez et <span style="color: var(--primary-dark); font-size: inherit;">Lisez votre Jeu</span>', sym: "Symbolisme Mystique", ora: "Dynamique de l'Oracle", pnp: "Print & Play (Découper)", tutTitle: "Création du Jeu", tut: "Suivez ces étapes pour extraire les cartes.", step1: "Extraire", step1Desc: "Détachez soigneusement les pages de la reliure.", step2: "Plastifier", step2Desc: "Appliquez un film adhésif transparent des DEUX côtés des feuilles.", step3: "Couper", step3Desc: "Coupez le long des marges. Le recto et le verso s'aligneront parfaitement.", toc: "Table des Matières", defTitle: "Le Tarot" },
-            "Español": { ed: "Edición Premium", subHtml: 'Crea, Recorta y <span style="color: var(--primary-dark); font-size: inherit;">Lee tu Mazo</span>', sym: "Simbolismo Místico", ora: "Dinámica del Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extracción del Mazo", tut: "Sigue estos pasos para transformar las páginas en tu mazo físico.", step1: "Extraer", step1Desc: "Desprende las hojas con cuidado de la encuadernación.", step2: "Plastificar", step2Desc: "Aplica película adhesiva transparente en AMBOS lados.", step3: "Recortar", step3Desc: "Recorta por los bordes. El anverso y reverso coincidirán perfectamente.", toc: "Índice de Contenidos", defTitle: "El Tarot" },
-            "日本語": { ed: "プレミアム版", subHtml: 'あなたの秘教的なデッキを<span style="color: var(--primary-dark); font-size: inherit;">作成、解釈、切り取り</span>', sym: "神秘的な象徴主義", ora: "オラクルの力学", pnp: "プリント＆プレイ", tutTitle: "デッキの抽出", tut: "これらの手順に従って、ページを実際のデッキに変えてください。", step1: "切り離す", step1Desc: "ページを綴じ込みから慎重に切り離します。", step2: "ラミネート", step2Desc: "シートの両面に透明な粘着フィルムを貼ります。", step3: "カット", step3Desc: "余白に沿って切ります。表と裏が完全に一致します。", toc: "目次", defTitle: "タロット" },
-            "Polski": { ed: "Edycja Premium", subHtml: 'Stwórz, Wytnij i <span style="color: var(--primary-dark); font-size: inherit;">Czytaj Swoją Talię</span>', sym: "Mistyczna Symbolika", ora: "Dynamika Wyroczni", pnp: "Print & Play (Wycięcie)", tutTitle: "Wyodrębnianie Talii", tut: "Wykonaj te kroki, aby przekształcić strony w fizyczną talię.", step1: "Wytnij", step1Desc: "Ostrożnie oderwij arkusze od oprawy.", step2: "Laminuj", step2Desc: "Nałóż przezroczystą folię samoprzylepną z OBU stron arkuszy.", step3: "Tnij", step3Desc: "Tnij wzdłuż krawędzi. Przód i tył będą idealnie wyrównane.", toc: "Spis Treści", defTitle: "Tarot" },
-            "Português": { ed: "Edição Premium", subHtml: 'Crie, Recorte e <span style="color: var(--primary-dark); font-size: inherit;">Leia Seu Baralho</span>', sym: "Simbolismo Místico", ora: "Dinâmica do Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extração do Baralho", tut: "Siga estes passos para extrair suas cartas.", step1: "Extrair", step1Desc: "Destaque cuidadosamente as folhas da encadernação.", step2: "Plastificar", step2Desc: "Aplique película adesiva transparente de AMBOS os lados das folhas.", step3: "Recortar", step3Desc: "Corte ao longo das margens. A frente e o verso se alinharão perfeitamente.", toc: "Índice", defTitle: "O Tarot" }
+            "English (US)": { sub: "Craft, Read and Cut Your Esoteric Deck" },
+            "Italiano": { sub: "Crea, Leggi e Ritaglia il tuo Mazzo Esoterico" },
+            "Deutsch": { sub: "Erstelle, Lese und Schneide dein Esoterisches Deck" },
+            "Français": { sub: "Créez, Lisez et Découpez votre Jeu Ésotérique" },
+            "Español": { sub: "Crea, Lee y Recorta tu Mazo Esotérico" }
         };
 
-        function updateCover() {
-            const lang = DOM.languageInput.value;
-            const t = dictUI[lang] || dictUI["English (US)"];
-            const rawTitle = DOM.topicInput.value.trim() || t.defTitle || "The Tarot";
-            
-            const coverEdition = document.getElementById('coverEdition');
-            const coverTitle = document.getElementById('coverTitle');
-            const coverSubtitle = document.getElementById('coverSubtitle');
-            
-            if (coverEdition) coverEdition.textContent = t.ed;
-            if (coverTitle) coverTitle.textContent = rawTitle;
-            if (coverSubtitle) coverSubtitle.innerHTML = t.subHtml;
-        }
-
-        DOM.languageInput.addEventListener('change', updateCover);
+        const updateCover = () => {
+            DOM.coverTitle.innerText = DOM.topicInput.value.trim() || "Tarot Pro Studio";
+            DOM.coverSub.innerText = dictUI[DOM.languageInput.value]?.sub || dictUI["English (US)"].sub;
+        };
         DOM.topicInput.addEventListener('input', updateCover);
-        updateCover();
+        DOM.languageInput.addEventListener('change', updateCover);
+
+        DOM.trimSize.addEventListener('change', () => {
+            const val = DOM.trimSize.value;
+            const widthIn = val === '6x9' ? 6 : 8.5;
+            const heightIn = val === '6x9' ? 9 : 11;
+            document.documentElement.style.setProperty('--page-width-px', `${widthIn * 96}px`);
+            document.documentElement.style.setProperty('--page-height-px', `${heightIn * 96}px`);
+            document.documentElement.style.setProperty('--font-scale', widthIn <= 6 ? 0.85 : 1.0);
+            document.getElementById('dynamicPrintStyle').innerHTML = `@media print { @page { size: ${widthIn}in ${heightIn}in; margin: 0 !important; } .page-text, .page-bleed { width: ${widthIn}in !important; height: ${heightIn}in !important; overflow: hidden !important; } }`;
+            document.getElementById('headerTrimLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${widthIn}" x ${heightIn}" Bleed`;
+        });
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
 
         function showToast(message, type = 'info') {
             const toast = document.createElement('div'); toast.className = `toast ${type}`;
@@ -408,600 +353,352 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 5000);
         }
 
-        function updateStatus(msg, percent = null, current = null, total = null) {
-            DOM.progressStatus.textContent = msg;
-            if(percent !== null) DOM.progressBar.style.width = `${percent}%`;
-            if(current !== null && total !== null) DOM.progressCount.textContent = `${current}/${total}`;
-        }
-        const delay = ms => new Promise(res => setTimeout(res, ms));
-
-        function extractJSON(text) {
-            try {
-                let s = text.indexOf('{'); let b = text.indexOf('[');
-                let start = (s !== -1 && b !== -1) ? Math.min(s, b) : (s !== -1 ? s : b);
-                if (start !== -1) {
-                    let endChar = text[start] === '{' ? '}' : ']';
-                    let end = text.lastIndexOf(endChar);
-                    if (end !== -1) return JSON.parse(text.substring(start, end + 1));
+        function generateProceduralTexture() {
+            const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1200; const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, 800, 1200);
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.15)'; ctx.lineWidth = 1.5;
+            for(let i = -100; i < 900; i += 80) {
+                for(let j = -100; j < 1300; j += 80) {
+                    ctx.beginPath(); ctx.arc(i, j, 60, 0, Math.PI * 2); ctx.stroke();
                 }
-                return JSON.parse(text); 
-            } catch(e) { throw new Error("Errore formattazione JSON dall'IA."); }
-        }
-
-        const fetchWithRetry = async (urlGen, optGen, maxRetries = 3) => {
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const res = await fetch(urlGen(), optGen());
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res;
-                } catch (e) { if (i === maxRetries - 1) throw e; await delay(3000); }
             }
-        };
+            for(let i=0; i<15000; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(212, 175, 55, 0.4)' : 'rgba(255, 255, 255, 0.1)';
+                ctx.fillRect(Math.random()*800, Math.random()*1200, Math.random()*1.5, Math.random()*1.5);
+            }
+            return canvas.toDataURL('image/jpeg', 0.8);
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            masterFrameBase64 = generateProceduralTexture();
+            DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
+        });
 
         async function callGemini(prompt, systemInstruction) {
-            const url = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
-            const opt = () => ({
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
+            const opt = {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
                     generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
                     systemInstruction: { parts: [{ text: systemInstruction }] }
                 })
-            });
-            const res = await fetchWithRetry(url, opt);
-            const data = await res.json();
-            return extractJSON(data.candidates[0].content.parts[0].text);
+            };
+            
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const res = await fetch(url, opt);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    let text = data.candidates[0].content.parts[0].text;
+                    let s = text.indexOf('{'), e = text.lastIndexOf('}');
+                    return JSON.parse(text.substring(s, e + 1));
+                } catch (e) { if (i === 2) throw e; await delay(3000); }
+            }
         }
 
-        async function callGeminiImage(prompt, aspect = '3:4', maxWidth = 1000) {
-            const url = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
-            const opt = () => ({
+        async function callGeminiImage(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
+            const opt = {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }], 
-                    generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: aspect } }
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: '9:16' } }
                 })
-            });
+            };
             try {
-                const res = await fetchWithRetry(url, opt);
+                const res = await fetch(url, opt);
+                if (!res.ok) throw new Error("Image API Failed");
                 const data = await res.json();
                 const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-                if (part) return await processImageToBlobUrl(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, maxWidth, 0.9); 
-            } catch(e) { console.warn("Image gen fail:", e); }
-            return null;
+                if (part) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            } catch(e) { console.warn(e); }
+            return `https://placehold.co/900x1600/1a1e29/d4af37?text=Image+Generation+Failed`;
         }
-
-        async function processImageToBlobUrl(base64Str, maxWidth = 1500, quality = 0.9) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height;
-                    if (w > maxWidth) { h = Math.round((h * maxWidth) / w); w = maxWidth; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    canvas.toBlob(blob => { canvas.width = 0; canvas.height = 0; resolve(URL.createObjectURL(blob)); }, 'image/jpeg', quality);
-                };
-                img.onerror = () => resolve(base64Str);
-                img.src = base64Str;
-            });
-        }
-
-        function applyLayoutEngine() {
-            const val = DOM.trimSize.value;
-            const [wStr, hStr] = val.split('x');
-            const widthIn = parseFloat(wStr); const heightIn = parseFloat(hStr);
-            let fontScale = (widthIn <= 6) ? 0.85 : 1.0;
-            document.documentElement.style.setProperty('--page-width-px', `${widthIn * 96}px`);
-            document.documentElement.style.setProperty('--page-height-px', `${heightIn * 96}px`);
-            document.documentElement.style.setProperty('--font-scale', fontScale);
-            document.getElementById('dynamicPrintStyle').innerHTML = `@media print { @page { size: ${widthIn}in ${heightIn}in; margin: 0 !important; } .page-text, .page-bleed { width: ${widthIn}in !important; height: ${heightIn}in !important; overflow: hidden !important; } }`;
-            document.getElementById('headerTrimLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${widthIn}" x ${heightIn}" Bleed`;
-            return { widthIn, heightIn };
-        }
-        DOM.trimSize.addEventListener('change', applyLayoutEngine);
-
-        function wrapImageForEdit(imgHtml, originalPrompt, idx) {
-            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
-        }
-
-        window.openRegenModal = function(container) {
-            imageToRegenerate = container.querySelector('img.tarot-artwork') || container.nextElementSibling;
-            basePromptForRegen = container.dataset.prompt;
-            currentEditingIdx = container.dataset.idx;
-            DOM.regenPrompt.value = "";
-            DOM.regenModal.classList.add('show');
-        }
-        DOM.closeRegenModal.addEventListener('click', () => DOM.regenModal.classList.remove('show'));
-        
-        DOM.btnConfirmRegen.addEventListener('click', async () => {
-            const mod = DOM.regenPrompt.value.trim();
-            const finalPrompt = mod ? `${basePromptForRegen}. User specific modification: ${mod}` : basePromptForRegen;
-            DOM.btnRegenText.classList.add('hidden'); DOM.btnRegenLoader.classList.remove('hidden'); DOM.btnConfirmRegen.disabled = true;
-            try {
-                const aspect = imageToRegenerate.classList.contains('tarot-artwork') || imageToRegenerate.parentElement.parentElement.classList.contains('page-bleed') ? '9:16' : '3:4';
-                const newImgUrl = await callGeminiImage(finalPrompt, aspect, 1500);
-                if(newImgUrl) { 
-                    imageToRegenerate.src = newImgUrl; 
-                    if(currentEditingIdx !== null && generatedCards[currentEditingIdx]) {
-                        generatedCards[currentEditingIdx].image = newImgUrl;
-                        const pnpImg = document.getElementById(`pnp-img-${currentEditingIdx}`);
-                        if(pnpImg) pnpImg.src = newImgUrl;
-                    }
-                    showToast("Immagine rigenerata ovunque!", "success"); 
-                }
-            } catch(e) { showToast(e.message, "error"); } finally {
-                DOM.btnRegenText.classList.remove('hidden'); DOM.btnRegenLoader.classList.add('hidden'); DOM.btnConfirmRegen.disabled = false;
-                DOM.regenModal.classList.remove('show');
-            }
-        });
 
         DOM.btnGenerateFrame.addEventListener('click', async () => {
             DOM.btnGenerateFrame.disabled = true; DOM.btnFrameText.classList.add('hidden'); DOM.btnFrameLoader.classList.remove('hidden');
             try {
-                const style = DOM.frameStyle.value;
-                const prompt = `A flawless, seamless, symmetrical, highly detailed, very ornate esoteric background texture and pattern. Perfect for the back of a luxury Tarot card or a solid background frame. Style: ${style}. Rich, premium, magical, intricate details covering the whole image evenly. NO text, NO empty spaces in the middle, full solid texture.`;
-                const frameUrl = await callGeminiImage(prompt, '9:16', 1500);
-                if(frameUrl) {
-                    masterFrameBase64 = frameUrl;
-                    DOM.masterFramePreview.innerHTML = `<img src="${frameUrl}" style="width:100%; height:100%; object-fit:cover;">`;
-                    showToast("Texture Maestra forgiata! Sarà applicata a tutte le carte (Fronte e Retro).", "success");
-                }
-            } catch(e) { showToast("Errore Texture: " + e.message, "error"); } finally {
-                DOM.btnGenerateFrame.disabled = false; DOM.btnFrameText.classList.remove('hidden'); DOM.btnFrameLoader.classList.add('hidden');
-            }
+                const style = DOM.frameStyle.value || "Sacred Geometry intricate patterns";
+                const prompt = `A flawless, seamless, symmetrical, highly detailed, very ornate esoteric background texture. Style: ${style}. Rich, premium, magical, intricate details covering the whole image evenly. NO text, full solid texture.`;
+                masterFrameBase64 = await callGeminiImage(prompt);
+                DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
+                showToast("Texture forgiata!", "success");
+            } catch(e) { showToast("Errore Texture: " + e.message, "error"); } 
+            finally { DOM.btnGenerateFrame.disabled = false; DOM.btnFrameText.classList.remove('hidden'); DOM.btnFrameLoader.classList.add('hidden'); }
         });
 
-        DOM.btnStart.addEventListener('click', () => generateBookLogic(false));
-        DOM.btnTranslate.addEventListener('click', () => generateBookLogic(true));
+        window.openRegenModal = function(container) {
+            imageToRegenerate = container.querySelector('.tarot-artwork');
+            basePromptForRegen = container.dataset.prompt;
+            currentEditingIdx = parseInt(container.dataset.idx);
+            baseNameForRegen = container.dataset.basename;
+            DOM.regenPrompt.value = "";
+            DOM.regenModal.classList.add('show');
+        };
 
-        async function generateBookLogic(isTranslation = false) {
-            if(!masterFrameBase64) return showToast("Devi prima FORGIARE LA TEXTURE MAESTRA (Step 1).", "warning");
-            if(isTranslation && generatedCards.length === 0) return showToast("Genera prima il libro per poterlo tradurre.", "warning");
-            
-            const customListStr = DOM.customList.value.trim();
-            const lang = DOM.languageInput.value;
-            const visualSetting = DOM.visualSetting.value.trim();
-            const readingTheme = DOM.readingTheme.value;
-            
-            let listToProcess = [];
-            if (isTranslation) {
-                listToProcess = [...generatedCards];
-            } else {
-                let arcanaList = customListStr ? customListStr.split(',').map(s => s.trim()).filter(s => s) : defaultArcana;
-                listToProcess = arcanaList.map(name => ({ baseName: name, image: null }));
-            }
-            
-            DOM.btnStart.disabled = true; DOM.btnTranslate.disabled = true;
-            if(isTranslation) { DOM.btnTranslateText.classList.add('hidden'); DOM.btnTranslateLoader.classList.remove('hidden'); }
-            else { DOM.btnText.classList.add('hidden'); DOM.btnLoader.classList.remove('hidden'); }
-            
+        DOM.closeRegenModal.addEventListener('click', () => DOM.regenModal.classList.remove('show'));
+        
+        DOM.btnConfirmRegen.addEventListener('click', async () => {
+            DOM.btnRegenText.classList.add('hidden'); DOM.btnRegenLoader.classList.remove('hidden'); DOM.btnConfirmRegen.disabled = true;
+            try {
+                const mod = DOM.regenPrompt.value.trim();
+                const finalPrompt = mod ? `${basePromptForRegen}. User modification: ${mod}` : basePromptForRegen;
+                const newImgUrl = await callGeminiImage(finalPrompt);
+                
+                if (imageToRegenerate) imageToRegenerate.src = newImgUrl;
+                const pnpImg = document.getElementById(`pnp-img-${currentEditingIdx}`);
+                if (pnpImg) pnpImg.src = newImgUrl;
+                if (generatedCards[currentEditingIdx]) generatedCards[currentEditingIdx].image = newImgUrl;
+                
+                showToast("Visione rigenerata ovunque!", "success");
+            } catch(e) { showToast(e.message, "error"); } 
+            finally { DOM.btnRegenText.classList.remove('hidden'); DOM.btnRegenLoader.classList.add('hidden'); DOM.btnConfirmRegen.disabled = false; DOM.regenModal.classList.remove('show'); }
+        });
+
+        const majorArcana = ["0 - The Fool", "1 - The Magician", "2 - The High Priestess", "3 - The Empress", "4 - The Emperor", "5 - The Hierophant", "6 - The Lovers", "7 - The Chariot", "8 - Strength", "9 - The Hermit", "10 - Wheel of Fortune", "11 - Justice", "12 - The Hanged Man", "13 - Death", "14 - Temperance", "15 - The Devil", "16 - The Tower", "17 - The Star", "18 - The Moon", "19 - The Sun", "20 - Judgement", "21 - The World"];
+        const suits = ["Wands", "Cups", "Swords", "Pentacles"];
+        const ranks = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Page", "Knight", "Queen", "King"];
+        const minorArcana = suits.flatMap(suit => ranks.map(rank => `${rank} of ${suit}`));
+
+        DOM.btnStart.addEventListener('click', async () => {
+            DOM.btnStart.disabled = true; DOM.btnText.classList.add('hidden'); DOM.btnLoader.classList.remove('hidden');
             DOM.progressSection.classList.remove('hidden');
             
-            const t = dictUI[lang] || dictUI["English (US)"];
-            const rawTitle = DOM.topicInput.value.trim() || t.defTitle || "The Tarot";
+            generatedCards = [];
+            let listToProcess = [...majorArcana];
+            if (DOM.includeMinors.checked) listToProcess = listToProcess.concat(minorArcana);
             
-            DOM.bookPage.innerHTML = `
-                <div class="page-text no-page-num" style="padding: 0;">
-                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                        <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">${t.ed}</div>
-                        <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">${rawTitle}</h1>
-                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                        <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">${t.subHtml}</p>
-                    </div>
-                </div>
-            `;
+            const lang = DOM.languageInput.value;
+            const theme = DOM.readingTheme.value;
+            const visualStyle = DOM.visualSetting.value.trim() || "Epic mystical realism";
             
-            let tempGeneratedCards = [];
-            globalTocEntries = []; 
-            let currentPhysicalPage = 1; 
-            let currentLogicalPage = 1;
+            updateCover();
+            while (DOM.bookPage.children.length > 1) DOM.bookPage.removeChild(DOM.bookPage.lastChild);
 
-            const sysBase = `You are a Master Tarot Reader and Esoteric Publisher writing a premium book in ${lang.toUpperCase()}.
-CRITICAL: ALL text, INCLUDING THE CARD TITLE AND NUMBER, must be strictly translated to ${lang.toUpperCase()}.
-CRITICAL FORMATTING: Keep "intro" to exactly 2 sentences. "symbols" descriptions MUST be STRICTLY UNDER 20 WORDS each. "readings" text MUST be exactly 2 short sentences. "mantra" is a short affirmation in quotes.
-Interpret the card specifically through the lens of: "${readingTheme}".
-Output valid JSON:
+            const sysBase = `You are a Master Tarot Reader. Output ONLY valid JSON, strictly following this exact structure example.
+Language: ${lang.toUpperCase()}.
+CRITICAL RULE 1: "title" MUST be the translated name.
+CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page, Queen). NEVER use words like "Ace" or "Asso" for numbers, use "1".
 {
-  "title": "TRANSLATED Card Name in ${lang.toUpperCase()} (e.g. 'Il Matto' instead of 'The Fool')",
-  "number": "STRICTLY use ONLY the universal Roman Numeral or numeric digit (e.g., '0', 'I', 'II', 'III', 'X'). NEVER write the number as a word in any language.",
+  "title": "Il Matto",
+  "number": "0",
   "intro": "2 sentences introduction.",
-  "symbols": [{"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}],
-  "numerology": "1 sentence on numerology/color.",
-  "readings": [
-    {"archetype":"Translated term for 'Origin & Roots'", "position":"Translated term for 'Past'", "text":"..."},
-    {"archetype":"Translated term for 'Focus & Manifestation'", "position":"Translated term for 'Present'", "text":"..."},
-    {"archetype":"Translated term for 'Projection & Destiny'", "position":"Translated term for 'Future'", "text":"..."},
-    {"archetype":"Translated term for 'Shadow & Crossroads'", "position":"Translated term for 'Obstacle'", "text":"..."}
+  "symbols": [
+    {"name":"Symbol 1", "desc":"Short desc"},
+    {"name":"Symbol 2", "desc":"Short desc"}
   ],
-  "mantra": "Affirmation quote",
-  "visualPrompt": "ENGLISH visual prompt. A beautiful full-bleed tarot illustration of [Card]. The main subject MUST be centered. Leave generous empty negative space at the very bottom of the image so text can be safely overlaid without covering the subject. ZERO text. ZERO numbers. Pure artwork. Style: ${visualSetting || 'Mystical realism'}."
+  "readings": [
+    {"archetype":"Origin", "text":"..."},
+    {"archetype":"Focus", "text":"..."}
+  ],
+  "mantra": "Short quote"
 }`;
 
-            try {
-                for(let i = 0; i < listToProcess.length; i++) {
-                    const item = listToProcess[i];
-                    updateStatus(`${isTranslation ? 'Traduzione' : 'Divinazione'}: ${item.baseName}...`, (i/listToProcess.length)*100, i+1, listToProcess.length);
+            for (let i = 0; i < listToProcess.length; i++) {
+                const baseName = listToProcess[i];
+                const isMinor = i >= majorArcana.length;
+                
+                DOM.progressStatus.textContent = `Creazione: ${baseName}...`;
+                DOM.progressBar.style.width = `${(i / listToProcess.length) * 100}%`;
+                DOM.progressCount.textContent = `${i+1}/${listToProcess.length}`;
+                
+                try {
+                    const cardData = await callGemini(`Analyze Tarot card: ${baseName}. Lens: ${theme}.`, sysBase);
+                    if(cardData.number.toLowerCase().includes('ace') || cardData.number.toLowerCase().includes('asso')) cardData.number = "1";
                     
-                    const callPrompt = `Analyze the Tarot card: ${item.baseName}. Lens: ${readingTheme}. Target Language: ${lang.toUpperCase()}. 
-CRITICAL INSTRUCTION: You MUST translate the card title into ${lang.toUpperCase()}! The field "title" must reflect the final target language. The field "number" MUST remain a universal symbol (like '0', 'I', 'II') and NEVER be written as a word.`;
-                    const cardData = await callGemini(callPrompt, sysBase);
-
-                    let finalImg = item.image;
-                    if (!finalImg) {
-                        updateStatus(`Illustrazione: ${item.baseName}...`, null, i+1, listToProcess.length);
-                        const artPrompt = `${cardData.visualPrompt}. NO TEXT. NO NUMBERS. Pure art.`;
-                        const imgArt = await callGeminiImage(artPrompt, '9:16', 1500);
-                        finalImg = imgArt || `https://placehold.co/900x1600/1a1e29/d4af37?text=${encodeURIComponent(item.baseName)}`;
+                    let artPrompt = `Masterpiece tarot art. FULL BLEED EDGE-TO-EDGE. NO BORDERS. NO TEXT. Style: ${visualStyle}. `;
+                    if(isMinor) {
+                        artPrompt += `EXACT mathematical count: ${baseName}. The subject must be prominent and centered. Leave 15% safe empty margin at top and bottom to avoid cropping.`;
+                    } else {
+                        artPrompt += `TRADITIONAL RIDER-WAITE ICONOGRAPHY for ${baseName}. STRICTLY FORBIDDEN to add random swords, cups, wands, or pentacles. The subject must be majestic and centered. Leave 15% safe empty margin at top and bottom to avoid cropping.`;
                     }
                     
-                    tempGeneratedCards.push({ title: cardData.title, number: cardData.number, image: finalImg, baseName: item.baseName });
-
-                    currentPhysicalPage++;
-                    DOM.bookPage.insertAdjacentHTML('beforeend', `
-                        <div class="page-bleed recipe-block no-page-num" data-idx="${i}">
-                            <div class="tarot-card-container">
-                                <img src="${masterFrameBase64}" class="tarot-master-bg">
-                                <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-art-window">
-                                    ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, cardData.visualPrompt, i)}
-                                    <div class="tarot-text-overlay">
-                                        <h3 class="tarot-num">${cardData.number}</h3>
-                                        <h2 class="tarot-name">${cardData.title}</h2>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="action-overlay">
-                                <button class="btn-action" onclick="openTikTokStudio('${cardData.title.replace(/'/g, "\\'")}', '${cardData.number}', '${finalImg}')">🎬 Crea Video TikTok</button>
-                            </div>
-                        </div>
-                    `);
-                    await delay(500);
-
-                    currentPhysicalPage++;
-                    globalTocEntries.push({ title: cardData.title, number: cardData.number, pageNum: currentLogicalPage });
+                    const imgUrl = await callGeminiImage(artPrompt);
                     
-                    DOM.bookPage.insertAdjacentHTML('beforeend', `
-                        <div class="page-text recipe-block" data-idx="${i}">
-                            <div class="symbol-page">
-                                <h1 class="doc-h1">${t.sym}</h1>
-                                <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
-                                <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
-                                <div class="symbol-grid">
-                                    ${cardData.symbols.map(s => `
-                                        <div class="symbol-item">
-                                            <div class="symbol-title">${s.name}</div>
-                                            <p class="symbol-desc">${s.desc}</p>
-                                        </div>
-                                    `).join('')}
+                    generatedCards.push({ idx: i, baseName: baseName, title: cardData.title, number: cardData.number, image: imgUrl, prompt: artPrompt });
+
+                    const htmlCard = `
+                        <div class="page-bleed no-page-num" style="page-break-after: always;">
+                            <div class="tarot-card-container">
+                                <div class="editable-image-container" data-idx="${i}" data-basename="${baseName}" data-prompt="${artPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
+                                    <img src="${imgUrl}" class="tarot-artwork">
                                 </div>
-                                <div class="numerology-box">
-                                    <div class="numerology-title">Numerology & Color</div>
-                                    <p class="numerology-text">${cardData.numerology}</p>
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-text-overlay">
+                                    <h3 class="tarot-num">${cardData.number}</h3>
+                                    <h2 class="tarot-name">${cardData.title}</h2>
                                 </div>
                             </div>
                         </div>
-                    `);
-
-                    currentPhysicalPage++;
-                    currentLogicalPage++;
-                    DOM.bookPage.insertAdjacentHTML('beforeend', `
-                        <div class="page-text recipe-block" data-idx="${i}">
-                            <div class="oracle-wrapper">
-                                <h1 class="doc-h1">${t.ora}</h1>
-                                <div style="margin-bottom: 20px;"></div>
-                                ${cardData.readings.map(r => `
-                                    <div class="reading-slot">
-                                        <div class="reading-content">
-                                            <h3 class="reading-archetype">${r.archetype}</h3>
-                                            <span class="reading-position">${r.position}</span>
-                                            <p class="reading-text">${r.text}</p>
-                                        </div>
+                        
+                        <div class="page-text" style="page-break-after: always; padding: 40px;">
+                            <h1 class="doc-h1">${cardData.title}</h1>
+                            <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
+                            <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
+                            
+                            <div class="symbol-grid">
+                                ${cardData.symbols.map(s => `
+                                    <div class="symbol-item">
+                                        <div class="symbol-title">${s.name}</div>
+                                        <p class="symbol-desc">${s.desc}</p>
                                     </div>
                                 `).join('')}
-                                <div class="mantra-box">
-                                    <span class="mantra-ornament">✦</span>
-                                    <p class="mantra-text">${cardData.mantra}</p>
+                            </div>
+                            
+                            ${cardData.readings.map(r => `
+                                <div class="reading-slot">
+                                    <h3 class="reading-archetype">${r.archetype}</h3>
+                                    <p class="reading-text">${r.text}</p>
                                 </div>
+                            `).join('')}
+                            
+                            <div class="mantra-box">
+                                <span style="color: var(--gold); font-size: 20px;">✦</span>
+                                <p class="mantra-text">"${cardData.mantra}"</p>
                             </div>
                         </div>
-                    `);
-                    currentLogicalPage++;
+                    `;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', htmlCard);
+                    
+                    await delay(3000); // Respiro vitale per l'IA
+
+                } catch(err) {
+                    console.error(err);
+                    showToast(`Errore carta ${baseName}. Salto...`, "error");
                 }
+            }
+
+            if (generatedCards.length > 0) {
+                DOM.progressStatus.textContent = `Generazione Fogli da Ritagliare (Fronte/Retro)...`;
                 
-                generatedCards = tempGeneratedCards;
-
-                for(let i=0; i<generatedCards.length; i+=4) {
-                    currentPhysicalPage++;
-                    let frontHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
-                    for(let j=0; j<4; j++) {
-                        if(generatedCards[i+j]) {
-                            frontHTML += `
-                            <div class="pnp-card">
-                                <img src="${masterFrameBase64}" class="tarot-master-bg">
-                                <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-art-window" style="border-width: 2px;">
-                                    <img src="${generatedCards[i+j].image}" id="pnp-img-${i+j}" class="tarot-artwork">
-                                    <div class="tarot-text-overlay" style="padding: 25px 2px 5px 2px;">
-                                        <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 11px; font-weight: bold; margin-bottom: 2px; text-align: center; text-shadow: 0 1px 3px black;">${generatedCards[i+j].number}</div>
-                                        <div style="font-family: 'Cinzel', serif; color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; text-align: center; text-shadow: 0 1px 4px black;">${generatedCards[i+j].title}</div>
-                                    </div>
-                                </div>
-                            </div>`;
-                        } else {
-                            frontHTML += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
-                        }
-                    }
-                    frontHTML += '</div></div>';
-                    DOM.bookPage.insertAdjacentHTML('beforeend', frontHTML);
-
-                    currentPhysicalPage++;
-                    let backHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
-                    for(let j=0; j<4; j++) {
-                        if(generatedCards[i+j]) {
-                            backHTML += `
-                            <div class="pnp-card">
-                                <img src="${masterFrameBase64}" class="tarot-master-bg" style="filter: brightness(0.4) contrast(1.2);">
-                                <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-art-window" style="border-width: 2px; display: flex; justify-content: center; align-items: center; background: #0f1219;">
-                                    <img src="${masterFrameBase64}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.25; position: absolute;">
-                                    <div style="font-family: 'Cinzel', serif; font-size: 40px; color: #d4af37; z-index: 5;">✦</div>
-                                </div>
-                            </div>`;
-                        } else {
-                            backHTML += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
-                        }
-                    }
-                    backHTML += '</div></div>';
-                    DOM.bookPage.insertAdjacentHTML('beforeend', backHTML);
-                }
-
-                // Tutorial
                 DOM.bookPage.insertAdjacentHTML('beforeend', `
-                    <div class="page-text">
-                        <h1 class="doc-h1">${t.tutTitle}</h1>
-                        <p class="symbol-intro" style="margin-bottom: 1rem;">${t.tut}</p>
-                        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
-                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
-                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">1</div>
-                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step1}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step1Desc}</p></div>
-                            </div>
-                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
-                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">2</div>
-                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step2}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step2Desc}</p></div>
-                            </div>
-                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
-                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">3</div>
-                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step3}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step3Desc}</p></div>
-                            </div>
-                        </div>
+                    <div class="page-text" style="page-break-after: always; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                        <h1 class="doc-h1">Print & Play Deck</h1>
+                        <p style="text-align:center; color: #475569;">Stampa le seguenti pagine in modalità "Fronte/Retro sul lato lungo".<br>I fogli sono allineati a specchio per coincidere perfettamente al taglio.</p>
                     </div>
                 `);
 
-                // TOC - Leader Dots (Premium Layout in One Strict Page)
-                let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 1.5rem;">${t.toc}</h1><div style="display: flex; flex-direction: column; gap: 8px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
-                globalTocEntries.forEach(entry => {
-                    tocHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
-                            <span style="font-weight: 500; color: var(--primary-dark); font-size: calc(9.5pt * var(--font-scale)); background: var(--page-bg); padding-right: 8px; z-index: 2; line-height: 1;">
-                                ${entry.number ? entry.number + ' - ' : ''}${entry.title}
-                            </span>
-                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 4px; opacity: 0.7; z-index: 1;"></div>
-                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(10pt * var(--font-scale)); background: var(--page-bg); padding-left: 8px; z-index: 2; line-height: 1;">
-                                ${entry.pageNum}
-                            </span>
-                        </div>`;
-                });
-                tocHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative; margin-top: 10px;">
-                            <span style="font-weight: 700; color: var(--primary-dark); font-size: calc(9.5pt * var(--font-scale)); background: var(--page-bg); padding-right: 8px; z-index: 2; line-height: 1;">
-                                ${t.tutTitle}
-                            </span>
-                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 4px; opacity: 0.7; z-index: 1;"></div>
-                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(10pt * var(--font-scale)); background: var(--page-bg); padding-left: 8px; z-index: 2; line-height: 1;">
-                                ${currentLogicalPage}
-                            </span>
-                        </div>
-                    </div></div>`;
-                DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
+                const cardsPerPage = 4;
+                
+                for(let i = 0; i < generatedCards.length; i += cardsPerPage) {
+                    let batch = generatedCards.slice(i, i + cardsPerPage);
+                    while(batch.length < cardsPerPage) batch.push(null); 
+                    
+                    let frontHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-container">`;
+                    batch.forEach(card => {
+                        if(card) {
+                            frontHtml += `
+                            <div class="pnp-card">
+                                <div class="editable-image-container" data-idx="${card.idx}" data-basename="${card.baseName}" data-prompt="${card.prompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
+                                    <img src="${card.image}" id="pnp-img-${card.idx}" class="tarot-artwork">
+                                </div>
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-text-overlay">
+                                    <h3 class="tarot-num">${card.number}</h3>
+                                    <h2 class="tarot-name">${card.title}</h2>
+                                </div>
+                            </div>`;
+                        } else {
+                            frontHtml += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
+                        }
+                    });
+                    frontHtml += `</div></div>`;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', frontHtml);
 
-                updateStatus(isTranslation ? "Traduzione Completata!" : "Manoscritto Completato!", 100, listToProcess.length, listToProcess.length);
-                showToast("Libro elaborato con successo!", "success");
-            } catch(e) { showToast(e.message, "error"); } finally {
-                DOM.btnStart.disabled = false; DOM.btnTranslate.disabled = false;
-                DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden');
-                DOM.btnTranslateText.classList.remove('hidden'); DOM.btnTranslateLoader.classList.add('hidden');
-                setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
+                    let backBatch = [batch[1], batch[0], batch[3], batch[2]];
+                    
+                    let backHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-container">`;
+                    backBatch.forEach(card => {
+                        if(card) {
+                            backHtml += `
+                            <div class="pnp-card" style="display:flex; justify-content:center; align-items:center;">
+                                <img src="${masterFrameBase64}" class="tarot-master-bg" style="filter: brightness(1) contrast(1.1);">
+                                <div class="tarot-css-frame-outer"></div>
+                                <div style="font-family: 'Cinzel', serif; font-size: 60px; color: #d4af37; z-index: 5;">✦</div>
+                            </div>`;
+                        } else {
+                            backHtml += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
+                        }
+                    });
+                    backHtml += `</div></div>`;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', backHtml);
+                }
             }
-        }
-
-        window.openTikTokStudio = async function(title, num, imageSrc) {
-            DOM.videoModal.classList.add('show'); DOM.videoPromptCopy.value = "Scrittura copione in corso...";
-            DOM.videoScriptCopy.value = "Elaborazione..."; DOM.videoToneLabel.innerText = DOM.voiceTone.value;
-            DOM.btnPlayTTS.onclick = null; 
-
-            const sys = `You are a TikTok Video Director. Generate a dynamic prompt for AI video generators (Runway Gen3, Luma) to animate a static tarot card. Then, write a 15-second emotional voiceover script in Italian matching the tone "${DOM.voiceTone.value}". JSON format: {"videoPrompt": "English prompt describing camera movement, parallax effect...", "script": "Italian script..."}`;
-            try {
-                const data = await callGemini(`Create video prompt and script for Tarot Card: ${num} ${title}.`, sys);
-                DOM.videoPromptCopy.value = data.videoPrompt; DOM.videoScriptCopy.value = data.script;
-                DOM.btnPlayTTS.onclick = () => {
-                    const utterance = new SpeechSynthesisUtterance(data.script); utterance.lang = 'it-IT'; utterance.rate = 0.9;
-                    if(DOM.voiceTone.value.includes('Dolce')) utterance.pitch = 1.2;
-                    else if(DOM.voiceTone.value.includes('Oscuro')) utterance.pitch = 0.6;
-                    window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance);
-                };
-            } catch(e) { DOM.videoPromptCopy.value = "Errore di connessione."; DOM.videoScriptCopy.value = "Errore."; }
-        }
-        DOM.closeVideoModal.addEventListener('click', () => { window.speechSynthesis.cancel(); DOM.videoModal.classList.remove('show'); });
+            
+            DOM.btnStart.disabled = false; DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden');
+            setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
+            showToast("Grimorio Completato!", "success");
+        });
 
         DOM.saveMpcBtn.addEventListener('click', async () => {
-            if(generatedCards.length === 0 || !masterFrameBase64) return showToast("Genera prima le carte e la texture.", "warning");
-            showToast("Taglio geometrico carte per MPC in corso...", "info");
+            if(generatedCards.length === 0) return showToast("Genera prima il mazzo.", "warning");
+            showToast("Taglio geometrico per Export in corso...", "info");
             DOM.saveMpcBtn.disabled = true;
 
             try {
                 const zip = new JSZip(); const w = 825; const h = 1425; 
                 const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d');
-
                 const loadImg = (src) => new Promise(res => { const i = new Image(); i.crossOrigin="anonymous"; i.onload = ()=>res(i); i.src = src; });
-                const masterFrameImg = await loadImg(masterFrameBase64);
-
-                const insetX = w * 0.09; const insetY = h * 0.07;
-                const innerW = w - (insetX * 2); const innerH = h - (insetY * 2);
 
                 for(let i = 0; i < generatedCards.length; i++) {
                     const card = generatedCards[i]; ctx.clearRect(0,0,w,h);
                     
-                    // Draw outer border (Bleed area)
-                    ctx.drawImage(masterFrameImg, 0, 0, w, h);
-                    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,h);
-
-                    // Draw Inner window
-                    ctx.save(); ctx.beginPath(); ctx.rect(insetX, insetY, innerW, innerH); ctx.clip();
-                    ctx.fillStyle = '#000000'; ctx.fillRect(insetX, insetY, innerW, innerH);
-
-                    // Draw Artwork
                     const artImg = await loadImg(card.image);
-                    const scale = Math.max(innerW / artImg.width, innerH / artImg.height);
-                    const imgX = insetX + (innerW / 2) - (artImg.width / 2) * scale;
-                    const imgY = insetY + (innerH / 2) - (artImg.height / 2) * scale;
+                    const scale = Math.max(w / artImg.width, h / artImg.height);
+                    const imgX = (w / 2) - (artImg.width / 2) * scale;
+                    const imgY = (h / 2) - (artImg.height / 2) * scale;
                     ctx.drawImage(artImg, imgX, imgY, artImg.width * scale, artImg.height * scale);
 
-                    // Elegante Gradiente Sfumato dal basso (risolve la riga tagliata)
-                    const gradientH = innerH * 0.45; 
-                    const grd = ctx.createLinearGradient(0, insetY + innerH - gradientH, 0, insetY + innerH);
-                    grd.addColorStop(0, "rgba(15,18,25,0)");
-                    grd.addColorStop(0.5, "rgba(15,18,25,0.7)");
-                    grd.addColorStop(1, "rgba(15,18,25,0.98)");
-                    ctx.fillStyle = grd;
-                    ctx.fillRect(insetX, insetY + innerH - gradientH, innerW, gradientH);
-                    ctx.restore(); // ripristina la clip per disegnare i bordi INTATTI SOPRA il gradiente
+                    const grd = ctx.createLinearGradient(0, h * 0.6, 0, h);
+                    grd.addColorStop(0, "transparent"); grd.addColorStop(0.6, "rgba(0,0,0,0.6)"); grd.addColorStop(1, "rgba(0,0,0,0.95)");
+                    ctx.fillStyle = grd; ctx.fillRect(0, h * 0.6, w, h * 0.4);
 
-                    ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
-                    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
-                    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
+                    ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
 
-                    ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 45px "Cinzel", serif';
-                    ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
-                    ctx.fillText(card.number, w/2, insetY + innerH - 85);
+                    ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 50px "Cinzel", serif';
+                    ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+                    ctx.fillText(card.number, w/2, h - 130);
                     
-                    ctx.fillStyle = '#ffffff'; let fontSize = 60; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
-                    while(ctx.measureText(card.title).width > innerW - 40) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
-                    ctx.fillText(card.title.toUpperCase(), w/2, insetY + innerH - 25);
-                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+                    ctx.fillStyle = '#ffffff'; let fontSize = 70; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
+                    while(ctx.measureText(card.title).width > w - 100) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
+                    ctx.fillText(card.title.toUpperCase(), w/2, h - 50);
 
                     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
                     zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`, blob);
                 }
 
-                ctx.clearRect(0,0,w,h); ctx.drawImage(masterFrameImg, 0,0,w,h);
-                ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,h);
-                ctx.save(); ctx.beginPath(); ctx.rect(insetX, insetY, innerW, innerH); ctx.clip();
-                ctx.fillStyle = '#0f1219'; ctx.fillRect(insetX, insetY, innerW, innerH);
-                ctx.globalAlpha = 0.25; ctx.drawImage(masterFrameImg, insetX, insetY, innerW, innerH); ctx.globalAlpha = 1.0; ctx.restore();
-                
-                ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
-                ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
-                ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
+                ctx.clearRect(0,0,w,h); 
+                const backImg = await loadImg(masterFrameBase64);
+                ctx.drawImage(backImg, 0, 0, w, h);
+                ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
                 ctx.fillStyle = '#d4af37'; ctx.textAlign = 'center'; ctx.font = 'bold 150px "Cinzel", serif'; ctx.fillText("✦", w/2, h/2 + 50);
                 
                 const backBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
                 zip.file(`Retro_Mazzo.jpg`, backBlob);
-                
-                // Generazione ZIP compresso per salvaguardare memoria e dimensione (Algoritmo DEFLATE)
-                const zipContent = await zip.generateAsync({
-                    type: "blob", 
-                    compression: "DEFLATE", 
-                    compressionOptions: { level: 6 }
-                });
-                
-                const a = document.createElement('a'); a.href = URL.createObjectURL(zipContent); a.download = `MPC_Tarot_Deck.zip`; a.click();
-                showToast("File ZIP geometricamente perfetto e compresso pronto!", "success");
-            } catch(e) { showToast("Errore Export MPC: " + e.message, "error"); } finally { DOM.saveMpcBtn.disabled = false; }
+
+                const zipContent = await zip.generateAsync({type:"blob", compression: "DEFLATE", compressionOptions: { level: 6 }});
+                const a = document.createElement('a'); a.href = URL.createObjectURL(zipContent); a.download = `Master_Deck_${Date.now()}.zip`; a.click();
+                showToast("File ZIP per la stampa pronto!", "success");
+            } catch(e) { showToast("Errore Export: " + e.message, "error"); } 
+            finally { DOM.saveMpcBtn.disabled = false; }
         });
 
         DOM.savePdfBtn.addEventListener('click', () => {
-            if(!document.querySelector('.tarot-card-container')) return showToast("Genera prima un libro.", "warning");
-            showToast("Stampa: Margini 'Nessuno', attiva 'Grafica in background'.", "info"); setTimeout(() => window.print(), 1000);
+            if(generatedCards.length === 0) return showToast("Genera prima un libro.", "warning");
+            showToast("Stampa: Seleziona A4, Margini 'Nessuno', attiva 'Grafica in background'.", "info"); 
+            setTimeout(() => window.print(), 1000);
         });
-
-        DOM.btnSaveProject.addEventListener('click', async () => {
-            if (generatedCards.length === 0) return showToast("Nessun libro da salvare.", "warning");
-            DOM.btnSaveProject.disabled = true; showToast("Salvataggio in corso...", "info");
-            try {
-                const tempDiv = document.createElement('div'); tempDiv.innerHTML = DOM.bookPage.innerHTML;
-                const images = tempDiv.querySelectorAll('img');
-                for(let img of images) {
-                    if(img.src.startsWith('blob:')) {
-                        const response = await fetch(img.src); const blob = await response.blob();
-                        const reader = new FileReader();
-                        const base64 = await new Promise(r => { reader.onloadend = () => r(reader.result); reader.readAsDataURL(blob); });
-                        img.src = base64;
-                    }
-                }
-                const projectData = {
-                    topic: DOM.topicInput.value, readingTheme: DOM.readingTheme.value, language: DOM.languageInput.value,
-                    customList: DOM.customList.value, visualSetting: DOM.visualSetting.value,
-                    frameBase64: masterFrameBase64, generatedCards: generatedCards, html: tempDiv.innerHTML
-                };
-                const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData)); 
-                a.download = `KDP_Tarot_${Date.now()}.kdp`; a.click();
-                showToast("Progetto salvato!", "success");
-            } catch(e) { showToast("Errore: " + e.message, "error"); } finally { DOM.btnSaveProject.disabled = false; }
-        });
-
-        DOM.btnLoadProject.addEventListener('click', () => DOM.fileLoadProject.click());
-        DOM.fileLoadProject.addEventListener('change', (e) => {
-            const file = e.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const data = JSON.parse(event.target.result);
-                    DOM.topicInput.value = data.topic || ""; DOM.readingTheme.value = data.readingTheme || "Generale";
-                    DOM.languageInput.value = data.language || "English (US)"; DOM.customList.value = data.customList || "";
-                    DOM.visualSetting.value = data.visualSetting || "";
-                    masterFrameBase64 = data.frameBase64 || null;
-                    if(masterFrameBase64) DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
-                    generatedCards = data.generatedCards || []; generatedCards.forEach(c => { if(!c.baseName) c.baseName = c.title; });
-                    const tempDiv = document.createElement('div'); tempDiv.innerHTML = data.html;
-                    for(let img of tempDiv.querySelectorAll('img')) { if(img.src.startsWith('data:image')) img.src = await processImageToBlobUrl(img.src, 1500, 0.9); }
-                    DOM.bookPage.innerHTML = tempDiv.innerHTML;
-                    
-                    updateCover(); 
-                    showToast("Progetto ricaricato!", "success");
-                } catch(err) { showToast("File corrotto.", "error"); }
-            }; reader.readAsText(file);
-        });
-
-        function resetWorkspaceToCover() {
-            DOM.bookPage.innerHTML = `
-                <div class="page-text no-page-num" style="padding: 0;">
-                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                        <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;"></div>
-                        <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;"></h1>
-                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                        <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;"></p>
-                    </div>
-                </div>
-            `;
-            updateCover();
-        }
 
         DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
         DOM.btnCancelReset.addEventListener('click', () => DOM.resetConfirmModal.classList.remove('show'));
         DOM.btnConfirmReset.addEventListener('click', () => {
-            resetWorkspaceToCover();
-            generatedCards = []; masterFrameBase64 = null; DOM.masterFramePreview.innerHTML = '<span class="text-xs text-slate-500">Nessuna Cornice</span>';
+            while (DOM.bookPage.children.length > 1) DOM.bookPage.removeChild(DOM.bookPage.lastChild);
+            generatedCards = []; 
+            masterFrameBase64 = generateProceduralTexture(); 
+            DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
             DOM.resetConfirmModal.classList.remove('show'); showToast("Progetto azzerato.", "success");
         });
-
-        function adjustFontSize(delta) {
-            const selection = window.getSelection(); if (!selection.rangeCount || selection.isCollapsed) return;
-            let node = selection.focusNode; if (node.nodeType === 3) node = node.parentElement;
-            if (node.id === 'bookPage' || node.classList.contains('page-text')) return document.execCommand('fontSize', false, '7');
-            node.style.fontSize = (parseFloat(window.getComputedStyle(node).fontSize) + delta) + 'px';
-        }
     </script>
-
 </body>
 </html>
