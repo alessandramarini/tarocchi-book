@@ -1,600 +1,264 @@
 <!DOCTYPE html>
-<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 96px; --font-scale: 0.85;">
+<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDP Tarot Pro Studio | Divination Edition</title>
+    <title>KDP Tarot Pro Studio | Master Edition</title>
     
+    <!-- Librerie Esterne -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style id="dynamicPrintStyle">@media print { @page { size: 6in 9in; margin: 0 !important; } .page-text, .page-bleed { width: 6in !important; height: 9in !important; overflow: hidden !important; } }</style>
 
     <style>
         :root {
-            --page-width-px: 816px;
-            --page-height-px: 1056px;
-            --safe-margin-px: 96px;
-            --font-scale: 1;
+            --primary-dark: #0f1219;
+            --secondary-dark: #1a1e29;
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --text-main: #333333;
+            --page-bg: #faf9f6;
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #0b0f19; /* Deeper mystical dark */
-            color: #f8fafc; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-        }
-        
+        body { font-family: 'Inter', sans-serif; background-color: var(--primary-dark); color: #f8fafc; margin: 0; padding: 0; overflow: hidden; }
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #111827; }
-        ::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+        ::-webkit-scrollbar-track { background: var(--primary-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
-        .loader { 
-            border: 2px solid rgba(255,255,255,0.1); 
-            border-top: 2px solid #fbbf24; 
-            border-radius: 50%; 
-            width: 18px; height: 18px; 
-            animation: spin 1s linear infinite; 
-            display: inline-block; vertical-align: middle; 
-        }
+        .loader { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid var(--gold); border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #editorContainer { display: flex; flex-direction: column; flex: 1; height: 100%; background-color: #1e1b4b; }
-        #toolbar { 
-            background-color: #0f172a; border-bottom: 1px solid #312e81; 
-            padding: 8px 16px; display: flex; gap: 16px; align-items: center; justify-content: center; z-index: 10; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.4); 
-        }
-        .toolbar-group { display: flex; gap: 4px; border-right: 1px solid #312e81; padding-right: 16px; }
-        .toolbar-group:last-child { border-right: none; }
-        .tool-btn { 
-            background: #1e1b4b; color: #e2e8f0; border: 1px solid #312e81; border-radius: 4px; 
-            padding: 6px 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; 
-        }
-        .tool-btn:hover { background: #312e81; color: #fbbf24; }
-        .tool-btn svg { width: 16px; height: 16px; pointer-events: none; }
-
-        #editorWorkspace { 
-            background-image: radial-gradient(circle at center, #1e1b4b 0%, #0b0f19 100%);
-            overflow-y: auto; display: flex; flex-direction: column; align-items: center; 
-            padding: 4rem 2rem; flex: 1; scroll-behavior: smooth;
-        }
+        #editorContainer { display: flex; flex-direction: column; flex: 1; height: 100%; background-color: #232733; }
+        #toolbar { background-color: var(--secondary-dark); border-bottom: 1px solid #000; padding: 8px 16px; display: flex; gap: 16px; align-items: center; justify-content: center; z-index: 10; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.5); }
+        .tool-btn { background: #334155; color: #f8fafc; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .tool-btn:hover { background: #475569; color: var(--gold); }
         
-        #bookPage { 
-            width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3.5rem; outline: none; counter-reset: pdf-page; 
-        }
+        #editorWorkspace { background-color: #111; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 4rem 2rem; flex: 1; scroll-behavior: smooth; }
+        #bookPage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3.5rem; outline: none; counter-reset: pdf-page; }
 
-        .page-text, .page-bleed { 
-            background-color: #faf9f6; 
-            background-image: url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.03"/></svg>');
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8), 0 2px 10px rgba(0,0,0,0.5); 
-            width: var(--page-width-px); height: var(--page-height-px); 
-            position: relative; overflow: hidden; color: #1e1b4b; box-sizing: border-box; flex-shrink: 0; 
-            counter-increment: pdf-page; 
-        }
-        
-        .page-text { padding: var(--safe-margin-px); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
-        .page-bleed { padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; border: none; }
+        /* Struttura Base Pagine */
+        .page-text, .page-bleed { background-color: var(--page-bg); box-shadow: 0 10px 25px rgba(0,0,0,0.8); width: var(--page-width-px); height: var(--page-height-px); position: relative; overflow: hidden; color: var(--text-main); box-sizing: border-box; flex-shrink: 0; counter-increment: pdf-page; }
+        .page-text { padding: var(--safe-margin-px); display: flex; flex-direction: column; }
+        .page-bleed { padding: 0; display: flex; justify-content: center; align-items: center; border: none; }
         .page-bleed img { width: 100%; height: 100%; object-fit: cover; }
 
-        .page-text::after, .page-bleed::after { 
-            content: counter(pdf-page); position: absolute; bottom: calc(var(--safe-margin-px) * 0.4); 
-            left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: calc(10pt * var(--font-scale)); 
-            font-weight: 600; pointer-events: none; z-index: 50; 
-        }
-        .page-text::after { color: #6b7280; background-color: #faf9f6; width: max-content; padding: 0 15px; margin: 0 auto; left: 50%; transform: translateX(-50%); border-radius: 10px; box-shadow: 0 0 10px #faf9f6; }
-        .page-bleed::after { color: #ffffff; text-shadow: 0px 1px 4px rgba(0,0,0,0.9), 0px 0px 2px rgba(0,0,0,1); }
+        .page-text::after, .page-bleed::after { content: counter(pdf-page); position: absolute; bottom: calc(var(--safe-margin-px) * 0.4); left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: calc(11pt * var(--font-scale)); font-weight: 600; pointer-events: none; z-index: 50; }
+        .page-text::after { color: #94a3b8; }
+        .page-bleed::after { color: #ffffff; text-shadow: 0px 1px 4px rgba(0,0,0,0.9); }
 
-        .doc-title { font-family: 'Cinzel', serif; font-size: calc(3.5rem * var(--font-scale)); text-align: center; color: #1e1b4b; line-height: 1.1; margin: 0; outline: none; }
-        .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(2.2rem * var(--font-scale)); text-align: center; color: #1e1b4b; margin: 0 0 calc(1rem * var(--font-scale)) 0; line-height: 1.2; font-weight: 700; width: 100%; }
-        .doc-h2 { font-family: 'Cinzel', serif; font-size: calc(1.5rem * var(--font-scale)); color: #1e1b4b; margin-top: 0; margin-bottom: calc(1rem * var(--font-scale)); border-bottom: 2px solid #4c1d95; display: inline-block; padding-bottom: 4px; font-weight: 700; }
-        .doc-quote { font-family: 'Cinzel', serif; font-size: calc(1.1rem * var(--font-scale)); font-style: italic; text-align: center; color: #4338ca; margin: 0 0 calc(1.5rem * var(--font-scale)) 0; line-height: 1.5; padding: 0 2rem; border-left: 2px solid #d946ef; border-right: 2px solid #d946ef; width: 100%; box-sizing: border-box; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        .doc-title { font-family: 'Cinzel', serif; font-size: calc(3.5rem * var(--font-scale)); text-align: center; color: var(--primary-dark); line-height: 1.1; margin: 0; text-transform: uppercase; }
+        .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(2.2rem * var(--font-scale)); text-align: center; color: var(--primary-dark); margin: 0 0 calc(1.5rem * var(--font-scale)) 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
+        .doc-h2 { font-family: 'Cinzel', serif; font-size: calc(1.5rem * var(--font-scale)); color: var(--primary-dark); text-align: center; margin-top: 0; margin-bottom: calc(1.5rem * var(--font-scale)); letter-spacing: 2px; }
+        .drop-cap::first-letter { font-family: 'Cinzel', serif; font-size: 3.5em; float: left; margin-top: -0.1em; margin-right: 0.1em; color: var(--gold); line-height: 1; }
 
-        .tarot-meta-bar { display: flex; justify-content: center; gap: calc(2rem * var(--font-scale)); margin: calc(1rem * var(--font-scale)) 0; border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1; padding: calc(1rem * var(--font-scale)) 0; flex-shrink: 0; width: 100%; }
-        .meta-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .meta-val { font-family: 'Cinzel', serif; font-size: calc(12pt * var(--font-scale)); color: #312e81; font-weight: 700; line-height: 1; text-align: center; text-transform: uppercase; }
-        .meta-lbl { font-family: 'Inter', sans-serif; font-size: calc(7pt * var(--font-scale)); text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 600; }
+        /* Smarginatura Carta + Scudo Tipografico (Come da regole Taschen/Lo Scarabeo) */
+        .tarot-card-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #fff; }
+        .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
+        .tarot-master-frame { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; mix-blend-mode: multiply; pointer-events: none; }
+        .tarot-shield { position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0) 100%); z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: calc(var(--safe-margin-px) * 0.8); }
+        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0; }
+        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.4rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0; text-align: center; padding: 0 20px; line-height: 1.1; }
 
-        .esoteric-panel { background: transparent; border: 2px solid #4c1d95; border-radius: 8px; padding: calc(1.5rem * var(--font-scale)); width: 100%; max-width: 500px; margin: 0 auto; box-shadow: inset 0 0 20px rgba(76, 29, 149, 0.05); flex-shrink: 0; position: relative; box-sizing: border-box; }
-        .esoteric-panel::before { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 1px dashed #a5b4fc; border-radius: 4px; pointer-events: none; }
-        .eso-header { display: flex; justify-content: center; align-items: center; border-bottom: 2px solid #4c1d95; padding-bottom: 10px; margin-bottom: 12px; position: relative; }
-        .eso-header::after { content: '✦'; position: absolute; bottom: -12px; color: #d946ef; font-size: 16px; background: #faf9f6; padding: 0 8px; }
-        .eso-title { font-family: 'Cinzel', serif; font-size: calc(13pt * var(--font-scale)); font-weight: 800; color: #312e81; margin: 0; text-transform: uppercase; letter-spacing: 2px;}
+        .symbol-page { display: flex; flex-direction: column; height: 100%; }
+        .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(12pt * var(--font-scale)); line-height: 1.7; color: #1e293b; margin-bottom: calc(2rem * var(--font-scale)); text-align: justify; }
+        .symbol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(2rem * var(--font-scale)); flex-grow: 1; }
+        .symbol-item { border-left: 2px solid var(--gold); padding-left: 15px; }
+        .symbol-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+        .symbol-title::before { content: '✦'; color: var(--gold); font-size: 14pt; }
+        .symbol-desc { font-family: 'Inter', sans-serif; font-size: calc(10pt * var(--font-scale)); color: #475569; line-height: 1.5; margin: 0; }
         
-        .eso-grid { display: flex; flex-direction: column; gap: 10px; }
-        .eso-row { display: flex; justify-content: space-between; align-items: flex-start; font-family: 'Inter', sans-serif; font-size: calc(10pt * var(--font-scale)); border-bottom: 1px solid #e0e7ff; padding-bottom: 6px; }
-        .eso-lbl { color: #4338ca; font-weight: 700; text-transform: uppercase; font-size: 0.85em; width: 35%; flex-shrink: 0; letter-spacing: 1px; margin-top: 2px;}
-        .eso-val-txt { color: #1e1b4b; font-weight: 500; text-align: right; font-style: italic; width: 60%; line-height: 1.3; }
+        .numerology-box { background: #f8fafc; border: 1px solid #cbd5e1; border-top: 3px solid var(--primary-dark); padding: calc(1.2rem * var(--font-scale)); margin-top: auto; }
+        .numerology-title { font-family: 'Cinzel', serif; font-size: calc(10pt * var(--font-scale)); font-weight: 700; letter-spacing: 1px; color: var(--primary-dark); margin-bottom: 8px; text-transform: uppercase; }
+        .numerology-text { font-family: 'Inter', sans-serif; font-size: calc(9.5pt * var(--font-scale)); color: #334155; line-height: 1.5; margin: 0; }
 
-        /* NUOVO STILE SIMBOLISMO MISTICO (Il Pluteo dei Simboli) */
-        .symbols-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: calc(1.5rem * var(--font-scale));
-            background-color: #1e1b4b; /* Deep night blue */
-            border: 2px solid #fbbf24; /* Outer Gold Border */
-            border-radius: 8px;
-            position: relative;
-            margin-top: calc(1rem * var(--font-scale));
-            box-sizing: border-box;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3); /* Subtle shadow for depth */
-        }
+        .oracle-wrapper { display: flex; flex-direction: column; height: 100%; }
+        .reading-slot { display: flex; gap: calc(1.5rem * var(--font-scale)); margin-bottom: calc(1.5rem * var(--font-scale)); border-left: 2px solid var(--gold); padding-left: 15px; align-items: flex-start; }
+        .reading-thumb-box { width: calc(90px * var(--font-scale)); height: calc(135px * var(--font-scale)); flex-shrink: 0; border: 2px solid var(--gold); border-radius: 50px 50px 0 0; overflow: hidden; background: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
+        .reading-thumb { width: 100%; height: 100%; object-fit: cover; }
+        .reading-content { flex: 1; min-width: 0; }
+        .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(13pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); text-transform: uppercase; margin: 0 0 4px 0; }
+        .reading-position { font-family: 'Inter', sans-serif; font-size: calc(8.5pt * var(--font-scale)); font-weight: 600; letter-spacing: 1.5px; color: #94a3b8; text-transform: uppercase; margin: 0 0 8px 0; display: block; }
+        .reading-text { font-family: 'Playfair Display', serif; font-size: calc(11.5pt * var(--font-scale)); line-height: 1.5; color: #334155; margin: 0; }
         
-        /* Dashed inner border */
-        .symbols-container::before {
-            content: '';
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
-            border: 1px dashed rgba(251, 191, 36, 0.6); /* Lighter gold dashed */
-            border-radius: 4px;
-            pointer-events: none;
-        }
+        .mantra-box { margin-top: auto; border-top: 1px solid #cbd5e1; padding-top: calc(1.5rem * var(--font-scale)); text-align: center; position: relative; }
+        .mantra-ornament { color: var(--gold); font-size: calc(14pt * var(--font-scale)); background: var(--page-bg); padding: 0 15px; position: relative; top: calc(-2.3rem * var(--font-scale)); display: inline-block; }
+        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(12.5pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); letter-spacing: 0.5px; margin: 0; line-height: 1.4; }
 
-        .symbols-container .doc-h2 {
-            font-family: 'Cinzel', serif;
-            font-size: calc(18pt * var(--font-scale));
-            color: #fbbf24; /* Gold title */
-            border-bottom: none;
-            text-align: center;
-            align-self: center !important;
-            margin-bottom: calc(0.5rem * var(--font-scale));
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .pnp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; width: 100%; height: 100%; border: 1px dashed #cbd5e1; }
+        .pnp-card { width: 100%; height: 100%; border: 1px dashed #94a3b8; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #fff; }
+        .pnp-img { width: 100%; height: 100%; object-fit: contain; }
+        .pnp-label { position: absolute; bottom: 5px; background: rgba(255,255,255,0.9); padding: 2px 8px; font-family: 'Cinzel', serif; font-size: 8pt; font-weight: bold; border-radius: 4px;}
 
-        /* Mystic separator under title */
-        .symbols-container .doc-h2::after {
-            content: '✦ ✧ ✦';
-            display: block;
-            font-size: 0.5em;
-            color: #a5b4fc; /* Light purple star accents */
-            text-align: center;
-            margin-top: 8px;
-            letter-spacing: 12px;
-        }
-
-        .symbols-grid {
-            column-count: 2;
-            column-gap: calc(2rem * var(--font-scale));
-            width: 100%;
-            position: relative;
-            z-index: 2;
-            margin-top: calc(1rem * var(--font-scale));
-        }
-
-        .sym-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: calc(10px * var(--font-scale)) 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle divider */
-            break-inside: avoid;
-            page-break-inside: avoid;
-        }
-
-        .sym-icon {
-            width: calc(16px * var(--font-scale));
-            height: calc(16px * var(--font-scale));
-            color: #fbbf24; /* Gold icon */
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .sym-text {
-            font-family: 'Inter', sans-serif;
-            font-size: calc(10.5pt * var(--font-scale));
-            font-weight: 500;
-            color: #f8fafc; /* Crisp white text */
-            line-height: 1.4;
-            flex: 1;
-            min-width: 0;
-            word-break: break-word;
-        }
-
-
-        /* NUOVO STILE DINAMICHE ORACOLO (Il Manoscritto Oracolare) */
-        .readings-page-wrapper {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            justify-content: flex-start; /* Flow items from top */
-            background: transparent; /* Remove solid background, let page texture show */
-            position: relative;
-            box-sizing: border-box;
-            padding-top: calc(2rem * var(--font-scale)); /* Space for overlapping title */
-        }
-        
-        /* Outer elegant border */
-        .readings-page-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid #fbbf24; /* Outer Gold */
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        /* Inner subtle border */
-        .readings-page-wrapper::after {
-            content: '';
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            right: 4px;
-            bottom: 4px;
-            border: 1px solid #4c1d95; /* Inner Purple */
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .readings-header-box {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Center on top border */
-            background: #faf9f6; /* Match page background to mask border */
-            padding: 0 15px;
-            z-index: 10; /* Above borders */
-            text-align: center;
-        }
-
-        .readings-header-box .doc-h2 {
-            color: #fbbf24; /* Gold title to match border */
-            border-bottom: none;
-            margin: 0;
-            font-size: calc(16pt * var(--font-scale));
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
-        }
-
-        /* Container for the reading cards */
-        .readings-grid {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            width: 100%;
-            gap: calc(1rem * var(--font-scale));
-            padding: calc(1.5rem * var(--font-scale)); /* Inner padding for content */
-            position: relative;
-            z-index: 5;
-            box-sizing: border-box;
-        }
-        
-        .context-row {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start; /* Align to top */
-            gap: calc(1.2rem * var(--font-scale));
-            background: #ffffff; /* White "card" background */
-            padding: calc(1rem * var(--font-scale));
-            box-sizing: border-box;
-            flex: 0 0 auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px; /* Slight rounding */
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); /* Soft card shadow */
-            transition: transform 0.2s; /* Slight lift on hover if needed later */
-        }
-        
-        .context-row:last-child {
-            margin-bottom: 0;
-        }
-        
-        /* Finestra ad Arco Mistica Compattata - refined */
-        .context-arch-img-box { 
-            width: calc(70px * var(--font-scale));
-            height: calc(100px * var(--font-scale));
-            flex-shrink: 0; 
-            border-radius: 35px 35px 0 0;
-            border: 2px solid #fbbf24; /* Solid gold frame */
-            padding: 2px; 
-            background: #faf9f6;
-            position: relative;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.1); /* Inner depth */
-        }
-        
-        /* The "sill" of the arch window */
-        .context-arch-img-box::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: -2px;
-            right: -2px;
-            height: 4px;
-            background: #faf9f6;
-            z-index: 10;
-            border-top: 2px solid #fbbf24;
-            border-bottom: 1px solid rgba(0,0,0,0.1); /* Slight shadow under sill */
-        }
-
-        .context-img-small {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            border-radius: 32px 32px 0 0;
-            filter: sepia(0.2) contrast(1.1); /* Give images a slightly mystical, old feel */
-        }
-        
-        .context-content {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding-top: 4px;
-        }
-
-        .context-title {
-            font-family: 'Cinzel', serif;
-            font-size: calc(11pt * var(--font-scale));
-            color: #1e1b4b; /* Deep dark blue */
-            margin: 0 0 4px 0;
-            font-weight: 700;
-            line-height: 1.2;
-            text-transform: uppercase;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 4px;
-        }
-
-        .context-subtitle {
-            font-family: 'Inter', sans-serif;
-            font-size: calc(8pt * var(--font-scale));
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #d946ef; /* Magenta accent */
-            margin: 0 0 6px 0;
-            font-weight: 600;
-        }
-
-        .context-desc {
-            font-family: 'Inter', sans-serif;
-            font-size: calc(9.5pt * var(--font-scale));
-            line-height: 1.5;
-            color: #334155;
-            margin: 0;
-            font-weight: 400;
-            word-break: break-word;
-            text-align: justify;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .mantra-box { width: 100%; text-align: center; border-top: 1px solid #fbbf24; border-bottom: 1px solid #fbbf24; padding: calc(0.5rem * var(--font-scale)) 0; margin-top: 0; position: relative; flex-shrink: 0;}
-        .mantra-box::before { content: '✨'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 1.2rem; background: #faf9f6; padding: 0 10px;}
-        .mantra-title { font-family: 'Inter', sans-serif; font-size: calc(8pt * var(--font-scale)); text-transform: uppercase; letter-spacing: 2px; color: #fbbf24; margin-bottom: 4px; font-weight: 600; color: #b45309; }
-        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(1.1rem * var(--font-scale)); color: #1e1b4b; font-weight: 600; font-style: italic;}
-
-        .toc-columns { display: block; margin-top: calc(2rem * var(--font-scale)); width: 100%; }
-        .toc-2col { column-count: 2; column-gap: 3rem; }
-        .toc-3col { column-count: 3; column-gap: 2rem; font-size: 0.9em; }
-        .toc-item { display: flex; justify-content: space-between; align-items: baseline; padding: calc(8px * var(--font-scale)) 0; margin-bottom: calc(0.5rem * var(--font-scale)); page-break-inside: avoid; break-inside: avoid; }
-        .toc-title { font-family: 'Cinzel', serif; font-size: calc(11pt * var(--font-scale)); background: transparent; padding-right: 8px; font-weight: 700; color: #1e1b4b; }
-        .toc-leader { flex-grow: 1; border-bottom: 2px dotted #94a3b8; position: relative; top: -4px; margin: 0 4px; }
-        .toc-page { font-family: 'Inter', sans-serif; font-size: calc(11pt * var(--font-scale)); color: #4c1d95; background: transparent; padding-left: 8px; font-weight: 700; }
-
-        .editable-image-container { position: relative; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; display: flex; justify-content: center; align-items: center; flex-direction: column;}
-        .editable-image-container::after { content: '✎ Rigenera'; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.1rem; opacity: 0; transition: opacity 0.2s; z-index: 10; backdrop-filter: blur(2px); border-radius: inherit; }
+        .editable-image-container { position: relative; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; }
+        .editable-image-container::after { content: '✎ Rigenera'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 10; backdrop-filter: blur(2px); border-radius: inherit; font-family: 'Inter', sans-serif; }
         .editable-image-container:hover::after { opacity: 1; }
         
-        .evoca-btn {
-            margin-top: -40px; z-index: 20; position: relative;
-            background: linear-gradient(135deg, #4c1d95 0%, #d946ef 100%);
-            color: white; border: 2px solid #fbbf24; border-radius: 20px;
-            padding: 8px 24px; font-family: 'Cinzel', serif; font-weight: bold; font-size: 1rem;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-transform: uppercase;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .evoca-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(217, 70, 239, 0.6); }
-        .evoca-btn svg { width: 18px; height: 18px; }
+        .action-overlay { position: absolute; bottom: -40px; right: 10px; z-index: 100; transition: 0.3s; opacity: 0; display: flex; gap: 8px; }
+        .page-text:hover .action-overlay, .page-bleed:hover .action-overlay { bottom: 10px; opacity: 1; }
+        .btn-action { background: var(--primary-dark); color: var(--gold); border: 1px solid var(--gold); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px; }
+        .btn-action:hover { background: var(--gold); color: var(--primary-dark); }
 
-        /* Video Overlay */
-        #videoOverlay { backdrop-filter: blur(10px); }
-        .animate-ken-burns { animation: kenburns 20s linear infinite alternate; }
-        @keyframes kenburns { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal.show { display: flex; }
+        .modal-content { background: var(--secondary-dark); border: 1px solid #334155; border-radius: 12px; width: 95%; max-width: 600px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
 
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--secondary-dark); border-left: 4px solid var(--gold); color: white; padding: 16px 24px; border-radius: 4px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease-out; display: flex; align-items: center; gap: 12px; }
+        .toast.show { transform: translateX(0); }
+        
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
-            header, .w-\[360px\], #toolbar, #toast-container, .modal, .evoca-btn, #videoOverlay { display: none !important; }
+            header, .w-\[360px\], #toolbar, #toast-container, .modal, .action-overlay { display: none !important; }
             #editorContainer, #editorWorkspace { padding: 0 !important; margin: 0 !important; height: auto !important; overflow: visible !important; display: block !important; background: none !important; }
             #bookPage { gap: 0 !important; display: block !important; }
             .page-text, .page-bleed { box-shadow: none !important; border: none !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; }
             .editable-image-container::after { display: none !important; }
-            img { image-rendering: high-quality; max-width: 100%; }
         }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal.show { display: flex; }
-        .modal-content { background: #1e1b4b; border: 1px solid #4c1d95; border-radius: 12px; width: 95%; max-width: 1200px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-height: 95vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #312e81; padding-bottom: 12px; }
-        .close-modal { cursor: pointer; color: #a5b4fc; transition: 0.2s; }
-        .close-modal:hover { color: #f8fafc; }
-
-        /* A+ Banners */
-        .aplus-container { display: flex; flex-direction: column; gap: 24px; align-items: center; width: 100%; }
-        .aplus-banner { width: 970px; height: 300px; position: relative; overflow: hidden; display: flex; box-sizing: border-box; flex-shrink: 0; }
-        .editable-text { outline: none; padding: 2px; border-radius: 4px; transition: 0.2s; }
-        .editable-text:hover, .editable-text:focus { background: rgba(0,0,0,0.05); box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
-        .aplus-banner[style*="#0f172a"] .editable-text:hover, .aplus-banner[style*="#0f172a"] .editable-text:focus { background: rgba(255,255,255,0.1); box-shadow: 0 0 0 1px rgba(255,255,255,0.3); }
-
-        /* Toasts */
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: #1e1b4b; border-left: 4px solid #8b5cf6; color: white; padding: 16px 24px; border-radius: 4px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease-out; display: flex; align-items: center; gap: 12px; border: 1px solid #312e81; }
-        .toast.show { transform: translateX(0); }
-        .toast.success { border-left-color: #10b981; }
-        .toast.warning { border-left-color: #f59e0b; }
-        .toast.error { border-left-color: #ef4444; }
-
-        /* TikTok Style Button & Modal */
-        .tk-btn {
-            margin-top: -40px; z-index: 20; position: relative;
-            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
-            color: #0b0f19; border: 2px solid #ffffff; border-radius: 30px;
-            padding: 10px 24px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 0.95rem;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4); text-transform: uppercase;
-            display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px;
-        }
-        .tk-btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0, 242, 254, 0.6); }
-        .tk-btn svg { width: 18px; height: 18px; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden text-slate-200">
 
-    <header class="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-20 shrink-0 shadow-sm">
-        <h1 class="text-xl font-bold font-serif flex items-center gap-3 text-purple-400">
-            <svg class="w-6 h-6 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-300">KDP Tarot Pro Studio</span>
+    <header class="bg-[#0f1219] border-b border-[#1a1e29] p-4 flex justify-between items-center z-20 shrink-0 shadow-lg">
+        <h1 class="text-xl font-bold font-serif flex items-center gap-3">
+            <svg class="w-6 h-6 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] to-[#f3e5ab]" style="font-family: 'Cinzel', serif;">KDP Tarot Pro Studio</span>
         </h1>
         <div class="flex items-center gap-3">
-            <div id="headerTrimLabel" class="text-[11px] font-medium bg-slate-800 py-1.5 px-3 rounded text-slate-400 border border-slate-700 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse"></span> 6" x 9" Bleed</div>
-            <button id="saveEpubBtn" class="bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(147,51,234,0.3)]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> Kindle EPUB
+            <div id="headerTrimLabel" class="text-[11px] font-medium bg-[#1a1e29] py-1.5 px-3 rounded text-slate-400 border border-slate-700 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 6" x 9" Bleed</div>
+            <button id="saveMpcBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(79,70,229,0.4)]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg> Esporta Mazzo (MPC Zip)
             </button>
-            <button id="savePdfBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(79,70,229,0.3)]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Print PDF
+            <button id="savePdfBtn" class="bg-[#d4af37] hover:bg-[#c5a028] text-[#0f1219] text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(212,175,55,0.4)]">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Stampa Libro PDF
             </button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <div class="w-[360px] bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 z-10">
+        <div class="w-[360px] bg-[#0f1219] border-r border-[#1a1e29] flex flex-col shrink-0 z-10 shadow-2xl">
             <div class="p-5 overflow-y-auto flex-1 custom-scrollbar">
                 
-                <div class="mb-4 bg-slate-800/80 p-3 rounded border border-indigo-900/50">
-                    <label class="block text-[10px] font-bold text-indigo-400 mb-1 uppercase tracking-wider">Gemini API Key</label>
-                    <input type="password" id="apiKeyInput" class="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-indigo-500" placeholder="Inserisci la chiave">
+                <div class="mb-4">
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key (Opzionale nel Web)</label>
+                    <input type="password" id="apiKeyInput" class="w-full p-2 bg-[#1a1e29] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]" placeholder="Lascia vuoto per ambiente Immersive">
                 </div>
 
-                <div class="bg-slate-800/50 rounded-lg p-5 mb-4 border border-slate-700/50">
-                    <h3 class="text-purple-300 font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        Tarot Settings
+                <div class="bg-[#1a1e29] rounded-lg p-4 mb-5 border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
+                    <h3 class="text-[#d4af37] font-bold mb-3 flex items-center gap-2 text-xs uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+                        1. Forgia Cornice Maestra
+                    </h3>
+                    <div class="mb-3">
+                        <select id="frameStyle" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]">
+                            <option value="Classic Golden Renaissance, highly ornate gold borders">Rinascimento Dorato</option>
+                            <option value="Dark Gothic, silver thorns and obsidian borders">Gotico Oscuro</option>
+                            <option value="Art Nouveau, elegant flowing floral borders">Art Nouveau</option>
+                            <option value="Celestial Astrological, stars and zodiac borders">Astrologico Celestiale</option>
+                        </select>
+                    </div>
+                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview">
+                        <span class="text-xs text-slate-500">Nessuna Cornice</span>
+                    </div>
+                    <button id="btnGenerateFrame" class="w-full bg-slate-700 hover:bg-slate-600 text-[#d4af37] font-bold py-2 rounded transition-all text-xs flex justify-center items-center gap-2 border border-[#d4af37]/50">
+                        <span id="btnFrameText">Evoca Nuova Cornice</span>
+                        <div id="btnFrameLoader" class="loader hidden"></div>
+                    </button>
+                    <p class="text-[9px] text-slate-400 mt-2 text-center leading-tight">La cornice generata qui verrà applicata matematicamente a tutte le carte del mazzo per garantirne l'uniformità.</p>
+                </div>
+
+                <div class="bg-[#1a1e29] rounded-lg p-5 mb-4 border border-slate-700/50">
+                    <h3 class="text-slate-300 font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        2. Tarot Settings
                     </h3>
                     
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Argomento / Titolo Libro</label>
-                        <textarea id="bookTopic" class="w-full h-12 p-3 bg-slate-900 border border-slate-700 rounded focus:ring-1 focus:ring-purple-500 outline-none text-sm resize-none text-slate-200" placeholder="es. 'I Segreti degli Arcani Maggiori'"></textarea>
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Argomento / Titolo Libro</label>
+                        <input type="text" id="bookTopic" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. I Tarocchi di Cristallo">
                     </div>
 
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Lista Carte (Lascia vuoto per tutti e 22 gli Arcani)</label>
-                        <textarea id="customRecipeList" class="w-full h-16 p-3 bg-slate-900 border border-slate-700 rounded focus:ring-1 focus:ring-purple-500 outline-none text-sm resize-none text-slate-200" placeholder="es. 'Il Matto, Il Mago, La Papessa'"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 mb-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Stile Artistico (Artwork)</label>
-                            <select id="artStyle" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded outline-none text-sm text-slate-200 cursor-pointer focus:ring-1 focus:ring-purple-500">
-                                <option value="Classic Rider-Waite, vintage tarot aesthetic" selected>Classico (Rider-Waite)</option>
-                                <option value="Cute mystical cats, magical feline theme">Gatti Mistici</option>
-                                <option value="High-end Japanese Anime Studio Ghibli style">Anime Giapponese</option>
-                                <option value="3D Pixar Disney style, highly detailed 8k">Pixar / Disney 3D</option>
-                                <option value="Dark Noir comic book style, Diabolik aesthetic, high contrast">Noir / Fumetto Scuro</option>
-                                <option value="Sensual elegant comic style, Milo Manara aesthetic, tasteful">Erotico d'Autore</option>
-                                <option value="Dark Fantasy RPG style, grimdark, Elden Ring aesthetic">Dark Fantasy RPG</option>
-                                <option value="Minimalist esoteric vector art, gold foil on black">Minimalista Oro/Nero</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1.5">Tono Voce & Video</label>
-                            <select id="arcanaTone" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded outline-none text-sm text-slate-200 cursor-pointer focus:ring-1 focus:ring-purple-500">
-                                <option value="Mistico" selected>Mistico / Saggio</option>
-                                <option value="Ammiccante">Ammiccante / Sensuale</option>
-                                <option value="Intimidatorio">Intimidatorio / Oscuro</option>
-                                <option value="Dolce">Dolce / Rassicurante</option>
-                                <option value="Perentorio">Perentorio / Autoritario</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-fuchsia-400 mb-1.5">Ambientazione Visiva (Artwork)</label>
-                        <textarea id="visualSetting" class="w-full h-12 p-3 bg-slate-900 border border-slate-700 rounded focus:ring-1 focus:ring-fuchsia-500 outline-none text-sm resize-none text-slate-200" placeholder="es. 'Stile Art Nouveau, mistico, illuminazione a candela'"></textarea>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between items-end mb-1.5">
-                            <label class="block text-xs font-medium text-slate-400">Lingua Base</label>
-                            <button id="btnLiveTranslate" class="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded flex items-center gap-1 transition-all shadow" title="Traduci il libro generato">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg> Traduci Live
-                            </button>
-                        </div>
-                        <select id="bookLanguage" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded outline-none text-sm text-slate-200 cursor-pointer focus:ring-1 focus:ring-indigo-500 transition-all">
-                            <option value="Italiano" selected>Italiano</option>
-                            <option value="English (US)">English (US)</option>
-                            <option value="Español">Español</option>
-                            <option value="Français">Français</option>
-                            <option value="Deutsch">Deutsch</option>
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Tema Lettura (Croce Celtica)</label>
+                        <select id="readingTheme" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200">
+                            <option value="Generale">Significato Generale Universale</option>
+                            <option value="Amore e Relazioni">Focalizzato su Amore e Relazioni</option>
+                            <option value="Lavoro e Carriera">Focalizzato su Lavoro e Finanze</option>
+                            <option value="Salute e Benessere">Focalizzato su Salute e Benessere</option>
+                            <option value="Crescita Spirituale">Focalizzato su Crescita Spirituale</option>
                         </select>
                     </div>
 
-                    <div class="mb-2">
-                        <label class="block text-xs font-medium text-emerald-400 mb-1.5">Gabbia Libro (Trim Size)</label>
-                        <select id="trimSize" class="w-full p-2.5 bg-slate-900 border border-emerald-700/50 rounded outline-none text-sm text-emerald-100 cursor-pointer focus:ring-1 focus:ring-emerald-500 transition-all">
-                            <option value="5x8">5 x 8 in. (12.7 x 20.32 cm)</option>
-                            <option value="6x9" selected>6 x 9 in. (15.24 x 22.86 cm)</option>
-                            <option value="7x10">7 x 10 in. (17.78 x 25.4 cm)</option>
-                            <option value="8.5x11">8.5 x 11 in. (21.59 x 27.94 cm)</option>
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Stile Artistico IA (Es. Gatti, Manga, Manara)</label>
+                        <input type="text" id="visualSetting" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. 'Stile Acquerello, gatti neri'">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Lista Personalizzata (Opzionale)</label>
+                        <textarea id="customRecipeList" class="w-full h-12 p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-[11px] resize-none text-slate-200" placeholder="Lascia vuoto per i 22 Arcani Maggiori completi"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Lingua Target</label>
+                            <select id="bookLanguage" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
+                                <option value="Italiano" selected>Italiano</option>
+                                <option value="English (US)">English</option>
+                                <option value="Français">Français</option>
+                                <option value="Español">Español</option>
+                                <option value="Deutsch">Deutsch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia Libro</label>
+                            <select id="trimSize" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
+                                <option value="6x9" selected>6 x 9 in. (Standard)</option>
+                                <option value="7x10">7 x 10 in. (Grande)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Tono Voce Video (TikTok)</label>
+                        <select id="voiceTone" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
+                            <option value="Mistico e Solenne">Mistico e Solenne</option>
+                            <option value="Intimidatorio e Oscuro">Intimidatorio e Oscuro</option>
+                            <option value="Dolce e Rassicurante">Dolce e Rassicurante</option>
+                            <option value="Ammiccante e Misterioso">Ammiccante e Misterioso</option>
+                            <option value="Perentorio e Severo">Perentorio e Severo</option>
                         </select>
                     </div>
                 </div>
                 
-                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded shadow-lg transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50">
-                    <span id="btnStartText" class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg> Evoca Grimorio Completo</span>
-                    <span id="btnStartLoader" class="hidden"><div class="loader border-transparent border-top-white"></div> Evocazione in corso...</span>
+                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50" style="font-family: 'Cinzel', serif;">
+                    <span id="btnStartText" class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> Forgia Grimorio Completo</span>
+                    <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione in corso...</span>
                 </button>
 
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button id="btnSaveProject" class="bg-slate-800 hover:bg-slate-700 text-blue-400 border border-blue-900/50 font-bold py-2.5 rounded shadow transition-all flex flex-col justify-center items-center gap-1 text-[11px]" title="Salva il progetto sul PC">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Salva
+                    <button id="btnSaveProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex flex-col justify-center items-center gap-1 text-[11px]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Salva Book
                     </button>
-                    <button id="btnLoadProject" class="bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-yellow-900/50 font-bold py-2.5 rounded shadow transition-all flex flex-col justify-center items-center gap-1 text-[11px]" title="Carica un progetto dal PC">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Carica
+                    <button id="btnLoadProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex flex-col justify-center items-center gap-1 text-[11px]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Carica Book
                     </button>
                     <input type="file" id="fileLoadProject" accept=".kdp" class="hidden">
-                    <button id="btnOpenAPlusModal" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-900/50 font-bold py-2.5 rounded shadow transition-all flex flex-col justify-center items-center gap-1 text-[11px]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg> A+ Studio
-                    </button>
-                    <button id="btnResetProject" class="bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded shadow transition-all flex flex-col justify-center items-center gap-1 text-[11px]" title="Azzera tutto il progetto">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Reset
+                    <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Azzera Progetto
                     </button>
                 </div>
 
-                <button id="btnExportMPC" class="w-full bg-slate-800 hover:bg-slate-700 text-fuchsia-400 border border-fuchsia-900/50 font-bold py-3.5 rounded shadow-lg transition-all flex justify-center items-center gap-2 mb-4 text-sm" title="Esporta file ZIP con tutte le carte per MakePlayingCards">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> 
-                    Esporta Mazzo (MPC Zip)
-                </button>
-
-                <div id="progressSection" class="flex-col gap-4 bg-slate-900 p-4 rounded border border-slate-800 shadow-inner hidden">
+                <div id="progressSection" class="flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner hidden">
                     <div class="flex justify-between text-xs mb-1 text-slate-400">
-                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-purple-400">Lettura in corso...</span>
-                        <span id="progressCount" class="font-mono">1/1</span>
+                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Elaborazione...</span>
+                        <span id="progressCount" class="font-mono text-[10px]">0/0</span>
                     </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5">
-                        <div id="progressBar" class="bg-gradient-to-r from-purple-500 to-fuchsia-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    <div class="w-full bg-[#1a1e29] rounded-full h-1.5 overflow-hidden">
+                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -616,63 +280,8 @@
             <div id="editorWorkspace">
                 <div id="bookPage" contenteditable="true" spellcheck="false">
                     <div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder">
-                        <h1 class="doc-title" style="font-family: 'Cinzel', serif; color: #1e1b4b; font-size: calc(2.8rem * var(--font-scale)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #4c1d95; padding-bottom: 20px; outline: none;">Il Viaggio del Bagatto</h1>
-                        <p style="font-family: 'Inter', sans-serif; color: #4338ca; font-size: calc(12pt * var(--font-scale)); margin-top: 20px; font-style: italic; outline: none;">Guida Esoterica agli Arcani Maggiori</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TikTok Video Studio Modal -->
-    <div id="tiktokModal" class="modal">
-        <div class="modal-content" style="max-width: 900px; display: flex; flex-direction: row; gap: 24px; padding: 24px;">
-            <div class="w-1/3 flex flex-col gap-4 relative">
-                <div class="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-1 rounded font-bold tracking-wider z-10 backdrop-blur-sm">Rif. Immagine</div>
-                <img id="tkImage" class="w-full h-auto rounded-lg shadow-2xl border-2 border-indigo-500 object-contain max-h-[60vh] bg-black">
-                <button id="tkCopyPromptBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition-all">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copia Prompt Animazione
-                </button>
-            </div>
-            <div class="w-2/3 flex flex-col gap-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 003.5 15.7a6.34 6.34 0 0012.67-1.18V8.75a8.3 8.3 0 004.83 1.54V6.84a6.22 6.22 0 01-1.41-.15z"/></svg>
-                        TikTok Video Studio Pro
-                    </h2>
-                    <svg class="w-6 h-6 close-modal" id="closeTikTokModal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    Usa il tuo generatore video preferito (Luma Dream Machine, Kling AI, Runway Gen-3). Carica l'immagine a lato come riferimento iniziale e incolla il <strong>Prompt Animazione</strong> per dare vita alla carta in formato 9:16. Scarica l'Audio per montarlo sotto al video.
-                </p>
-
-                <div id="tkLoader" class="flex flex-col items-center justify-center py-12 hidden">
-                    <div class="loader w-10 h-10 border-t-cyan-400"></div> 
-                    <span class="mt-4 text-cyan-400 text-sm font-medium tracking-wide">Invocazione dell'Entità (Prompt & Audio Neurale)...</span>
-                </div>
-                
-                <div id="tkContent" class="flex flex-col gap-4 hidden">
-                    <div>
-                        <label class="text-[10px] text-cyan-400 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Prompt Animazione Video (Inglese - Luma/Kling)</label>
-                        <textarea id="tkVideoPrompt" readonly class="w-full h-20 p-3 bg-slate-900 border border-slate-700 rounded text-sm text-slate-200 resize-none outline-none focus:border-cyan-500"></textarea>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-fuchsia-400 font-bold uppercase tracking-wider block mb-1.5 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg> Script Voiceover & Hook (Italiano)</label>
-                        <textarea id="tkScript" readonly class="w-full h-24 p-3 bg-slate-900 border border-slate-700 rounded text-sm text-slate-200 resize-none outline-none focus:border-fuchsia-500"></textarea>
-                    </div>
-                    <div>
-                        <input type="text" id="tkHashtags" readonly class="w-full p-2 bg-slate-900 border border-slate-700 rounded text-xs text-blue-300 font-mono outline-none">
-                    </div>
-                    
-                    <div class="flex justify-between items-center bg-slate-900 p-3 rounded-lg border border-slate-800 shadow-inner mt-2">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Audio Voce Neurale:</span>
-                            <audio id="tkAudioPlayer" controls class="h-8 w-48 outline-none"></audio>
-                        </div>
-                        <a id="tkDownloadAudio" href="#" download="voiceover.wav" class="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white text-xs font-bold py-2 px-5 rounded shadow transition flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Scarica .WAV
-                        </a>
+                        <h1 class="doc-title" style="color: var(--primary-dark); font-size: calc(3.5rem * var(--font-scale)); font-weight: 700; border-bottom: 2px solid var(--gold); padding-bottom: 20px;">Tarot Pro Studio</h1>
+                        <p style="font-family: 'Inter', sans-serif; color: #64748b; font-size: calc(12pt * var(--font-scale)); margin-top: 20px; font-style: italic; text-align: center;">Forgia la Cornice Maestra a sinistra per iniziare il Viaggio.</p>
                     </div>
                 </div>
             </div>
@@ -680,49 +289,44 @@
     </div>
 
     <div id="regenModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2 class="text-lg font-serif text-f8fafc">Modifica Immagine Mistica</h2>
-            <p class="text-xs text-slate-400 mb-2">Aggiungi istruzioni per l'IA (es. "Aggiungi candele viola") o lascia vuoto per rimpiazzo casuale.</p>
-            <textarea id="regenPrompt" class="w-full h-24 p-3 bg-slate-900 border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none"></textarea>
-            <div class="flex justify-end gap-3 mt-4">
-                <button id="closeRegenModal" class="px-4 py-2 text-slate-400 hover:text-white transition">Annulla</button>
-                <button id="btnConfirmRegen" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded flex items-center gap-2 shadow">
-                    <span id="btnRegenText" class="">Applica</span><div id="btnRegenLoader" class="loader hidden"></div>
+        <div class="modal-content">
+            <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">✎ Modifica Illustrazione</h2>
+            <p class="text-xs text-slate-400">Aggiungi istruzioni magiche (es. "aggiungi un gatto nero") o lascia vuoto per rimpiazzo casuale.</p>
+            <textarea id="regenPrompt" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none"></textarea>
+            <div class="flex justify-end gap-3 mt-2">
+                <button id="closeRegenModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Annulla</button>
+                <button id="btnConfirmRegen" class="bg-[#d4af37] hover:bg-[#c5a028] text-[#0f1219] font-bold py-2 px-6 rounded flex items-center gap-2 shadow text-sm">
+                    <span id="btnRegenText">Applica</span><div id="btnRegenLoader" class="loader hidden border-[#0f1219] border-top-transparent"></div>
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="aplusModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="text-xl font-serif text-f8fafc flex items-center gap-2"><svg class="w-6 h-6 text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg> A+ Content Studio (3D Edition)</h2>
-                <div class="flex gap-3">
-                    <button id="btnRegenerateAPlus" class="bg-slate-700 hover:bg-slate-600 text-white text-sm px-4 py-2 rounded transition-all flex items-center gap-2 shadow">
-                        <span id="btnRegenAPlusText" class="">Rigenera Testi</span><div id="btnRegenAPlusLoader" class="loader hidden"></div>
-                    </button>
-                    <button id="btnDownloadAPlus" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold px-4 py-2 rounded shadow flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Scarica 3 Banner
-                    </button>
-                    <svg class="w-6 h-6 close-modal ml-2 mt-1" id="closeAPlusModal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
+    <div id="videoModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">🎬 TikTok Video Studio Pro</h2>
+            <p class="text-xs text-slate-400">Copia questo prompt e incollalo su Luma, Runway o Kling AI assieme alla foto della carta per animarla in formato verticale.</p>
+            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly></textarea>
+            
+            <p class="text-xs text-slate-400 mt-2">Script Vocale generato (Tono: <span id="videoToneLabel" class="text-white font-bold"></span>)</p>
+            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly></textarea>
+            
+            <div class="flex justify-between items-center mt-2">
+                <button id="btnPlayTTS" class="text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Ascolta Voce
+                </button>
+                <button id="closeVideoModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Chiudi Studio</button>
             </div>
-            <p class="text-xs text-slate-400 mb-1 text-center">Banner formattati 970x300. Il sistema crea veri mockups 3D partendo dalle pagine del tuo libro mistico.</p>
-            <div class="aplus-container overflow-y-auto pb-4" id="aplusBannersContainer"></div>
         </div>
     </div>
 
     <div id="resetConfirmModal" class="modal">
         <div class="modal-content" style="max-width: 400px; text-align: center; border-color: #7f1d1d;">
-            <h2 class="text-xl font-serif text-red-400 mb-2 flex justify-center items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Attenzione!
-            </h2>
-            <p class="text-sm text-slate-300 mb-6">Sei sicuro di voler azzerare l'intero grimorio? Tutte le carte, le immagini e le interpretazioni non salvate andranno perse irreversibilmente.</p>
+            <h2 class="text-xl font-serif text-red-400 mb-2 flex justify-center items-center gap-2" style="font-family: 'Cinzel', serif;">Attenzione!</h2>
+            <p class="text-sm text-slate-300 mb-6">Sei sicuro di voler azzerare l'intero progetto? Tutte le carte, le immagini e le modifiche non salvate andranno perse.</p>
             <div class="flex justify-center gap-3">
-                <button id="btnCancelReset" class="px-5 py-2.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded transition font-medium text-sm">Annulla</button>
-                <button id="btnConfirmReset" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-5 rounded shadow flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Azzera Tutto
-                </button>
+                <button id="btnCancelReset" class="px-5 py-2.5 text-slate-400 hover:text-white bg-slate-800 rounded transition text-sm">Annulla</button>
+                <button id="btnConfirmReset" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-5 rounded shadow flex items-center gap-2 text-sm">Azzera Tutto</button>
             </div>
         </div>
     </div>
@@ -732,68 +336,32 @@
     <script>
         const DOM = {
             btnStart: document.getElementById('btnStartAutoPilot'), btnText: document.getElementById('btnStartText'), btnLoader: document.getElementById('btnStartLoader'),
-            topicInput: document.getElementById('bookTopic'), languageInput: document.getElementById('bookLanguage'), trimSize: document.getElementById('trimSize'),
+            topicInput: document.getElementById('bookTopic'), readingTheme: document.getElementById('readingTheme'), languageInput: document.getElementById('bookLanguage'), trimSize: document.getElementById('trimSize'),
+            customList: document.getElementById('customRecipeList'), visualSetting: document.getElementById('visualSetting'), voiceTone: document.getElementById('voiceTone'),
             bookPage: document.getElementById('bookPage'), apiKeyInput: document.getElementById('apiKeyInput'),
-            customRecipeList: document.getElementById('customRecipeList'), artStyle: document.getElementById('artStyle'), visualSetting: document.getElementById('visualSetting'), arcanaTone: document.getElementById('arcanaTone'),
-            savePdfBtn: document.getElementById('savePdfBtn'), saveEpubBtn: document.getElementById('saveEpubBtn'), btnLiveTranslate: document.getElementById('btnLiveTranslate'),
+            savePdfBtn: document.getElementById('savePdfBtn'), saveMpcBtn: document.getElementById('saveMpcBtn'),
             btnSaveProject: document.getElementById('btnSaveProject'), btnLoadProject: document.getElementById('btnLoadProject'), fileLoadProject: document.getElementById('fileLoadProject'),
             progressSection: document.getElementById('progressSection'), progressStatus: document.getElementById('progressStatus'), progressCount: document.getElementById('progressCount'), progressBar: document.getElementById('progressBar'),
             toastContainer: document.getElementById('toast-container'),
             regenModal: document.getElementById('regenModal'), closeRegenModal: document.getElementById('closeRegenModal'), btnConfirmRegen: document.getElementById('btnConfirmRegen'), regenPrompt: document.getElementById('regenPrompt'), btnRegenText: document.getElementById('btnRegenText'), btnRegenLoader: document.getElementById('btnRegenLoader'),
-            btnOpenAPlusModal: document.getElementById('btnOpenAPlusModal'), aplusModal: document.getElementById('aplusModal'), closeAPlusModal: document.getElementById('closeAPlusModal'),
-            btnRegenerateAPlus: document.getElementById('btnRegenerateAPlus'), btnRegenAPlusText: document.getElementById('btnRegenAPlusText'), btnRegenAPlusLoader: document.getElementById('btnRegenAPlusLoader'), btnDownloadAPlus: document.getElementById('btnDownloadAPlus'), aplusBannersContainer: document.getElementById('aplusBannersContainer'),
-            btnResetProject: document.getElementById('btnResetProject'), resetConfirmModal: document.getElementById('resetConfirmModal'), btnCancelReset: document.getElementById('btnCancelReset'), btnConfirmReset: document.getElementById('btnConfirmReset'),
-            btnExportMPC: document.getElementById('btnExportMPC'),
-            tiktokModal: document.getElementById('tiktokModal'), closeTikTokModal: document.getElementById('closeTikTokModal'), tkImage: document.getElementById('tkImage'), tkCopyPromptBtn: document.getElementById('tkCopyPromptBtn'), tkLoader: document.getElementById('tkLoader'), tkContent: document.getElementById('tkContent'), tkVideoPrompt: document.getElementById('tkVideoPrompt'), tkScript: document.getElementById('tkScript'), tkHashtags: document.getElementById('tkHashtags'), tkAudioPlayer: document.getElementById('tkAudioPlayer'), tkDownloadAudio: document.getElementById('tkDownloadAudio')
+            videoModal: document.getElementById('videoModal'), closeVideoModal: document.getElementById('closeVideoModal'), videoPromptCopy: document.getElementById('videoPromptCopy'), videoScriptCopy: document.getElementById('videoScriptCopy'), btnPlayTTS: document.getElementById('btnPlayTTS'), videoToneLabel: document.getElementById('videoToneLabel'),
+            btnGenerateFrame: document.getElementById('btnGenerateFrame'), frameStyle: document.getElementById('frameStyle'), masterFramePreview: document.getElementById('masterFramePreview'), btnFrameText: document.getElementById('btnFrameText'), btnFrameLoader: document.getElementById('btnFrameLoader'),
+            btnResetProject: document.getElementById('btnResetProject'), resetConfirmModal: document.getElementById('resetConfirmModal'), btnCancelReset: document.getElementById('btnCancelReset'), btnConfirmReset: document.getElementById('btnConfirmReset')
         };
 
         const getAPIKey = () => DOM.apiKeyInput.value.trim() || "";
-        let generatedImages = [];
-        let imageToRegenerate = null, basePromptForRegen = "";
+        let masterFrameBase64 = null;
+        let generatedCards = [];
         let globalTocEntries = [];
+        let imageToRegenerate = null, basePromptForRegen = "";
 
-        // Tarot Specific i18n updated for new Structure
-        const i18n = {
-            "Italiano": { 
-                element: "Elemento", planet: "Pianeta", zodiac: "Zodiaco", yesno: "Sì / No", 
-                keywords: "Parole Chiave", symbols: "Simbolismo Mistico", 
-                upright: "Luce", reversed: "Ombra", love: "Amore", career: "Lavoro", spirit: "Spirito",
-                toc: "Indice degli Arcani", dynamics: "Dinamiche dell'Oracolo" 
-            },
-            "English (US)": { 
-                element: "Element", planet: "Planet", zodiac: "Zodiac", yesno: "Yes / No", 
-                keywords: "Key Meanings", symbols: "Mystic Symbolism", 
-                upright: "Light", reversed: "Shadow", love: "Love", career: "Career", spirit: "Spirit",
-                toc: "Table of Arcana", dynamics: "Oracle Dynamics" 
-            },
-            "Español": { 
-                element: "Elemento", planet: "Planeta", zodiac: "Zodíaco", yesno: "Sí / No", 
-                keywords: "Palabras Clave", symbols: "Simbolismo Místico", 
-                upright: "Luz", reversed: "Sombra", love: "Amor", career: "Carrera", spirit: "Espíritu",
-                toc: "Índice de Arcanos", dynamics: "Dinámicas del Oráculo" 
-            },
-            "Français": { 
-                element: "Élément", planet: "Planète", zodiac: "Zodiaque", yesno: "Oui / Non", 
-                keywords: "Mots-clés", symbols: "Symbolisme Mystique", 
-                upright: "Lumière", reversed: "Ombre", love: "Amour", career: "Carrière", spirit: "Esprit",
-                toc: "Table des Arcanes", dynamics: "Dynamiques de l'Oracle" 
-            },
-            "Deutsch": { 
-                element: "Element", planet: "Planet", zodiac: "Tierkreis", yesno: "Ja / Nein", 
-                keywords: "Schlüsselwörter", symbols: "Mystische Symbolik", 
-                upright: "Licht", reversed: "Schatten", love: "Liebe", career: "Karriere", spirit: "Geist",
-                toc: "Inhaltsverzeichnis", dynamics: "Orakel Dynamik" 
-            }
-        };
+        const defaultArcana = ["0 - Il Matto", "I - Il Bagatto", "II - La Papessa", "III - L'Imperatrice", "IV - L'Imperatore", "V - Il Papa", "VI - Gli Amanti", "VII - Il Carro", "VIII - La Forza", "IX - L'Eremita", "X - La Ruota della Fortuna", "XI - La Giustizia", "XII - L'Appeso", "XIII - La Morte", "XIV - La Temperanza", "XV - Il Diavolo", "XVI - La Torre", "XVII - La Stella", "XVIII - La Luna", "XIX - Il Sole", "XX - Il Giudizio", "XXI - Il Mondo"];
 
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            let icon = type === 'success' ? '<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' : 
-                       type === 'warning' ? '<svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>' :
-                       type === 'error' ? '<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>' : 
-                       '<svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-            toast.innerHTML = `${icon} <span>${message}</span>`;
+            let icon = type === 'success' ? '✔' : type === 'error' ? '✖' : 'ℹ';
+            toast.innerHTML = `<span style="font-weight:bold; font-size: 16px;">${icon}</span> <span>${message}</span>`;
             DOM.toastContainer.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 5000);
@@ -808,10 +376,7 @@
         const delay = ms => new Promise(res => setTimeout(res, ms));
 
         function extractJSON(text) {
-            text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
             try {
-                return JSON.parse(text); 
-            } catch(e) { 
                 let s = text.indexOf('{'); let b = text.indexOf('[');
                 let start = (s !== -1 && b !== -1) ? Math.min(s, b) : (s !== -1 ? s : b);
                 if (start !== -1) {
@@ -819,25 +384,19 @@
                     let end = text.lastIndexOf(endChar);
                     if (end !== -1) return JSON.parse(text.substring(start, end + 1));
                 }
-                throw new Error("JSON format error from AI."); 
-            }
+                return JSON.parse(text); 
+            } catch(e) { throw new Error("JSON format error from AI."); }
         }
 
-        const fetchWithRetry = async (urlGenerator, optionsGenerator, maxRetries = 5) => {
+        const fetchWithRetry = async (urlGenerator, optionsGenerator, maxRetries = 3) => {
             for (let retries = 0; retries < maxRetries; retries++) {
                 try {
                     const response = await fetch(urlGenerator(), optionsGenerator());
-                    if (!response.ok) {
-                        const err = await response.json().catch(()=>({}));
-                        if (response.status === 400 && err.error?.message?.includes("API key not valid")) throw new Error("Invalid API Key in sidebar.");
-                        if (response.status === 429 || response.status === 500) throw new Error("Rate limit / Server Error");
-                        throw new Error(`HTTP ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response;
                 } catch (error) {
-                    if(error.message.includes("API Key") || retries === maxRetries - 1) throw error;
-                    updateStatus(`API Limit. Retrying in ${5 * (retries + 1)}s...`);
-                    await delay(5000 * (retries + 1)); 
+                    if (retries === maxRetries - 1) throw error;
+                    await delay(3000); 
                 }
             }
         };
@@ -857,28 +416,12 @@
             return extractJSON(data.candidates[0].content.parts[0].text);
         }
 
-        async function callGeminiTextOnly(prompt, systemInstruction) {
-            const urlGen = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
-            const optGen = () => ({
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.8 },
-                    systemInstruction: { parts: [{ text: systemInstruction }] }
-                })
-            });
-            const response = await fetchWithRetry(urlGen, optGen);
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
-        }
-
-        async function callGeminiImage(prompt, aspect, maxWidth = 1000, quality = 0.85) {
-            const safetyAppend = ". A mystical, highly detailed esoteric illustration or beautiful tarot setting. Strictly NO texts, NO words, NO letters in the image.";
+        async function callGeminiImage(prompt, aspect = '3:4', maxWidth = 1000) {
             const urlGen = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
             const optGen = () => ({
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ role: 'user', parts: [{ text: prompt + safetyAppend }] }], 
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }], 
                     generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: aspect } }
                 })
             });
@@ -886,12 +429,12 @@
                 const response = await fetchWithRetry(urlGen, optGen);
                 const data = await response.json();
                 const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-                if (part) return await processImageToBlobUrl(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, maxWidth, quality); 
+                if (part) return await processImageToBlobUrl(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, maxWidth, 0.9); 
             } catch(e) { console.warn("Image gen failed:", e); }
             return null;
         }
 
-        async function processImageToBlobUrl(base64Str, maxWidth = 2400, quality = 0.85) {
+        async function processImageToBlobUrl(base64Str, maxWidth = 1500, quality = 0.9) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
@@ -907,80 +450,32 @@
             });
         }
 
-        // --- Audio/TTS Helpers per Voiceover Neurale ---
-        function base64ToArrayBuffer(base64) {
-            var binaryString = window.atob(base64);
-            var bytes = new Uint8Array(binaryString.length);
-            for (var i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const byteRate = sampleRate * numChannels * 2;
-            const blockAlign = numChannels * 2;
-            const buffer = new ArrayBuffer(44 + pcm16.byteLength);
-            const view = new DataView(buffer);
-            const writeString = (offset, string) => { for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i)); };
-            
-            writeString(0, 'RIFF'); view.setUint32(4, 36 + pcm16.byteLength, true);
-            writeString(8, 'WAVE'); writeString(12, 'fmt ');
-            view.setUint32(16, 16, true); view.setUint16(20, 1, true);
-            view.setUint16(22, numChannels, true); view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true); view.setUint16(32, blockAlign, true);
-            view.setUint16(34, 16, true); writeString(36, 'data');
-            view.setUint32(40, pcm16.byteLength, true);
-            new Int16Array(buffer, 44).set(pcm16);
-            return new Blob([buffer], { type: 'audio/wav' });
-        }
-        // -------------------------
-
         function applyLayoutEngine() {
             const val = DOM.trimSize.value;
             const [wStr, hStr] = val.split('x');
             const widthIn = parseFloat(wStr); 
             const heightIn = parseFloat(hStr);
 
-            let fontScale = heightIn >= 10 ? 1.0 : (widthIn <= 5.5 ? 0.75 : 0.85);
-
+            let fontScale = (widthIn <= 6) ? 0.85 : 1.0;
             document.documentElement.style.setProperty('--page-width-px', `${widthIn * 96}px`);
             document.documentElement.style.setProperty('--page-height-px', `${heightIn * 96}px`);
             document.documentElement.style.setProperty('--font-scale', fontScale);
-
             document.getElementById('dynamicPrintStyle').innerHTML = `@media print { @page { size: ${widthIn}in ${heightIn}in; margin: 0 !important; } .page-text, .page-bleed { width: ${widthIn}in !important; height: ${heightIn}in !important; overflow: hidden !important; } }`;
-            document.getElementById('headerTrimLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse"></span> ${widthIn}" x ${heightIn}" Bleed`;
-            
-            return { widthIn, heightIn, isLarge: heightIn >= 10 };
+            document.getElementById('headerTrimLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${widthIn}" x ${heightIn}" Bleed`;
+            return { widthIn, heightIn };
         }
         DOM.trimSize.addEventListener('change', applyLayoutEngine);
-
-        function adjustFontSize(delta) {
-            const selection = window.getSelection();
-            if (!selection.rangeCount || selection.isCollapsed) return;
-            let node = selection.focusNode;
-            if (node.nodeType === 3) node = node.parentElement;
-            if (node.id === 'bookPage' || node.classList.contains('page-text')) {
-                document.execCommand('fontSize', false, '7'); 
-                const spans = document.getElementsByTagName("font");
-                for(let span of spans) { if(span.size === "7") { span.removeAttribute("size"); span.style.fontSize = "16pt"; } }
-                return;
-            }
-            node.style.fontSize = (parseFloat(window.getComputedStyle(node).fontSize) + delta) + 'px';
-        }
 
         function wrapImageForEdit(imgHtml, originalPrompt) {
             return `<div class="editable-image-container" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
         }
 
         window.openRegenModal = function(container) {
-            imageToRegenerate = container.querySelector('img');
+            imageToRegenerate = container.querySelector('img.tarot-artwork') || container.querySelector('img');
             basePromptForRegen = container.dataset.prompt;
             DOM.regenPrompt.value = "";
             DOM.regenModal.classList.add('show');
-        };
-
+        }
         DOM.closeRegenModal.addEventListener('click', () => DOM.regenModal.classList.remove('show'));
         
         DOM.btnConfirmRegen.addEventListener('click', async () => {
@@ -988,567 +483,317 @@
             const finalPrompt = modifier ? `${basePromptForRegen}. User specific modification: ${modifier}` : basePromptForRegen;
             DOM.btnRegenText.classList.add('hidden'); DOM.btnRegenLoader.classList.remove('hidden'); DOM.btnConfirmRegen.disabled = true;
             try {
-                const aspect = imageToRegenerate.classList.contains('context-img-small') ? '3:4' : (imageToRegenerate.parentElement.classList.contains('page-bleed') ? '2:3' : '3:4');
-                const resolution = imageToRegenerate.classList.contains('context-img-small') ? 1000 : 2400;
-                const newImgUrl = await callGeminiImage(finalPrompt, aspect, resolution, 0.9);
-                if(newImgUrl) { imageToRegenerate.src = newImgUrl; showToast("Immagine mistica evocata!", "success"); }
-                else { showToast("Immagine non disponibile.", "warning"); }
+                const aspect = imageToRegenerate.classList.contains('tarot-artwork') || imageToRegenerate.parentElement.parentElement.classList.contains('page-bleed') ? '9:16' : '3:4';
+                const newImgUrl = await callGeminiImage(finalPrompt, aspect, 1500);
+                if(newImgUrl) { imageToRegenerate.src = newImgUrl; showToast("Immagine rigenerata!", "success"); }
             } catch(e) { showToast(e.message, "error"); } finally {
                 DOM.btnRegenText.classList.remove('hidden'); DOM.btnRegenLoader.classList.add('hidden'); DOM.btnConfirmRegen.disabled = false;
                 DOM.regenModal.classList.remove('show');
             }
         });
 
+        DOM.btnGenerateFrame.addEventListener('click', async () => {
+            DOM.btnGenerateFrame.disabled = true; DOM.btnFrameText.classList.add('hidden'); DOM.btnFrameLoader.classList.remove('hidden');
+            try {
+                const style = DOM.frameStyle.value;
+                const prompt = `A perfect, perfectly symmetrical, highly ornate rectangular border frame for a Tarot card. Style: ${style}. The absolutely central area MUST be pure, stark, solid 100% white (#FFFFFF), empty, with no textures inside the middle. The intricate borders should be on the outer edges only. Perfect 9:16 ratio. White background inside.`;
+                const frameUrl = await callGeminiImage(prompt, '9:16', 1500);
+                if(frameUrl) {
+                    masterFrameBase64 = frameUrl;
+                    DOM.masterFramePreview.innerHTML = `<img src="${frameUrl}" style="width:100%; height:100%; object-fit:cover;">`;
+                    showToast("Cornice Maestra forgiata con successo!", "success");
+                }
+            } catch(e) { showToast("Errore cornice: " + e.message, "error"); } finally {
+                DOM.btnGenerateFrame.disabled = false; DOM.btnFrameText.classList.remove('hidden'); DOM.btnFrameLoader.classList.add('hidden');
+            }
+        });
+
         DOM.btnStart.addEventListener('click', async () => {
-            const topic = DOM.topicInput.value.trim(); 
-            const lang = DOM.languageInput.value; 
-            const customList = DOM.customRecipeList.value.trim();
-            const artStyle = DOM.artStyle.value || "Classic Rider-Waite";
+            if(!masterFrameBase64) return showToast("Devi prima FORGIARE LA CORNICE MAESTRA (Step 1) a sinistra.", "warning");
+            
+            const customListStr = DOM.customList.value.trim();
+            const arcanaList = customListStr ? customListStr.split(',').map(s => s.trim()).filter(s => s) : defaultArcana;
+            const lang = DOM.languageInput.value;
             const visualSetting = DOM.visualSetting.value.trim();
+            const readingTheme = DOM.readingTheme.value;
             
             DOM.btnStart.disabled = true; DOM.btnText.classList.add('hidden'); DOM.btnLoader.classList.remove('hidden');
             DOM.progressSection.classList.remove('hidden');
+            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title">${DOM.topicInput.value || "I Tarocchi"}</h1></div>`; 
             
-            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title" style="font-family: 'Cinzel', serif; color: #1e1b4b; font-size: calc(3.5rem * var(--font-scale)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #4c1d95; padding-bottom: 20px; outline: none;">Arcana Mystica</h1><p style="font-family: 'Inter', sans-serif; color: #4338ca; font-size: calc(12pt * var(--font-scale)); margin-top: 20px; font-style: italic; outline: none;">Il Sentiero dell'Iniziazione</p></div>`; 
-            
-            generatedImages = []; globalTocEntries = []; let currentPhysicalPage = 1; 
-            const layoutInfo = applyLayoutEngine(); 
-            const labels = i18n[lang] || i18n["English (US)"];
-            
-            const visualSettingPrompt = visualSetting ? `. CRITICAL VISUAL REQUIREMENT: Also incorporate this environmental detail: "${visualSetting}".` : '';
+            generatedCards = []; globalTocEntries = []; let currentPhysicalPage = 1; 
 
-            try {
-                updateStatus(`Canalizzazione Arcani Maggiori in ${lang}...`, 5);
-                
-                let cardArray = [];
-                if (customList) {
-                    cardArray = customList.split(',').map(s => s.trim()).filter(s => s);
-                } else {
-                    // Costringe l'AI a generare sempre 22 arcani
-                    const tocSys = `You are a Master Tarot Reader and Esoteric Author. 
-CRITICAL LANGUAGE: Output EXACTLY the standard 22 Major Arcana names in ${lang.toUpperCase()}. No English allowed.
-Return ONLY a valid JSON array of strings (e.g. ["Il Matto", "Il Bagatto", "La Papessa", ...]). ALWAYS 22 elements.`;
-                    cardArray = await callGemini(`Generate the 22 Major Arcana card names in ${lang.toUpperCase()}. JSON array only.`, tocSys);
-                }
-
-                for(let i = 0; i < cardArray.length; i++) {
-                    const cName = cardArray[i];
-                    updateStatus(`Lettura in corso: ${cName}...`, ((i)/cardArray.length)*100, i+1, cardArray.length);
-                    
-                    try {
-                        const tarotSys = `You are an elite Tarot Reader, Esoteric Writer and Psychologist.
-CRITICAL LANGUAGE REQUIREMENT: 100% of narrative text, meanings, symbols, labels and spread interpretations MUST be written STRICTLY in ${lang.toUpperCase()}. No English allowed (except for image prompts).
-CRITICAL LIMIT: Keep keywords VERY SHORT (max 5-6 words total per category) to prevent UI overflow.
-
-Schema:
-{ 
-  "meaning": "Deep, mystical description of the card's meaning in ${lang.toUpperCase()}. Max 2-3 short sentences.", 
-  "attributes": { "element": "Aria/Fuoco...", "planet": "Luna/Sole...", "zodiac": "Scorpione...", "yesNo": "Sì/No/Forse" },
-  "keywords": { 
-    "upright": "Brevi parole di luce. Max 6 words.", 
-    "reversed": "Brevi parole ombra. Max 6 words.", 
-    "love": "Brevi parole amore. Max 6 words.", 
-    "career": "Brevi parole lavoro. Max 6 words.", 
-    "spirit": "Brevi parole spirito. Max 6 words." 
-  },
-  "symbols": ["Duality...", "Hidden knowledge..."], 
-  "readingContexts": [ 
-    { "title": "Origine & Radici", "subtitle": "Il Passato", "description": "Archetypal explanation. Max 2 short sentences. ${lang.toUpperCase()}.", "imagePrompt": "Abstract mystical tarot art representing the PAST, sepia or nostalgic glowing embers, matching the energy of ${cName}. NO TEXT." },
-    { "title": "Fulcro & Manifestazione", "subtitle": "Il Presente", "description": "Archetypal explanation. Max 2 short sentences. ${lang.toUpperCase()}.", "imagePrompt": "Abstract mystical tarot art representing the PRESENT, burning candle, dynamic light, matching ${cName}. NO TEXT." },
-    { "title": "Proiezione & Destino", "subtitle": "Il Futuro", "description": "Archetypal explanation. Max 2 short sentences. ${lang.toUpperCase()}.", "imagePrompt": "Abstract mystical tarot art representing the FUTURE, starry sky, mysterious fog, matching ${cName}. NO TEXT." },
-    { "title": "L'Ombra & L'Incrocio", "subtitle": "L'Ostacolo", "description": "How to interpret this as a challenge. Max 2 short sentences. ${lang.toUpperCase()}.", "imagePrompt": "Abstract mystical tarot art representing an OBSTACLE, crossed swords, dark clouds, matching ${cName}. NO TEXT." }
+            const sysBase = `You are a Master Tarot Reader and Esoteric Publisher writing a premium book in ${lang.toUpperCase()}.
+CRITICAL: ALL text must be strictly in ${lang.toUpperCase()}.
+CRITICAL FORMATTING: Keep "intro" to exactly 2 sentences. "symbols" descriptions MUST be STRICTLY UNDER 20 WORDS each. "readings" text MUST be exactly 2 short sentences. "mantra" is a short affirmation in quotes.
+Interpret the card specifically through the lens of: "${readingTheme}".
+Output valid JSON:
+{
+  "title": "Translated Card Name",
+  "number": "Roman Numeral (e.g., 0, I, II, XXI)",
+  "intro": "2 sentences introduction.",
+  "symbols": [{"name":"Symbol 1", "desc":"Short desc"}, {"name":"Symbol 2", "desc":"Short desc"}, {"name":"Symbol 3", "desc":"Short desc"}, {"name":"Symbol 4", "desc":"Short desc"}],
+  "numerology": "1 sentence on numerology/color.",
+  "readings": [
+    {"archetype":"Origine & Radici", "position":"Il Passato", "text":"..."},
+    {"archetype":"Fulcro & Manifestazione", "position":"Il Presente", "text":"..."},
+    {"archetype":"Proiezione & Destino", "position":"Il Futuro", "text":"..."},
+    {"archetype":"L'Ombra & L'Incrocio", "position":"L'Ostacolo", "text":"..."}
   ],
-  "mantra": "Affermazione o mantra di potere in ${lang.toUpperCase()} legata all'arcano (es. 'Io abbraccio l'ignoto con fiducia').",
-  "visualPromptCard": "A highly detailed, beautiful Tarot card illustration of ${cName} in the ART STYLE OF: ${artStyle}. ${visualSettingPrompt} ENGLISH.",
-  "visualPromptReading": "An esoteric, moody flatlay of a tarot reading setup with crystals, candles. ONLY ONE SINGLE TAROT CARD is visible on the table representing ${cName}. CRITICAL: Pay extreme attention to the roman numeral and imagery of the card so it's accurate. ZERO HALLUCINATIONS. ENGLISH."
+  "mantra": "Affirmation quote",
+  "visualPrompt": "ENGLISH visual prompt. A beautiful full-bleed tarot illustration of [Card]. ZERO text. ZERO numbers. Pure artwork. Style: ${visualSetting || 'Mystical realism'}."
 }`;
-                        const cData = await callGemini(`Write full esoteric tarot data for the card "${cName}". Language: ${lang}. Deck Style: ${artStyle}. Output strictly JSON.`, tarotSys);
-
-                        // Page 1: Bleed Photo (The Card Itself with TikTok Button)
-                        currentPhysicalPage++; 
-                        updateStatus(`Illustrazione carta: ${cName}...`, null, i+1, cardArray.length);
-                        const imgCard = await callGeminiImage(cData.visualPromptCard, '2:3', 2400, 0.9);
-                        if(imgCard) generatedImages.push({url: imgCard, title: cName});
-                        const imgFallback = imgCard || `https://placehold.co/1600x2400/1e1b4b/fff?text=${encodeURIComponent(cName)}`;
-                        
-                        DOM.bookPage.insertAdjacentHTML('beforeend', `
-                            <div class="page-bleed recipe-block" data-recipe-id="${i}" style="background-color: #0b0f19;">
-                                ${wrapImageForEdit(`<img src="${imgFallback}" style="object-fit: contain; padding: 2rem;" alt="Tarot Card" data-cardname="${cName}" />`, cData.visualPromptCard)}
-                                <button class="tk-btn" onclick="window.openTikTokStudio('${cName}', '${imgFallback}')">
-                                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 003.5 15.7a6.34 6.34 0 0012.67-1.18V8.75a8.3 8.3 0 004.83 1.54V6.84a6.22 6.22 0 01-1.41-.15z"/></svg>
-                                    Crea Video TikTok
-                                </button>
-                            </div>
-                        `);
-                        await delay(3500); 
-
-                        // Page 2: Title, Meaning & Tavola Esoterica (Keywords)
-                        currentPhysicalPage++; 
-                        globalTocEntries.push({ title: cName, pageNum: currentPhysicalPage }); 
-                        DOM.bookPage.insertAdjacentHTML('beforeend', `
-                            <div class="page-text recipe-block" data-recipe-id="${i}">
-                                <h1 class="doc-h1">${cName}</h1>
-                                <p class="doc-quote">"${cData.meaning}"</p>
-                                
-                                <div class="tarot-meta-bar">
-                                    <div class="meta-item"><span class="meta-val prep-val">${cData.attributes.element}</span><span class="meta-lbl lbl-prep">${labels.element}</span></div>
-                                    <div class="meta-item"><span class="meta-val cook-val">${cData.attributes.planet}</span><span class="meta-lbl lbl-cook">${labels.planet}</span></div>
-                                    <div class="meta-item"><span class="meta-val diff-val">${cData.attributes.zodiac}</span><span class="meta-lbl lbl-diff">${labels.zodiac}</span></div>
-                                    <div class="meta-item"><span class="meta-val serv-val">${cData.attributes.yesNo}</span><span class="meta-lbl lbl-serv">${labels.yesno}</span></div>
-                                </div>
-
-                                <div class="esoteric-panel">
-                                    <div class="eso-header">
-                                        <h3 class="eso-title lbl-nut">${labels.keywords}</h3>
-                                    </div>
-                                    <div class="eso-grid">
-                                        <div class="eso-row"><span class="eso-lbl lbl-cal">${labels.upright}</span><span class="eso-val-txt nut-cal">${cData.keywords.upright}</span></div>
-                                        <div class="eso-row"><span class="eso-lbl lbl-pro">${labels.reversed}</span><span class="eso-val-txt nut-pro">${cData.keywords.reversed}</span></div>
-                                        <div class="eso-row"><span class="eso-lbl lbl-carb">${labels.love}</span><span class="eso-val-txt nut-carb">${cData.keywords.love}</span></div>
-                                        <div class="eso-row"><span class="eso-lbl lbl-vitd">${labels.career}</span><span class="eso-val-txt nut-vitd">${cData.keywords.career}</span></div>
-                                        <div class="eso-row"><span class="eso-lbl lbl-fat">${labels.spirit}</span><span class="eso-val-txt nut-fat">${cData.keywords.spirit}</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        `);
-
-                        // Page 3: Symbols/Atmosphere Bleed Photo
-                        currentPhysicalPage++;
-                        updateStatus(`Fotografia stesa: ${cName}...`, null, i+1, cardArray.length);
-                        const imgReading = await callGeminiImage(cData.visualPromptReading, layoutInfo.widthIn > layoutInfo.heightIn ? '16:9' : '3:4', 2400, 0.9);
-                        const imgReadingFallback = imgReading || `https://placehold.co/800/1e1b4b/fff?text=${encodeURIComponent('Tarot Setup')}`;
-                        DOM.bookPage.insertAdjacentHTML('beforeend', `<div class="page-bleed recipe-block" data-recipe-id="${i}">${wrapImageForEdit(`<img src="${imgReadingFallback}" alt="Reading Setup" />`, cData.visualPromptReading)}</div>`);
-                        await delay(3500);
-
-                        // Page 4: Symbols List (2-Col)
-                        currentPhysicalPage++; 
-                        const renderSymbolsCol = (items) => items.map(item => `<div class="sym-item"><svg class="sym-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="sym-text">${item}</span></div>`).join('');
-                        DOM.bookPage.insertAdjacentHTML('beforeend', `
-                            <div class="page-text recipe-block" data-recipe-id="${i}">
-                                <div class="symbols-container">
-                                    <h2 class="doc-h2 lbl-ingr" style="align-self: flex-start;">${labels.symbols}</h2>
-                                    <div class="symbols-grid">${renderSymbolsCol(cData.symbols)}</div>
-                                </div>
-                            </div>
-                        `);
-
-                        // Page 5: Reading Contexts (Arch Layout) - TUTTI IN UN'UNICA PAGINA
-                        currentPhysicalPage++;
-                        let posHtml = '';
-
-                        for(let s = 0; s < cData.readingContexts.length; s++) {
-                            updateStatus(`Miniatura Arcano ${s+1} (${cName})...`, null, i+1, cardArray.length);
-                            const imgPos = await callGeminiImage(cData.readingContexts[s].imagePrompt, '3:4', 800, 0.85);
-                            const imgPosFallback = imgPos || `https://placehold.co/300x400/f8fafc/0f172a?text=Vision`;
-                            posHtml += `
-                                <div class="context-row">
-                                    <div class="context-arch-img-box">${wrapImageForEdit(`<img src="${imgPosFallback}" class="context-img-small" alt="Vision" />`, cData.readingContexts[s].imagePrompt)}</div>
-                                    <div class="context-content">
-                                        <h3 class="context-title"><span class="step-title-text">${cData.readingContexts[s].title}</span></h3>
-                                        <h4 class="context-subtitle"><span class="step-subtitle-text">${cData.readingContexts[s].subtitle}</span></h4>
-                                        <p class="context-desc" title="${cData.readingContexts[s].description.replace(/"/g, '&quot;')}">${cData.readingContexts[s].description}</p>
-                                    </div>
-                                </div>`;
-                            if (s < cData.readingContexts.length - 1) await delay(3500); 
-                        }
-                        
-                        let mantraHtml = '';
-                        if (cData.mantra) {
-                            mantraHtml = `<div class="mantra-box"><div class="mantra-title">Mantra</div><div class="mantra-text">"${cData.mantra}"</div></div>`;
-                        }
-
-                        DOM.bookPage.insertAdjacentHTML('beforeend', `
-                            <div class="page-text recipe-block" data-recipe-id="${i}">
-                                <div class="readings-page-wrapper">
-                                    <div class="readings-header-box"><h2 class="doc-h2 lbl-dynamics">${labels.dynamics}</h2></div>
-                                    <div class="readings-grid">${posHtml}</div>
-                                    ${mantraHtml}
-                                </div>
-                            </div>
-                        `);
-                        
-                    } catch(err) { showToast(`Errore: ${cName} - ${err.message}`, "error"); }
-                }
-
-                // Final Page: Table of Contents
-                updateStatus("Impaginazione Indice finale...", 98);
-                const colClass = globalTocEntries.length > 20 ? 'toc-3col' : (globalTocEntries.length > 10 ? 'toc-2col' : '');
-                let tocHTML = `<div class="page-text" id="pdfTOC"><h1 class="doc-h1">${labels.toc}</h1><div class="toc-columns ${colClass}">`;
-                globalTocEntries.forEach(e => { tocHTML += `<div class="toc-item"><span class="toc-title">${e.title}</span><div class="toc-leader"></div><span class="toc-page">${e.pageNum}</span></div>`; });
-                DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML + `</div></div>`);
-                
-                updateStatus("Grimorio Completato!", 100, cardArray.length, cardArray.length);
-                showToast("Libro Mistico generato con successo!", "success");
-            } catch(e) { 
-                showToast(e.message, "error"); 
-            } finally { 
-                DOM.btnStart.disabled = false; DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden'); 
-                setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000); 
-            }
-        });
-
-        DOM.closeTikTokModal.addEventListener('click', () => {
-            DOM.tiktokModal.classList.remove('show');
-            DOM.tkAudioPlayer.pause();
-            DOM.tkAudioPlayer.src = "";
-        });
-
-        DOM.tkCopyPromptBtn.addEventListener('click', () => {
-            DOM.tkVideoPrompt.select();
-            document.execCommand('copy');
-            showToast("Prompt Video copiato negli appunti! Incollalo in Luma, Kling o Runway.", "success");
-        });
-
-        window.openTikTokStudio = async function(cardName, imageSrc) {
-            DOM.tiktokModal.classList.add('show');
-            DOM.tkImage.src = imageSrc;
-            DOM.tkContent.classList.add('hidden');
-            DOM.tkLoader.classList.remove('hidden');
 
             try {
-                const tone = DOM.arcanaTone.value;
-                const style = DOM.artStyle.options[DOM.artStyle.selectedIndex].text;
-
-                // 1. Generate Advanced Video Prompt & Script
-                const sysPrompt = "You are an elite TikTok content creator and a master AI Video Prompt Engineer. You create viral vertical tarot videos.";
-                const prompt = `I am animating the Tarot card: ${cardName} (Art Style: ${style}). Tone of the video: ${tone}.
-                Return ONLY a valid JSON with this structure:
-                {
-                  "videoPrompt": "A highly detailed, technical English prompt for an AI video generator (like Luma Dream Machine or Kling AI) to animate the reference image. Describe slow cinematic vertical 9:16 movement, camera angles, atmospheric effects (smoke, magic sparkles, glowing eyes), and dynamic character motion. Max 45 words.",
-                  "script": "The Italian voiceover script for the TikTok video. Max 25 seconds of speaking. Start with an extremely engaging hook. Speak directly to the viewer in a ${tone} tone.",
-                  "hashtags": "4-5 trending vertical hashtags in Italian/English (e.g., #tarot #cartomanzia)"
-                }`;
-                
-                const aiData = await callGemini(prompt, sysPrompt);
-
-                // 2. Map the Tone to a Voice
-                let voiceName = "Orus"; // Mistico default
-                if(tone === 'Intimidatorio') voiceName = "Charon";
-                else if(tone === 'Dolce') voiceName = "Aoede";
-                else if(tone === 'Perentorio') voiceName = "Kore";
-                else if(tone === 'Ammiccante') voiceName = "Zephyr";
-
-                // 3. Generate Native High-Quality Audio (TTS)
-                const ttsPayload = {
-                    contents: [{ parts: [{ text: aiData.script }] }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceName } } }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-
-                const ttsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${getAPIKey()}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ttsPayload)
-                });
-                
-                if (!ttsRes.ok) throw new Error("Errore generazione audio neurale TTS.");
-                
-                const ttsData = await ttsRes.json();
-                const audioBase64 = ttsData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-                const mimeTypeStr = ttsData?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.mimeType || "audio/pcm;rate=24000";
-
-                if (audioBase64) {
-                    const sampleRateMatch = mimeTypeStr.match(/rate=(\d+)/);
-                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                for(let i = 0; i < arcanaList.length; i++) {
+                    const cardName = arcanaList[i];
+                    updateStatus(`Divinazione: ${cardName}...`, (i/arcanaList.length)*100, i+1, arcanaList.length);
                     
-                    const pcmData = base64ToArrayBuffer(audioBase64);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const cardData = await callGemini(`Analyze the Tarot card: ${cardName}. Lens: ${readingTheme}.`, sysBase);
 
-                    DOM.tkAudioPlayer.src = audioUrl;
-                    DOM.tkDownloadAudio.href = audioUrl;
+                    // Generazione Arte (Full Bleed)
+                    updateStatus(`Illustrazione: ${cardName}...`, null, i+1, arcanaList.length);
+                    const artPrompt = `${cardData.visualPrompt}. NO TEXT. NO NUMBERS. Pure art.`;
+                    const imgArt = await callGeminiImage(artPrompt, '9:16', 1500);
+                    const finalImg = imgArt || `https://placehold.co/900x1600/1a1e29/d4af37?text=${encodeURIComponent(cardName)}`;
+                    
+                    generatedCards.push({ title: cardData.title, number: cardData.number, image: finalImg });
+
+                    // Pagina 1: La Carta
+                    currentPhysicalPage++;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', `
+                        <div class="page-bleed recipe-block" data-idx="${i}">
+                            <div class="tarot-card-container">
+                                ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, artPrompt)}
+                                <img src="${masterFrameBase64}" class="tarot-master-frame">
+                                <div class="tarot-shield">
+                                    <h3 class="tarot-num">${cardData.number}</h3>
+                                    <h2 class="tarot-name">${cardData.title}</h2>
+                                </div>
+                            </div>
+                            <div class="action-overlay">
+                                <button class="btn-action" onclick="openTikTokStudio('${cardData.title.replace(/'/g, "\\'")}', '${cardData.number}', '${finalImg}')">🎬 Crea Video TikTok</button>
+                            </div>
+                        </div>
+                    `);
+                    await delay(2000);
+
+                    // Pagina 2: Simbolismo Mistico (Stile Taschen)
+                    currentPhysicalPage++;
+                    globalTocEntries.push({ title: cardData.title, pageNum: currentPhysicalPage-1 });
+                    DOM.bookPage.insertAdjacentHTML('beforeend', `
+                        <div class="page-text recipe-block" data-idx="${i}">
+                            <div class="symbol-page">
+                                <h1 class="doc-h1">Simbolismo Mistico</h1>
+                                <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
+                                <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
+                                <div class="symbol-grid">
+                                    ${cardData.symbols.map(s => `
+                                        <div class="symbol-item">
+                                            <div class="symbol-title">${s.name}</div>
+                                            <p class="symbol-desc">${s.desc}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="numerology-box">
+                                    <div class="numerology-title">Codice Numerologico e Cromatico</div>
+                                    <p class="numerology-text">${cardData.numerology}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+
+                    // Pagina 3: Dinamiche dell'Oracolo (Zero Overflow)
+                    currentPhysicalPage++;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', `
+                        <div class="page-text recipe-block" data-idx="${i}">
+                            <div class="oracle-wrapper">
+                                <h1 class="doc-h1">Dinamiche dell'Oracolo</h1>
+                                <div style="margin-bottom: 20px;"></div>
+                                ${cardData.readings.map(r => `
+                                    <div class="reading-slot">
+                                        <div class="reading-content">
+                                            <h3 class="reading-archetype">${r.archetype}</h3>
+                                            <span class="reading-position">${r.position}</span>
+                                            <p class="reading-text">${r.text}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                <div class="mantra-box">
+                                    <span class="mantra-ornament">✦</span>
+                                    <p class="mantra-text">${cardData.mantra}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `);
                 }
 
-                // 4. Update UI
-                DOM.tkVideoPrompt.value = aiData.videoPrompt;
-                DOM.tkScript.value = aiData.script;
-                DOM.tkHashtags.value = aiData.hashtags;
+                // Appendice: Print & Play a grandezza naturale (2.75" x 4.75" a slot)
+                currentPhysicalPage++;
+                let pnpGrids = "";
+                for(let i=0; i<generatedCards.length; i+=4) {
+                    let gridHTML = '<div class="page-text" style="padding: 10px;"><h2 class="doc-h2" style="margin-bottom:10px; font-size: 1rem;">Print & Play (Ritagliare)</h2><div class="pnp-grid">';
+                    for(let j=0; j<4; j++) {
+                        if(generatedCards[i+j]) {
+                            gridHTML += `
+                            <div class="pnp-card">
+                                <img src="${generatedCards[i+j].image}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
+                                <img src="${masterFrameBase64}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:2; mix-blend-mode:multiply;">
+                                <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15px;">
+                                    <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 14px; font-weight: bold;">${generatedCards[i+j].number}</div>
+                                    <div style="font-family: 'Cinzel', serif; color: white; font-size: 16px; font-weight: bold; text-transform: uppercase;">${generatedCards[i+j].title}</div>
+                                </div>
+                            </div>`;
+                        } else {
+                            gridHTML += `<div class="pnp-card" style="background:#e2e8f0;"></div>`;
+                        }
+                    }
+                    gridHTML += '</div></div>';
+                    DOM.bookPage.insertAdjacentHTML('beforeend', gridHTML);
+                }
 
-                DOM.tkLoader.classList.add('hidden');
-                DOM.tkContent.classList.remove('hidden');
+                // Tutorial Artigianale
+                DOM.bookPage.insertAdjacentHTML('beforeend', `
+                    <div class="page-text">
+                        <h1 class="doc-h1">Creazione del Mazzo</h1>
+                        <p class="symbol-intro">Stampa le pagine precedenti. Incolla i fogli su cartoncino leggero (es. scatole di cereali). Proteggi fronte e retro con nastro adesivo da imballaggio trasparente, stendendolo lentamente per evitare bolle. Infine, ritaglia lungo i bordi tratteggiati. Il tuo grimorio fisico è pronto.</p>
+                    </div>
+                `);
 
-            } catch (err) {
-                DOM.tkLoader.classList.add('hidden');
-                showToast("Le entità rifiutano la chiamata: " + err.message, "error");
+                updateStatus("Manoscritto Completato!", 100, arcanaList.length, arcanaList.length);
+                showToast("Libro generato con successo!", "success");
+            } catch(e) { showToast(e.message, "error"); } finally {
+                DOM.btnStart.disabled = false; DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden');
+                setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
             }
-        };
+        });
 
-        function createMPCCard(imgElement) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 900; 
-            canvas.height = 1500; 
-            const ctx = canvas.getContext('2d');
+        window.openTikTokStudio = async function(title, num, imageSrc) {
+            DOM.videoModal.classList.add('show');
+            DOM.videoPromptCopy.value = "Generazione prompt in corso...";
+            DOM.videoScriptCopy.value = "Generazione script in corso...";
+            DOM.videoToneLabel.innerText = DOM.voiceTone.value;
+            DOM.btnPlayTTS.onclick = null; 
 
-            ctx.fillStyle = '#0b0f19';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            const imgRatio = imgElement.naturalWidth / imgElement.naturalHeight;
-            const canvasRatio = canvas.width / canvas.height;
-            let drawWidth, drawHeight, offsetX, offsetY;
-
-            if (imgRatio > canvasRatio) {
-                drawHeight = canvas.height;
-                drawWidth = imgElement.naturalWidth * (drawHeight / imgElement.naturalHeight);
-                offsetX = (canvas.width - drawWidth) / 2;
-                offsetY = 0;
-            } else {
-                drawWidth = canvas.width;
-                drawHeight = imgElement.naturalHeight * (drawWidth / imgElement.naturalWidth);
-                offsetX = 0;
-                offsetY = (canvas.height - drawHeight) / 2;
+            const sys = `You are a TikTok Video Director. Generate a dynamic prompt for AI video generators (Runway Gen3, Luma) to animate a static tarot card. Then, write a 15-second emotional voiceover script in Italian matching the tone "${DOM.voiceTone.value}". JSON format: {"videoPrompt": "English prompt describing the camera movement and particle effects for a vertical video...", "script": "Italian script..."}`;
+            
+            try {
+                const data = await callGemini(`Create video prompt and script for Tarot Card: ${num} ${title}.`, sys);
+                DOM.videoPromptCopy.value = data.videoPrompt;
+                DOM.videoScriptCopy.value = data.script;
+                
+                DOM.btnPlayTTS.onclick = () => {
+                    const utterance = new SpeechSynthesisUtterance(data.script);
+                    utterance.lang = 'it-IT';
+                    utterance.rate = 0.9;
+                    if(DOM.voiceTone.value.includes('Dolce')) utterance.pitch = 1.2;
+                    else if(DOM.voiceTone.value.includes('Oscuro')) utterance.pitch = 0.6;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utterance);
+                };
+            } catch(e) {
+                DOM.videoPromptCopy.value = "Errore nella generazione.";
+                DOM.videoScriptCopy.value = "Errore nella generazione.";
             }
-
-            ctx.drawImage(imgElement, offsetX, offsetY, drawWidth, drawHeight);
-            return canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
         }
+        DOM.closeVideoModal.addEventListener('click', () => { window.speechSynthesis.cancel(); DOM.videoModal.classList.remove('show'); });
 
-        function createCardBack() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 900; canvas.height = 1500;
-            const ctx = canvas.getContext('2d');
+        DOM.saveMpcBtn.addEventListener('click', async () => {
+            if(generatedCards.length === 0 || !masterFrameBase64) return showToast("Genera prima le carte e la cornice.", "warning");
+            showToast("Estrazione e ritaglio carte per MPC in corso...", "info");
+            DOM.saveMpcBtn.disabled = true;
 
-            const grad = ctx.createRadialGradient(450, 750, 100, 450, 750, 800);
-            grad.addColorStop(0, '#312e81');
-            grad.addColorStop(1, '#0b0f19');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, 900, 1500);
-
-            ctx.strokeStyle = '#d946ef'; ctx.lineWidth = 15;
-            ctx.strokeRect(50, 50, 800, 1400);
-            
-            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 5;
-            ctx.strokeRect(70, 70, 760, 1360);
-
-            ctx.fillStyle = '#fbbf24';
-            ctx.beginPath();
-            ctx.moveTo(450, 600); ctx.lineTo(500, 750); ctx.lineTo(450, 900); ctx.lineTo(400, 750);
-            ctx.closePath(); ctx.fill();
-
-            return canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
-        }
-
-        DOM.btnExportMPC.addEventListener('click', async () => {
-            if (globalTocEntries.length === 0) return showToast("Genera prima il tuo grimorio per esportare le carte.", "warning");
-            
-            showToast("Preparazione carte per la stampa MPC (76x127mm + Bleed)...", "info");
-            DOM.btnExportMPC.disabled = true;
-            
             try {
                 const zip = new JSZip();
-                const cardsFolder = zip.folder("Tarot_Cards_MPC");
+                const w = 900;  // 76mm @ 300dpi approx
+                const h = 1500; // 127mm @ 300dpi approx
                 
-                for (let i = 0; i < globalTocEntries.length; i++) {
-                    const cardImgEl = document.querySelector(`.recipe-block[data-recipe-id="${i}"] .page-bleed:first-child img`);
-                    if (cardImgEl) {
-                        const base64Data = createMPCCard(cardImgEl);
-                        const title = globalTocEntries[i].title.replace(/[^a-zA-Z0-9]/g, '_');
-                        const fileName = `${String(i).padStart(2, '0')}_${title}.jpg`;
-                        cardsFolder.file(fileName, base64Data, { base64: true });
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+
+                const loadImg = (src) => new Promise(res => { const i = new Image(); i.crossOrigin="anonymous"; i.onload = ()=>res(i); i.src = src; });
+                const masterFrameImg = await loadImg(masterFrameBase64);
+
+                for(let i = 0; i < generatedCards.length; i++) {
+                    const card = generatedCards[i];
+                    ctx.clearRect(0,0,w,h);
+                    
+                    // 1. Sfondo Bianco Base
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0,0,w,h);
+
+                    // 2. Artwork Full Bleed (ritagliato centralmente)
+                    const artImg = await loadImg(card.image);
+                    const scale = Math.max(w / artImg.width, h / artImg.height);
+                    const x = (w / 2) - (artImg.width / 2) * scale;
+                    const y = (h / 2) - (artImg.height / 2) * scale;
+                    ctx.drawImage(artImg, x, y, artImg.width * scale, artImg.height * scale);
+
+                    // 3. Maschera Multiply (Applica la cornice preservando il centro)
+                    ctx.globalCompositeOperation = 'multiply';
+                    ctx.drawImage(masterFrameImg, 0, 0, w, h);
+                    ctx.globalCompositeOperation = 'source-over';
+
+                    // 4. Scudo Tipografico (Gradiente scuro alla base)
+                    const grd = ctx.createLinearGradient(0, h, 0, h - 450);
+                    grd.addColorStop(0, "rgba(0,0,0,0.95)");
+                    grd.addColorStop(0.4, "rgba(0,0,0,0.7)");
+                    grd.addColorStop(1, "rgba(0,0,0,0)");
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(0, h - 450, w, 450);
+
+                    // 5. Tipografia Vettoriale in "Safe Area"
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#f3e5ab';
+                    ctx.font = 'bold 50px "Cinzel", serif';
+                    ctx.fillText(card.number, w/2, h - 180);
+                    
+                    ctx.fillStyle = '#ffffff';
+                    let fontSize = 75;
+                    ctx.font = `bold ${fontSize}px "Cinzel", serif`;
+                    // Rimpicciolisce il font se esce dalla safe area
+                    while(ctx.measureText(card.title).width > w - 120) {
+                        fontSize -= 2;
+                        ctx.font = `bold ${fontSize}px "Cinzel", serif`;
                     }
+                    ctx.fillText(card.title.toUpperCase(), w/2, h - 90);
+
+                    // Aggiunge allo ZIP
+                    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+                    let fileIdx = i < 10 ? `0${i}` : `${i}`;
+                    let safeName = card.title.replace(/[^a-zA-Z0-9]/g, '_');
+                    zip.file(`${fileIdx}_${safeName}.jpg`, blob);
                 }
-                
-                cardsFolder.file("Retro_Mazzo.jpg", createCardBack(), { base64: true });
-                
-                const content = await zip.generateAsync({ type: "blob" });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(content);
-                a.download = `Mazzo_Tarocchi_MPC_${DOM.topicInput.value.replace(/[^a-z0-9]/gi, '_') || 'Custom'}.zip`;
-                a.click();
-                
-                showToast("Mazzo esportato con successo! Pronto per MPC o The Game Crafter.", "success");
-            } catch(e) { showToast("Errore durante l'esportazione: " + e.message, "error"); } 
-            finally { DOM.btnExportMPC.disabled = false; }
-        });
 
-        DOM.btnLiveTranslate.addEventListener('click', async () => {
-            const tLang = DOM.languageInput.value; 
-            const labels = i18n[tLang] || i18n["English (US)"];
-            
-            if(globalTocEntries.length === 0) return showToast("Genera prima un libro da tradurre.", "warning");
+                // Generazione Retro Mazzo (Generico)
+                ctx.fillStyle = '#1a1e29'; ctx.fillRect(0,0,w,h);
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.drawImage(masterFrameImg, 0,0,w,h);
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = '#d4af37';
+                ctx.textAlign = 'center';
+                ctx.font = 'bold 150px "Cinzel", serif';
+                ctx.fillText("✦", w/2, h/2 + 50);
+                const backBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
+                zip.file(`Retro_Mazzo.jpg`, backBlob);
 
-            DOM.btnLiveTranslate.disabled = true; DOM.progressSection.classList.remove('hidden');
-
-            for (let i = 0; i < globalTocEntries.length; i++) {
-                updateStatus(`Traduzione in corso (${tLang})...`, (i/globalTocEntries.length)*100, i+1, globalTocEntries.length);
-                
-                const pages = Array.from(document.querySelectorAll(`.recipe-block[data-recipe-id="${i}"]`));
-                if(pages.length === 0) continue;
-                pages[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                let titleNode, descNode, prepNode, cookNode, diffNode, servNode;
-                let calNode, proNode, caNode, carbNode, vitdNode, mantraNode;
-                
-                pages.forEach(p => {
-                    if(!titleNode) titleNode = p.querySelector('.doc-h1');
-                    if(!descNode) descNode = p.querySelector('.doc-quote');
-                    if(!prepNode) prepNode = p.querySelector('.prep-val');
-                    if(!cookNode) cookNode = p.querySelector('.cook-val');
-                    if(!diffNode) diffNode = p.querySelector('.diff-val');
-                    if(!servNode) servNode = p.querySelector('.serv-val');
-                    if(!calNode) calNode = p.querySelector('.nut-cal');
-                    if(!proNode) proNode = p.querySelector('.nut-pro');
-                    if(!caNode) caNode = p.querySelector('.nut-carb');
-                    if(!carbNode) carbNode = p.querySelector('.nut-vitd');
-                    if(!vitdNode) vitdNode = p.querySelector('.nut-fat');
-                    if(!mantraNode) mantraNode = p.querySelector('.mantra-text');
-                });
-
-                const rSymElements = Array.from(document.querySelectorAll(`.recipe-block[data-recipe-id="${i}"] .sym-text`));
-                const rStepTitles = Array.from(document.querySelectorAll(`.recipe-block[data-recipe-id="${i}"] .step-title-text`));
-                const rStepSubtitles = Array.from(document.querySelectorAll(`.recipe-block[data-recipe-id="${i}"] .step-subtitle-text`));
-                const rStepDesc = Array.from(document.querySelectorAll(`.recipe-block[data-recipe-id="${i}"] .context-desc`));
-                
-                try {
-                    const transSys = `You are a professional esoteric translator translating strictly to ${tLang.toUpperCase()}. 
-Output strictly JSON. Schema:
-{
-  "title": "...", "desc": "...",
-  "prep": "...", "cook": "...", "diff": "...", "serv": "...",
-  "nutrition": { "cal": "...", "pro": "...", "ca": "...", "carb": "...", "vitd": "..." },
-  "symbols": ["...", "..."],
-  "stepTitles": ["...", "..."],
-  "stepSubtitles": ["...", "..."],
-  "stepDesc": ["...", "..."],
-  "mantra": "..."
-}`;
-                    const payload = { 
-                        title: titleNode ? titleNode.innerText : "", desc: descNode ? descNode.innerText : "", 
-                        prep: prepNode ? prepNode.innerText : "", cook: cookNode ? cookNode.innerText : "",
-                        diff: diffNode ? diffNode.innerText : "", serv: servNode ? servNode.innerText : "",
-                        nutrition: {
-                            cal: calNode ? calNode.innerText : "", pro: proNode ? proNode.innerText : "", 
-                            ca: caNode ? caNode.innerText : "", carb: carbNode ? carbNode.innerText : "", vitd: vitdNode ? vitdNode.innerText : ""
-                        },
-                        symbols: rSymElements.map(el => el.innerHTML), 
-                        stepTitles: rStepTitles.map(e=>e.innerText), stepSubtitles: rStepSubtitles.map(e=>e.innerText), stepDesc: rStepDesc.map(e=>e.innerText),
-                        mantra: mantraNode ? mantraNode.innerText : ""
-                    };
-                    
-                    const transData = await callGemini(`Translate this: ${JSON.stringify(payload)}`, transSys);
-                    
-                    if(titleNode && transData.title) titleNode.innerText = transData.title;
-                    if(descNode && transData.desc) descNode.innerText = transData.desc;
-                    if(prepNode && transData.prep) prepNode.innerText = transData.prep;
-                    if(cookNode && transData.cook) cookNode.innerText = transData.cook;
-                    if(diffNode && transData.diff) diffNode.innerText = transData.diff;
-                    if(servNode && transData.serv) servNode.innerText = transData.serv;
-                    
-                    if(transData.nutrition) {
-                        if(calNode && transData.nutrition.cal) calNode.innerText = transData.nutrition.cal;
-                        if(proNode && transData.nutrition.pro) proNode.innerText = transData.nutrition.pro;
-                        if(caNode && transData.nutrition.ca) caNode.innerText = transData.nutrition.ca;
-                        if(carbNode && transData.nutrition.carb) carbNode.innerText = transData.nutrition.carb;
-                        if(vitdNode && transData.nutrition.vitd) vitdNode.innerText = transData.nutrition.vitd;
-                    }
-
-                    rSymElements.forEach((el, idx) => { if(transData.symbols[idx]) el.innerHTML = transData.symbols[idx]; });
-                    rStepTitles.forEach((el, idx) => { if(transData.stepTitles[idx]) el.innerHTML = transData.stepTitles[idx]; });
-                    rStepSubtitles.forEach((el, idx) => { if(transData.stepSubtitles[idx]) el.innerHTML = transData.stepSubtitles[idx]; });
-                    rStepDesc.forEach((el, idx) => { if(transData.stepDesc[idx]) el.innerHTML = transData.stepDesc[idx]; });
-                    if(mantraNode && transData.mantra) mantraNode.innerText = transData.mantra;
-                    
-                    pages.forEach(p => {
-                        p.querySelectorAll('.lbl-prep').forEach(l => l.innerText = labels.element);
-                        p.querySelectorAll('.lbl-cook').forEach(l => l.innerText = labels.planet);
-                        p.querySelectorAll('.lbl-diff').forEach(l => l.innerText = labels.zodiac);
-                        p.querySelectorAll('.lbl-serv').forEach(l => l.innerText = labels.yesno);
-                        p.querySelectorAll('.lbl-nut').forEach(l => l.innerText = labels.keywords);
-                        p.querySelectorAll('.lbl-cal').forEach(l => l.innerText = labels.upright);
-                        p.querySelectorAll('.lbl-pro').forEach(l => l.innerText = labels.reversed);
-                        p.querySelectorAll('.lbl-carb').forEach(l => l.innerText = labels.love);
-                        p.querySelectorAll('.lbl-vitd').forEach(l => l.innerText = labels.career);
-                        p.querySelectorAll('.lbl-fat').forEach(l => l.innerText = labels.spirit);
-                        p.querySelectorAll('.lbl-ingr').forEach(h2 => h2.innerText = labels.symbols);
-                        p.querySelectorAll('.lbl-dynamics').forEach(h2 => h2.innerText = labels.dynamics);
-                    });
-                    
-                    if(transData.title) globalTocEntries[i].title = transData.title;
-
-                } catch(e) { console.error("Translation error", i, e); }
-                await delay(3500); 
-            }
-            
-            const tocHead = document.querySelector('#pdfTOC .doc-h1'); 
-            if(tocHead) tocHead.innerText = labels.toc;
-            const tocItems = document.querySelectorAll('#pdfTOC .toc-title');
-            tocItems.forEach((el, idx) => { if(globalTocEntries[idx]) el.innerText = globalTocEntries[idx].title; });
-
-            updateStatus("Traduzione completata!", 100, globalTocEntries.length, globalTocEntries.length); 
-            showToast(`Traduzione in ${tLang} completata con successo!`, "success");
-            DOM.btnLiveTranslate.disabled = false; setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
+                // Scarica
+                const zipContent = await zip.generateAsync({type:"blob"});
+                const a = document.createElement('a'); a.href = URL.createObjectURL(zipContent); a.download = `MPC_Tarot_Deck.zip`; a.click();
+                showToast("File ZIP per MPC scaricato!", "success");
+            } catch(e) { showToast("Errore Export MPC: " + e.message, "error"); } finally { DOM.saveMpcBtn.disabled = false; }
         });
 
         DOM.savePdfBtn.addEventListener('click', () => {
-            if(!document.querySelector('.doc-h1')) return showToast("Genera prima un libro.", "warning");
-            showToast("Nel pannello di stampa seleziona Margini 'Nessuno' e attiva 'Grafica in background'.", "warning");
-            setTimeout(() => window.print(), 2500);
-        });
-
-        DOM.saveEpubBtn.addEventListener('click', async () => {
-            if(globalTocEntries.length === 0) return showToast("Genera prima un libro.", "warning");
-            showToast("Compilazione EPUB in corso... L'operazione può richiedere minuti.", "info");
-            try {
-                const zip = new JSZip(); 
-                zip.file("mimetype", "application/epub+zip");
-                const metaInf = zip.folder("META-INF"); 
-                metaInf.file("container.xml", `<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`);
-                
-                const oebps = zip.folder("OEBPS"); const imgFolder = oebps.folder("images");
-                const title = DOM.topicInput.value || "Tarot Guide";
-                
-                let manifestItems = []; let spineItems = []; let imageMap = new Map(); let imgCounter = 0;
-                const images = document.querySelectorAll('#bookPage img');
-                for (let i = 0; i < images.length; i++) {
-                    const src = images[i].src;
-                    if (!imageMap.has(src)) {
-                        const filename = `image_${imgCounter}.jpg`; imageMap.set(src, filename);
-                        try {
-                            const response = await fetch(src); const blob = await response.blob();
-                            imgFolder.file(filename, blob);
-                            manifestItems.push(`<item id="img_${imgCounter}" href="images/${filename}" media-type="image/jpeg"/>`);
-                            imgCounter++;
-                        } catch(e) {}
-                    }
-                }
-
-                const pages = document.querySelectorAll('.page-text, .page-bleed'); let fileCounter = 0;
-                for (let i = 0; i < pages.length; i++) {
-                    let p = pages[i].cloneNode(true);
-                    p.querySelectorAll('.evoca-btn').forEach(btn => btn.remove()); // Remove video buttons from epub
-                    let imgs = p.querySelectorAll('img');
-                    imgs.forEach(img => { if (imageMap.has(img.src)) img.src = `images/${imageMap.get(img.src)}`; });
-                    let pageHtml = `<?xml version="1.0" encoding="utf-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Page ${fileCounter}</title><style>body{font-family:sans-serif; margin: 0; padding: 5%; background: #faf9f6; color: #1e1b4b;} img{max-width:100%; height:auto;} .context-row { margin-bottom: 20px; clear:both; overflow:hidden;} .context-arch-img-box { float: left; width: 120px; border-radius:50px 50px 0 0; margin-right: 15px; } .context-content { overflow: hidden; } .sym-item { margin-bottom: 10px; } .esoteric-panel { border: 1px solid #4c1d95; padding: 15px; margin: 20px 0; }</style></head><body>${p.innerHTML}</body></html>`;
-                    const filename = `page_${fileCounter}.xhtml`;
-                    oebps.file(filename, pageHtml);
-                    manifestItems.push(`<item id="page_${fileCounter}" href="${filename}" media-type="application/xhtml+xml"/>`);
-                    spineItems.push(`<itemref idref="page_${fileCounter}"/>`);
-                    fileCounter++;
-                }
-
-                let epubTocHTML = `<?xml version="1.0" encoding="utf-8"?><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Table of Contents</title></head><body><h1>Table of Contents</h1><ul>`;
-                globalTocEntries.forEach((e) => { epubTocHTML += `<li><a href="page_0.xhtml">${e.title}</a></li>`; });
-                epubTocHTML += `</ul></body></html>`;
-                oebps.file("toc.xhtml", epubTocHTML);
-                manifestItems.push(`<item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>`);
-                spineItems.unshift(`<itemref idref="toc"/>`);
-
-                const langCode = DOM.languageInput.value.substring(0,2).toLowerCase();
-                oebps.file("content.opf", `<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${title}</dc:title><dc:language>${langCode}</dc:language><dc:identifier id="pub-id">urn:uuid:${crypto.randomUUID()}</dc:identifier></metadata><manifest>${manifestItems.join('\n')}</manifest><spine>${spineItems.join('\n')}</spine></package>`);
-                
-                const content = await zip.generateAsync({type:"blob", compression: "STORE"});
-                const a = document.createElement('a'); a.href = URL.createObjectURL(content); a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.epub`; a.click();
-                showToast("EPUB Generato con successo per Kindle!", "success");
-            } catch (e) { showToast("Errore durante la generazione EPUB", "error"); console.error(e); }
+            if(!document.querySelector('.tarot-card-container')) return showToast("Genera prima un libro.", "warning");
+            showToast("Stampa: Margini 'Nessuno', attiva 'Grafica in background'.", "info");
+            setTimeout(() => window.print(), 1000);
         });
 
         DOM.btnSaveProject.addEventListener('click', async () => {
-            if (!DOM.bookPage.innerHTML.trim() || DOM.bookPage.querySelectorAll('.recipe-block').length === 0) {
-                return showToast("Nessun libro da salvare. Genera prima un libro.", "warning");
-            }
-            showToast("Preparazione file di salvataggio... (Le immagini pesano, attendere)", "info");
-            DOM.btnSaveProject.disabled = true;
+            if (generatedCards.length === 0) return showToast("Nessun libro da salvare.", "warning");
+            DOM.btnSaveProject.disabled = true; showToast("Salvataggio in corso...", "info");
             try {
                 const tempDiv = document.createElement('div'); tempDiv.innerHTML = DOM.bookPage.innerHTML;
                 const images = tempDiv.querySelectorAll('img');
@@ -1556,20 +801,19 @@ Output strictly JSON. Schema:
                     if(img.src.startsWith('blob:')) {
                         const response = await fetch(img.src); const blob = await response.blob();
                         const reader = new FileReader();
-                        const base64 = await new Promise((resolve) => { reader.onloadend = () => resolve(reader.result); reader.readAsDataURL(blob); });
+                        const base64 = await new Promise(r => { reader.onloadend = () => r(reader.result); reader.readAsDataURL(blob); });
                         img.src = base64;
                     }
                 }
                 const projectData = {
-                    version: "5.0", topic: DOM.topicInput.value, style: DOM.deckStyle.value,
-                    language: DOM.languageInput.value, trimSize: document.getElementById('trimSize').value,
-                    customList: DOM.customRecipeList.value, visualSetting: DOM.visualSetting.value, tone: DOM.arcanaTone.value,
-                    toc: globalTocEntries, html: tempDiv.innerHTML
+                    topic: DOM.topicInput.value, readingTheme: DOM.readingTheme.value, language: DOM.languageInput.value,
+                    customList: DOM.customList.value, visualSetting: DOM.visualSetting.value,
+                    frameBase64: masterFrameBase64, generatedCards: generatedCards, html: tempDiv.innerHTML
                 };
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
-                const a = document.createElement('a'); a.href = dataStr; a.download = `KDP_Tarot_${DOM.topicInput.value.replace(/[^a-z0-9]/gi, '_') || 'Deck'}.kdp`; a.click();
-                showToast("Progetto salvato con successo sul PC!", "success");
-            } catch(e) { showToast("Errore salvataggio: " + e.message, "error"); } finally { DOM.btnSaveProject.disabled = false; }
+                const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData)); 
+                a.download = `KDP_Tarot_${Date.now()}.kdp`; a.click();
+                showToast("Progetto salvato!", "success");
+            } catch(e) { showToast("Errore: " + e.message, "error"); } finally { DOM.btnSaveProject.disabled = false; }
         });
 
         DOM.btnLoadProject.addEventListener('click', () => DOM.fileLoadProject.click());
@@ -1577,135 +821,39 @@ Output strictly JSON. Schema:
             const file = e.target.files[0]; if(!file) return;
             const reader = new FileReader();
             reader.onload = async (event) => {
-                showToast("Caricamento in corso...", "info");
                 try {
                     const data = JSON.parse(event.target.result);
-                    if (data.topic) DOM.topicInput.value = data.topic;
-                    if (data.style) DOM.deckStyle.value = data.style;
-                    if (data.language) DOM.languageInput.value = data.language;
-                    if (data.trimSize) document.getElementById('trimSize').value = data.trimSize;
-                    if (data.customList) DOM.customRecipeList.value = data.customList;
-                    if (data.visualSetting) DOM.visualSetting.value = data.visualSetting;
-                    if (data.tone) DOM.arcanaTone.value = data.tone;
-                    if (data.toc) globalTocEntries = data.toc;
+                    DOM.topicInput.value = data.topic || ""; DOM.readingTheme.value = data.readingTheme || "Generale";
+                    DOM.languageInput.value = data.language || "Italiano"; DOM.customList.value = data.customList || "";
+                    DOM.visualSetting.value = data.visualSetting || "";
+                    masterFrameBase64 = data.frameBase64 || null;
+                    if(masterFrameBase64) DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
+                    generatedCards = data.generatedCards || [];
                     
-                    applyLayoutEngine();
                     const tempDiv = document.createElement('div'); tempDiv.innerHTML = data.html;
-                    const images = tempDiv.querySelectorAll('img');
-                    for(let img of images) {
-                        if(img.src.startsWith('data:image')) {
-                            const isSmall = img.classList.contains('context-img-small');
-                            img.src = await processImageToBlobUrl(img.src, isSmall ? 1000 : 2400, 0.9);
-                        }
+                    for(let img of tempDiv.querySelectorAll('img')) {
+                        if(img.src.startsWith('data:image')) img.src = await processImageToBlobUrl(img.src, 1500, 0.9);
                     }
                     DOM.bookPage.innerHTML = tempDiv.innerHTML;
-                    showToast("Progetto ricaricato con successo!", "success");
-                } catch(err) { showToast("File di progetto non valido.", "error"); }
-                DOM.fileLoadProject.value = ""; 
-            };
-            reader.readAsText(file);
+                    showToast("Progetto ricaricato!", "success");
+                } catch(err) { showToast("File corrotto.", "error"); }
+            }; reader.readAsText(file);
         });
 
         DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
         DOM.btnCancelReset.addEventListener('click', () => DOM.resetConfirmModal.classList.remove('show'));
         DOM.btnConfirmReset.addEventListener('click', () => {
-            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title" style="font-family: 'Cinzel', serif; color: #1e1b4b; font-size: calc(3.5rem * var(--font-scale)); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #4c1d95; padding-bottom: 20px; outline: none;">Arcana Mystica</h1><p style="font-family: 'Inter', sans-serif; color: #4338ca; font-size: calc(12pt * var(--font-scale)); margin-top: 20px; font-style: italic; outline: none;">Il Sentiero dell'Iniziazione</p></div>`; 
-            generatedImages = []; globalTocEntries = []; DOM.topicInput.value = ""; DOM.customRecipeList.value = ""; DOM.visualSetting.value = "";
-            DOM.aplusBannersContainer.innerHTML = ""; DOM.btnDownloadAPlus.classList.add('hidden');
-            DOM.progressSection.classList.add('hidden'); DOM.resetConfirmModal.classList.remove('show');
-            showToast("Progetto azzerato con successo.", "success");
+            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title">Tarot Pro Studio</h1></div>`;
+            generatedCards = []; masterFrameBase64 = null; DOM.masterFramePreview.innerHTML = '<span class="text-xs text-slate-500">Nessuna Cornice</span>';
+            DOM.resetConfirmModal.classList.remove('show'); showToast("Progetto azzerato.", "success");
         });
 
-        DOM.btnOpenAPlusModal.addEventListener('click', () => { DOM.aplusModal.classList.add('show'); if (DOM.aplusBannersContainer.innerHTML.trim() === '') generateAPlusContent(); });
-        DOM.closeAPlusModal.addEventListener('click', () => DOM.aplusModal.classList.remove('show'));
-        DOM.btnRegenerateAPlus.addEventListener('click', generateAPlusContent);
-
-        function getCleanPageHtml(index) {
-            const pages = document.querySelectorAll('.recipe-block[data-recipe-id="0"]');
-            const width = getComputedStyle(document.documentElement).getPropertyValue('--page-width-px').trim();
-            const height = getComputedStyle(document.documentElement).getPropertyValue('--page-height-px').trim();
-            
-            let clone;
-            if(pages[index]) { clone = pages[index].cloneNode(true); clone.querySelectorAll('.evoca-btn').forEach(b=>b.remove()); } 
-            else { clone = document.createElement('div'); clone.style.background = '#faf9f6'; }
-            
-            clone.style.width = width; clone.style.height = height; clone.style.position = 'absolute';
-            clone.style.top = '0'; clone.style.left = '0'; clone.style.margin = '0'; clone.style.boxShadow = 'none'; clone.style.border = 'none';
-            clone.querySelectorAll('.editable-image-container').forEach(el => { el.className = ''; el.onclick = null; });
-            return `<div style="width: ${width}; height: ${height}; overflow: hidden; position: relative;">${clone.outerHTML}</div>`;
+        function adjustFontSize(delta) {
+            const selection = window.getSelection(); if (!selection.rangeCount || selection.isCollapsed) return;
+            let node = selection.focusNode; if (node.nodeType === 3) node = node.parentElement;
+            if (node.id === 'bookPage' || node.classList.contains('page-text')) return document.execCommand('fontSize', false, '7');
+            node.style.fontSize = (parseFloat(window.getComputedStyle(node).fontSize) + delta) + 'px';
         }
-
-        function createFlatBookMockup(pageL, pageR) {
-            const width = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-width-px'));
-            const height = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--page-height-px'));
-            const totalWidth = width * 2; const scale = Math.min(360 / totalWidth, 240 / height);
-
-            return `
-            <div class="aplus-mockup-wrapper" style="width: 400px; height: 280px; position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; perspective: 1000px;">
-                <div class="aplus-mockup-scaler" style="position: absolute; transform: scale(${scale}); transform-origin: center center; display: flex;">
-                    <div style="position: absolute; bottom: -10px; left: 8px; right: 8px; height: 10px; background: #312e81; border-radius: 0 0 6px 6px; border: 1px solid #1e1b4b; border-top: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5);"></div>
-                    <div class="aplus-flat-book" style="display: flex; box-shadow: 0 20px 40px rgba(0,0,0,0.8); border-radius: 4px; position: relative; background: #faf9f6; overflow: hidden; border: 1px solid #312e81;">
-                        <div style="width: ${width}px; height: ${height}px; overflow: hidden; position: relative; background: #faf9f6;">
-                            ${pageL}
-                            <div style="position: absolute; inset: 0; background: linear-gradient(to right, rgba(255,255,255,0) 80%, rgba(0,0,0,0.05) 92%, rgba(0,0,0,0.4) 100%); pointer-events: none; z-index: 100;"></div>
-                        </div>
-                        <div style="width: 4px; background: linear-gradient(to right, #4c1d95 0%, #1e1b4b 50%, #4c1d95 100%); z-index: 101;"></div>
-                        <div style="width: ${width}px; height: ${height}px; overflow: hidden; position: relative; background: #faf9f6;">
-                            ${pageR}
-                            <div style="position: absolute; inset: 0; background: linear-gradient(to left, rgba(255,255,255,0) 80%, rgba(0,0,0,0.05) 92%, rgba(0,0,0,0.4) 100%); pointer-events: none; z-index: 100;"></div>
-                        </div>
-                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: rgba(255,255,255,0.3); z-index: 102; pointer-events: none;"></div>
-                    </div>
-                </div>
-            </div>`;
-        }
-
-        async function generateAPlusContent() {
-            if(globalTocEntries.length < 1) return showToast("Genera prima un libro mistico per estrarre le pagine.", "warning");
-            DOM.btnRegenerateAPlus.disabled = true; DOM.btnRegenAPlusText.classList.add('hidden'); DOM.btnRegenAPlusLoader.classList.remove('hidden');
-            try {
-                const sys = `You are an Amazon KDP A+ Content marketing expert specialized in esoteric and tarot books. Write persuasive copy strictly in ${DOM.languageInput.value}. Output JSON: { "b1": { "headline": "...", "sub": "..." }, "b2": { "headline": "...", "bullets": ["...", "...", "..."] }, "b3": { "headline": "...", "sub": "..." } }`;
-                const promptData = DOM.topicInput.value || "Tarot Book";
-                const copy = await callGemini(`Write A+ marketing copy for a tarot guide about '${promptData}' in ${DOM.languageInput.value}.`, sys);
-                
-                DOM.aplusBannersContainer.innerHTML = `
-                    <div class="aplus-banner" style="width: 970px; height: 300px; background: radial-gradient(circle at center, #1e1b4b 0%, #0b0f19 100%); color: white; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; box-sizing: border-box; overflow: hidden; flex-shrink: 0; border: 1px solid #312e81;">
-                        <div style="flex: 1; padding-right: 30px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
-                            <h2 contenteditable="true" class="editable-text" style="font-family: 'Cinzel', serif; font-size: 2.3rem; color: #fbcfe8; margin: 0 0 1rem 0; line-height: 1.2;">${copy.b1.headline}</h2>
-                            <p contenteditable="true" class="editable-text" style="font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #a5b4fc; margin: 0; line-height: 1.6;">${copy.b1.sub}</p>
-                        </div>
-                        ${createFlatBookMockup(getCleanPageHtml(0), getCleanPageHtml(1))}
-                    </div>
-                    
-                    <div class="aplus-banner" style="width: 970px; height: 300px; background: #faf9f6; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; box-sizing: border-box; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0;">
-                        ${createFlatBookMockup(getCleanPageHtml(2), getCleanPageHtml(3))}
-                        <div style="flex: 1; padding-left: 30px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
-                            <h2 contenteditable="true" class="editable-text" style="font-family: 'Cinzel', serif; font-size: 2rem; color: #1e1b4b; margin: 0 0 1.2rem 0; line-height: 1.2;">${copy.b2.headline}</h2>
-                            <ul style="list-style: none; padding: 0; margin: 0; font-family: 'Inter', sans-serif;">
-                                ${copy.b2.bullets.map(b => `<li contenteditable="true" class="editable-text" style="margin-bottom: 0.8rem; display: flex; gap: 12px; font-size: 1.05rem; color: #312e81; align-items: flex-start;"><strong style="color: #d946ef; font-size: 1.2rem; line-height: 1;">✦</strong> <span>${b}</span></li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="aplus-banner" style="width: 970px; height: 300px; background: #1e1b4b; display: flex; align-items: center; padding: 0 40px; justify-content: space-between; box-sizing: border-box; overflow: hidden; flex-shrink: 0; border: 1px solid #312e81;">
-                        <div style="flex: 1; padding-right: 30px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
-                            <h2 contenteditable="true" class="editable-text" style="font-family: 'Cinzel', serif; font-size: 2.3rem; color: #e2e8f0; margin: 0 0 1rem 0; line-height: 1.2;">${copy.b3.headline}</h2>
-                            <p contenteditable="true" class="editable-text" style="font-family: 'Inter', sans-serif; font-size: 1.1rem; color: #8b5cf6; margin: 0; line-height: 1.6;">${copy.b3.sub}</p>
-                        </div>
-                        ${createFlatBookMockup(getCleanPageHtml(4), getCleanPageHtml(5))}
-                    </div>
-                `;
-                DOM.btnDownloadAPlus.classList.remove('hidden');
-            } catch(e) { showToast(e.message, "error"); } finally { DOM.btnRegenerateAPlus.disabled = false; DOM.btnRegenAPlusText.classList.remove('hidden'); DOM.btnRegenAPlusLoader.classList.add('hidden'); }
-        }
-
-        DOM.btnDownloadAPlus.addEventListener('click', async () => {
-            const banners = document.querySelectorAll('.aplus-banner');
-            for(let i=0; i<banners.length; i++) {
-                const canvas = await html2canvas(banners[i], { scale: 2, useCORS: true, backgroundColor: null });
-                const a = document.createElement('a'); a.href = canvas.toDataURL('image/jpeg', 0.9); a.download = `APlus_Banner_${i+1}.jpg`; a.click(); await delay(500);
-            }
-        });
     </script>
 </body>
 </html>
