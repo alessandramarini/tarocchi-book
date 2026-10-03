@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDP Tarot Pro Studio | Master Edition</title>
+    <title>KDP Tarot Pro Studio | Master Edition HD</title>
     
-    <!-- Librerie Esterne -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+    <!-- Aggiunte librerie per generazione PDF ad altissima definizione -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <!-- Regole di Stampa Dinamiche -->
+    <!-- Regole di Stampa Dinamiche (Mantenute per fallback di sicurezza) -->
     <style id="dynamicPrintStyle">@media print { @page { size: 8.5in 11in; margin: 0 !important; } .page-text, .page-bleed { width: 8.5in !important; height: 11in !important; overflow: hidden !important; } }</style>
 
     <style>
@@ -41,7 +43,10 @@
 
         /* Paginazione Libro */
         .page-text, .page-bleed { background-color: var(--page-bg); box-shadow: 0 10px 25px rgba(0,0,0,0.8); width: var(--page-width-px); height: var(--page-height-px); position: relative; overflow: hidden; color: var(--text-main); box-sizing: border-box; flex-shrink: 0; counter-increment: pdf-page; }
-        .page-text { padding: var(--safe-margin-px); display: flex; flex-direction: column; }
+        .page-text { padding: var(--safe-margin-px); display: block; }
+        
+        .page-inner-bounds { display: flex; flex-direction: column; height: 100%; max-height: 100%; justify-content: space-between; overflow: hidden; box-sizing: border-box; position: relative; z-index: 10; }
+
         .page-bleed { padding: 0; display: flex; justify-content: center; align-items: center; border: none; counter-increment: none; }
         .page-bleed img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -50,7 +55,7 @@
         .no-page-num::after { display: none !important; }
 
         .doc-title { font-family: 'Cinzel', serif; font-size: calc(3.5rem * var(--font-scale)); text-align: center; color: var(--primary-dark); line-height: 1.1; margin: 0; text-transform: uppercase; }
-        .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(2.2rem * var(--font-scale)); text-align: center; color: var(--primary-dark); margin: 0 0 calc(1.5rem * var(--font-scale)) 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
+        .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(1.8rem * var(--font-scale)); text-align: center; color: var(--primary-dark); margin: 0 0 calc(1rem * var(--font-scale)) 0; border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
         .drop-cap::first-letter { font-family: 'Cinzel', serif; font-size: 3.5em; float: left; margin-top: -0.1em; margin-right: 0.1em; color: var(--gold); line-height: 1; }
 
         /* Estetica Carta Perfetta (Edge-to-Edge) */
@@ -74,25 +79,27 @@
         }
         .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(2rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); margin: 0 0 5px 0; }
         .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.5rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.9); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
-
-        /* Tipografia Scheda Destra */
+        
+        /* Tipografia Scheda Destra - Calibrata per non sforare mai */
         .symbol-page { display: flex; flex-direction: column; height: 100%; }
-        .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(12pt * var(--font-scale)); line-height: 1.7; color: #1e293b; margin-bottom: calc(2rem * var(--font-scale)); text-align: justify; }
-        .symbol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1.5rem * var(--font-scale)); margin-bottom: 2rem; }
-        .symbol-item { border-left: 2px solid var(--gold); padding-left: 15px; }
-        .symbol-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
-        .symbol-title::before { content: '✦'; color: var(--gold); font-size: 14pt; }
-        .symbol-desc { font-family: 'Inter', sans-serif; font-size: calc(10pt * var(--font-scale)); color: #475569; line-height: 1.5; margin: 0; }
+        .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(11pt * var(--font-scale)); line-height: 1.6; color: #1e293b; margin-bottom: calc(1rem * var(--font-scale)); text-align: justify; }
+        .symbol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1rem * var(--font-scale)); margin-bottom: 1rem; flex-shrink: 0; }
+        .symbol-item { border-left: 2px solid var(--gold); padding-left: 12px; }
+        .symbol-title { font-family: 'Cinzel', serif; font-weight: 700; color: var(--primary-dark); font-size: calc(9.5pt * var(--font-scale)); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+        .symbol-title::before { content: '✦'; color: var(--gold); font-size: 11pt; }
+        .symbol-desc { font-family: 'Inter', sans-serif; font-size: calc(8.5pt * var(--font-scale)); color: #475569; line-height: 1.4; margin: 0; }
         
-        .reading-slot { margin-bottom: calc(1rem * var(--font-scale)); padding-left: 15px; border-left: 2px solid var(--primary-dark); }
-        .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(12pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); margin: 0; }
-        .reading-text { font-family: 'Playfair Display', serif; font-size: calc(11pt * var(--font-scale)); line-height: 1.5; color: #334155; margin: 5px 0 0 0; }
+        .readings-wrapper { display: flex; flex-direction: column; gap: calc(0.8rem * var(--font-scale)); flex-shrink: 1; }
+        .reading-slot { padding-left: 12px; border-left: 2px solid var(--primary-dark); }
+        .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(10pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); margin: 0; }
+        .reading-text { font-family: 'Playfair Display', serif; font-size: calc(9.5pt * var(--font-scale)); line-height: 1.4; color: #334155; margin: 3px 0 0 0; }
         
-        .mantra-box { margin-top: auto; border-top: 1px solid #cbd5e1; padding-top: calc(1rem * var(--font-scale)); text-align: center; }
-        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(12pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); }
+        .mantra-box { margin-top: auto; border-top: 1px solid #cbd5e1; padding-top: calc(0.8rem * var(--font-scale)); text-align: center; }
+        .mantra-text { font-family: 'Cinzel', serif; font-size: calc(11pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); }
 
         /* Print and Play - Formato Universale 2.75x4.75 */
         .pnp-sheet { padding: 0 !important; display: flex; justify-content: center; align-items: center; background: #fff; }
+        .pnp-wrapper { transform: scale(var(--pnp-scale, 1)); transform-origin: center center; }
         .pnp-container { display: grid; grid-template-columns: repeat(2, 2.75in); grid-template-rows: repeat(2, 4.75in); gap: 0.5in; }
         .pnp-card { width: 2.75in; height: 4.75in; position: relative; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
         
@@ -113,7 +120,7 @@
         .toast { background: var(--secondary-dark); border-left: 4px solid var(--gold); color: white; padding: 16px 24px; border-radius: 4px; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5); font-size: 14px; transform: translateX(120%); transition: transform 0.3s ease-out; display: flex; align-items: center; gap: 12px; }
         .toast.show { transform: translateX(0); }
         
-        /* FIX CRITICO: Distrugge Flexbox per abilitare Paginazione PDF infinita */
+        /* FIX CRITICO: Distrugge Flexbox per abilitare Paginazione PDF infinita se l'utente usa il print nativo per sbaglio */
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
@@ -131,7 +138,6 @@
 
 <body class="h-screen flex flex-col overflow-hidden text-slate-200">
 
-    <!-- HEADER TOP -->
     <header class="bg-[#0f1219] border-b border-[#1a1e29] p-4 flex justify-between items-center z-20 shrink-0 shadow-lg">
         <h1 class="text-xl font-bold font-serif flex items-center gap-3">
             <svg class="w-6 h-6 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
@@ -143,12 +149,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg> Esporta Mazzo (MPC Zip)
             </button>
             <button id="savePdfBtn" class="bg-[#d4af37] hover:bg-[#c5a028] text-[#0f1219] text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(212,175,55,0.4)]">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Stampa Libro PDF
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Genera PDF HD
             </button>
         </div>
     </header>
 
-    <!-- MAIN WRAPPER -->
     <div class="flex flex-1 overflow-hidden">
         <!-- PANNELLO LATERALE -->
         <div class="w-[360px] bg-[#0f1219] border-r border-[#1a1e29] flex flex-col shrink-0 z-10 shadow-2xl">
@@ -217,7 +222,6 @@
                     </label>
                 </div>
 
-                <!-- AVVIO E PROGRESSO -->
                 <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2">
                     <span id="btnStartText" style="font-family: 'Cinzel', serif;">Forgia Grimorio</span>
                     <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> INVOCAZIONE...</span>
@@ -242,7 +246,6 @@
             </div>
         </div>
 
-        <!-- EDITOR DOCUMENTO -->
         <div id="editorContainer">
             <div id="toolbar">
                 <div class="toolbar-group">
@@ -296,7 +299,6 @@
 
     <div id="toast-container"></div>
 
-    <!-- SCRIPT PRINCIPALE -->
     <script>
         const DOM = {
             btnStart: document.getElementById('btnStartAutoPilot'), btnText: document.getElementById('btnStartText'), btnLoader: document.getElementById('btnStartLoader'),
@@ -339,6 +341,10 @@
             document.documentElement.style.setProperty('--page-width-px', `${widthIn * 96}px`);
             document.documentElement.style.setProperty('--page-height-px', `${heightIn * 96}px`);
             document.documentElement.style.setProperty('--font-scale', widthIn <= 6 ? 0.85 : 1.0);
+            
+            /* Scala dinamica per i fogli da ritagliare, così non fuoriescono dal foglio 6x9 */
+            document.documentElement.style.setProperty('--pnp-scale', widthIn <= 6 ? 0.8 : 1.0);
+            
             document.getElementById('dynamicPrintStyle').innerHTML = `@media print { @page { size: ${widthIn}in ${heightIn}in; margin: 0 !important; } .page-text, .page-bleed { width: ${widthIn}in !important; height: ${heightIn}in !important; overflow: hidden !important; } }`;
             document.getElementById('headerTrimLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${widthIn}" x ${heightIn}" Bleed`;
         });
@@ -355,18 +361,21 @@
 
         function generateProceduralTexture() {
             const canvas = document.createElement('canvas'); canvas.width = 800; canvas.height = 1200; const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#0a0a0f'; ctx.fillRect(0, 0, 800, 1200);
-            ctx.strokeStyle = 'rgba(212, 175, 55, 0.15)'; ctx.lineWidth = 1.5;
-            for(let i = -100; i < 900; i += 80) {
-                for(let j = -100; j < 1300; j += 80) {
-                    ctx.beginPath(); ctx.arc(i, j, 60, 0, Math.PI * 2); ctx.stroke();
+            
+            // Sfondo molto più dark per contrasto
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 800, 1200);
+            
+            // Pattern gotico/geometrico estremamente visibile
+            ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.lineWidth = 2.5;
+            for(let i = -200; i < 1000; i += 60) {
+                for(let j = -200; j < 1400; j += 60) {
+                    ctx.beginPath(); 
+                    ctx.moveTo(i, j); ctx.lineTo(i+30, j+30); ctx.lineTo(i, j+60); ctx.lineTo(i-30, j+30); ctx.closePath();
+                    ctx.stroke();
+                    ctx.beginPath(); ctx.arc(i, j, 12, 0, Math.PI * 2); ctx.stroke();
                 }
             }
-            for(let i=0; i<15000; i++) {
-                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(212, 175, 55, 0.4)' : 'rgba(255, 255, 255, 0.1)';
-                ctx.fillRect(Math.random()*800, Math.random()*1200, Math.random()*1.5, Math.random()*1.5);
-            }
-            return canvas.toDataURL('image/jpeg', 0.8);
+            return canvas.toDataURL('image/jpeg', 0.9);
         }
         
         window.addEventListener('DOMContentLoaded', () => {
@@ -375,7 +384,26 @@
         });
 
         async function callGemini(prompt, systemInstruction) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
+            const key = getAPIKey();
+            if (!key) {
+                await delay(800);
+                const isFool = prompt.includes('0 - The Fool');
+                return {
+                    title: isFool ? 'Il Matto' : 'Carta Demo',
+                    number: prompt.match(/\d+/) ? prompt.match(/\d+/)[0] : "1",
+                    intro: "Questa è una carta generata in modalità demo. Inserisci la tua API Key di Gemini a sinistra per testi reali generati dall'IA.",
+                    symbols: [
+                        {name: "Simbolo di Prova", desc: "Descrizione breve per la modalità demo."},
+                        {name: "Dettaglio", desc: "Altra descrizione per riempire il layout."}
+                    ],
+                    readings: [
+                        {archetype: "Origine", text: "Lettura generata offline senza chiave API."},
+                        {archetype: "Destino", text: "Aggiungi la chiave API per sbloccare la vera magia."}
+                    ],
+                    mantra: "La magia richiede una chiave."
+                };
+            }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`;
             const opt = {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -398,7 +426,12 @@
         }
 
         async function callGeminiImage(prompt) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
+            const key = getAPIKey();
+            if (!key) {
+                await delay(800);
+                return `https://placehold.co/900x1600/1a1e29/d4af37?text=Demo+Art`;
+            }
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${key}`;
             const opt = {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -480,17 +513,18 @@
 Language: ${lang.toUpperCase()}.
 CRITICAL RULE 1: "title" MUST be the translated name.
 CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page, Queen). NEVER use words like "Ace" or "Asso" for numbers, use "1".
+CRITICAL RULE 3: Keep ALL text extremely concise. Intros max 2 short sentences. Descriptions max 15 words. Readings max 20 words. This ensures layout fits ONE page perfectly without cutting.
 {
   "title": "Il Matto",
   "number": "0",
-  "intro": "2 sentences introduction.",
+  "intro": "2 short sentences max.",
   "symbols": [
-    {"name":"Symbol 1", "desc":"Short desc"},
-    {"name":"Symbol 2", "desc":"Short desc"}
+    {"name":"Symbol 1", "desc":"Max 15 words"},
+    {"name":"Symbol 2", "desc":"Max 15 words"}
   ],
   "readings": [
-    {"archetype":"Origin", "text":"..."},
-    {"archetype":"Focus", "text":"..."}
+    {"archetype":"Origin", "text":"Max 20 words"},
+    {"archetype":"Focus", "text":"Max 20 words"}
   ],
   "mantra": "Short quote"
 }`;
@@ -521,41 +555,48 @@ CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page,
                     const htmlCard = `
                         <div class="page-bleed no-page-num" style="page-break-after: always;">
                             <div class="tarot-card-container">
-                                <div class="editable-image-container" data-idx="${i}" data-basename="${baseName}" data-prompt="${artPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
-                                    <img src="${imgUrl}" class="tarot-artwork">
-                                </div>
+                                <img src="${masterFrameBase64}" class="tarot-master-bg" style="pointer-events: none;">
                                 <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-text-overlay">
-                                    <h3 class="tarot-num">${cardData.number}</h3>
-                                    <h2 class="tarot-name">${cardData.title}</h2>
+                                <div class="tarot-art-window">
+                                    <div class="editable-image-container" data-idx="${i}" data-basename="${baseName}" data-prompt="${artPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
+                                        <img src="${imgUrl}" class="tarot-artwork">
+                                    </div>
+                                    <div class="tarot-text-overlay">
+                                        <h3 class="tarot-num">${cardData.number}</h3>
+                                        <h2 class="tarot-name">${cardData.title}</h2>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="page-text" style="page-break-after: always; padding: 40px;">
-                            <h1 class="doc-h1">${cardData.title}</h1>
-                            <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
-                            <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
-                            
-                            <div class="symbol-grid">
-                                ${cardData.symbols.map(s => `
-                                    <div class="symbol-item">
-                                        <div class="symbol-title">${s.name}</div>
-                                        <p class="symbol-desc">${s.desc}</p>
+                            <div class="page-inner-bounds">
+                                <div>
+                                    <h1 class="doc-h1">${cardData.title}</h1>
+                                    <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
+                                    <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
+                                    
+                                    <div class="symbol-grid">
+                                        ${cardData.symbols.map(s => `
+                                            <div class="symbol-item">
+                                                <div class="symbol-title">${s.name}</div>
+                                                <p class="symbol-desc">${s.desc}</p>
+                                            </div>
+                                        `).join('')}
                                     </div>
-                                `).join('')}
-                            </div>
-                            
-                            ${cardData.readings.map(r => `
-                                <div class="reading-slot">
-                                    <h3 class="reading-archetype">${r.archetype}</h3>
-                                    <p class="reading-text">${r.text}</p>
+                                    
+                                    ${cardData.readings.map(r => `
+                                        <div class="reading-slot">
+                                            <h3 class="reading-archetype">${r.archetype}</h3>
+                                            <p class="reading-text">${r.text}</p>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            `).join('')}
-                            
-                            <div class="mantra-box">
-                                <span style="color: var(--gold); font-size: 20px;">✦</span>
-                                <p class="mantra-text">"${cardData.mantra}"</p>
+                                
+                                <div class="mantra-box">
+                                    <span style="color: var(--gold); font-size: 20px;">✦</span>
+                                    <p class="mantra-text">"${cardData.mantra}"</p>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -585,30 +626,33 @@ CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page,
                     let batch = generatedCards.slice(i, i + cardsPerPage);
                     while(batch.length < cardsPerPage) batch.push(null); 
                     
-                    let frontHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-container">`;
+                    let frontHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-wrapper"><div class="pnp-container">`;
                     batch.forEach(card => {
                         if(card) {
                             frontHtml += `
                             <div class="pnp-card">
-                                <div class="editable-image-container" data-idx="${card.idx}" data-basename="${card.baseName}" data-prompt="${card.prompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
-                                    <img src="${card.image}" id="pnp-img-${card.idx}" class="tarot-artwork">
-                                </div>
+                                <img src="${masterFrameBase64}" class="tarot-master-bg" style="pointer-events: none;">
                                 <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-text-overlay">
-                                    <h3 class="tarot-num">${card.number}</h3>
-                                    <h2 class="tarot-name">${card.title}</h2>
+                                <div class="tarot-art-window">
+                                    <div class="editable-image-container" data-idx="${card.idx}" data-basename="${card.baseName}" data-prompt="${card.prompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">
+                                        <img src="${card.image}" id="pnp-img-${card.idx}" class="tarot-artwork">
+                                    </div>
+                                    <div class="tarot-text-overlay">
+                                        <h3 class="tarot-num">${card.number}</h3>
+                                        <h2 class="tarot-name">${card.title}</h2>
+                                    </div>
                                 </div>
                             </div>`;
                         } else {
                             frontHtml += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
                         }
                     });
-                    frontHtml += `</div></div>`;
+                    frontHtml += `</div></div></div>`;
                     DOM.bookPage.insertAdjacentHTML('beforeend', frontHtml);
 
                     let backBatch = [batch[1], batch[0], batch[3], batch[2]];
                     
-                    let backHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-container">`;
+                    let backHtml = `<div class="page-text no-page-num pnp-sheet" style="page-break-after: always;"><div class="pnp-wrapper"><div class="pnp-container">`;
                     backBatch.forEach(card => {
                         if(card) {
                             backHtml += `
@@ -621,7 +665,7 @@ CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page,
                             backHtml += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
                         }
                     });
-                    backHtml += `</div></div>`;
+                    backHtml += `</div></div></div>`;
                     DOM.bookPage.insertAdjacentHTML('beforeend', backHtml);
                 }
             }
@@ -644,25 +688,32 @@ CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page,
                 for(let i = 0; i < generatedCards.length; i++) {
                     const card = generatedCards[i]; ctx.clearRect(0,0,w,h);
                     
-                    const artImg = await loadImg(card.image);
-                    const scale = Math.max(w / artImg.width, h / artImg.height);
-                    const imgX = (w / 2) - (artImg.width / 2) * scale;
-                    const imgY = (h / 2) - (artImg.height / 2) * scale;
-                    ctx.drawImage(artImg, imgX, imgY, artImg.width * scale, artImg.height * scale);
+                    const backImg = await loadImg(masterFrameBase64);
+                    ctx.drawImage(backImg, 0, 0, w, h);
 
-                    const grd = ctx.createLinearGradient(0, h * 0.6, 0, h);
-                    grd.addColorStop(0, "transparent"); grd.addColorStop(0.6, "rgba(0,0,0,0.6)"); grd.addColorStop(1, "rgba(0,0,0,0.95)");
-                    ctx.fillStyle = grd; ctx.fillRect(0, h * 0.6, w, h * 0.4);
+                    const artW = w * 0.82; const artH = h * 0.86;
+                    const artX = w * 0.09; const artY = h * 0.07;
+                    
+                    const artImg = await loadImg(card.image);
+                    const scale = Math.max(artW / artImg.width, artH / artImg.height);
+                    const sW = artW / scale; const sH = artH / scale;
+                    const sX = (artImg.width - sW) / 2; const sY = (artImg.height - sH) / 2;
+                    ctx.drawImage(artImg, sX, sY, sW, sH, artX, artY, artW, artH);
 
                     ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
+                    ctx.lineWidth = 4; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(artX, artY, artW, artH);
+
+                    const grd = ctx.createLinearGradient(0, artY + artH * 0.6, 0, artY + artH);
+                    grd.addColorStop(0, "transparent"); grd.addColorStop(0.6, "rgba(0,0,0,0.6)"); grd.addColorStop(1, "rgba(0,0,0,0.95)");
+                    ctx.fillStyle = grd; ctx.fillRect(artX, artY + artH * 0.6, artW, artH * 0.4);
 
                     ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 50px "Cinzel", serif';
                     ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
-                    ctx.fillText(card.number, w/2, h - 130);
+                    ctx.fillText(card.number, w/2, artY + artH - 90);
                     
                     ctx.fillStyle = '#ffffff'; let fontSize = 70; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
-                    while(ctx.measureText(card.title).width > w - 100) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
-                    ctx.fillText(card.title.toUpperCase(), w/2, h - 50);
+                    while(ctx.measureText(card.title).width > artW - 40) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
+                    ctx.fillText(card.title.toUpperCase(), w/2, artY + artH - 25);
 
                     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
                     zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`, blob);
@@ -684,10 +735,87 @@ CRITICAL RULE 2: "number" MUST be ONLY digits (0, 1, 2, 14) or Court rank (Page,
             finally { DOM.saveMpcBtn.disabled = false; }
         });
 
-        DOM.savePdfBtn.addEventListener('click', () => {
-            if(generatedCards.length === 0) return showToast("Genera prima un libro.", "warning");
-            showToast("Stampa: Seleziona A4, Margini 'Nessuno', attiva 'Grafica in background'.", "info"); 
-            setTimeout(() => window.print(), 1000);
+        // Nuovo sistema di esportazione PDF HD (sostituisce window.print())
+        DOM.savePdfBtn.addEventListener('click', async () => {
+            if(generatedCards.length === 0 && DOM.bookPage.children.length <= 1) return showToast("Genera prima un libro.", "warning");
+
+            DOM.savePdfBtn.disabled = true;
+            const originalText = DOM.savePdfBtn.innerHTML;
+            DOM.savePdfBtn.innerHTML = `<div class="loader border-[#0f1219] border-top-transparent"></div> Rendering HD...`;
+            
+            DOM.progressSection.classList.remove('hidden');
+            
+            try {
+                // Inizializza jsPDF dal namespace window
+                const { jsPDF } = window.jspdf;
+                const val = DOM.trimSize.value;
+                const is6x9 = val === '6x9';
+                const widthIn = is6x9 ? 6 : 8.5;
+                const heightIn = is6x9 ? 9 : 11;
+
+                // Creazione istanza PDF con compressione attiva (Deflate algorithm)
+                const pdf = new jsPDF({ 
+                    orientation: 'portrait', 
+                    unit: 'in', 
+                    format: [widthIn, heightIn], 
+                    compress: true // Essenziale per ridurre il peso del file
+                });
+
+                // Seleziona tutte le pagine generate nel DOM
+                const pages = Array.from(DOM.bookPage.querySelectorAll('.page-text, .page-bleed'));
+                
+                for (let i = 0; i < pages.length; i++) {
+                    const page = pages[i];
+                    DOM.progressStatus.textContent = `Rendering Pagina ${i+1}/${pages.length}...`;
+                    DOM.progressBar.style.width = `${((i+1) / pages.length) * 100}%`;
+                    DOM.progressCount.textContent = `${i+1}/${pages.length}`;
+
+                    // Rimuove temporaneamente le ombre e l'arrotondamento per una cattura netta
+                    const origShadow = page.style.boxShadow;
+                    const origRadius = page.style.borderRadius;
+                    page.style.boxShadow = 'none';
+                    page.style.borderRadius = '0';
+
+                    // html2canvas cattura il nodo DOM e lo trasforma in Canvas
+                    // scale: 3 garantisce una risoluzione altissima (equivalente a circa 288 DPI su un foglio a4/letter)
+                    const canvas = await html2canvas(page, {
+                        scale: 3, 
+                        useCORS: true, 
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    });
+
+                    // Ripristina gli stili originali per l'interfaccia utente
+                    page.style.boxShadow = origShadow;
+                    page.style.borderRadius = origRadius;
+
+                    // Converte il canvas in JPEG ad alta qualità. 
+                    // Il JPEG al 95% è perfetto per mantenere l'altissima definizione bilanciando il peso.
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+                    if (i > 0) pdf.addPage([widthIn, heightIn], 'portrait');
+                    
+                    // Inserisce l'immagine nel PDF. 
+                    // 'SLOW' indica a jsPDF di ottimizzare in modo approfondito il dizionario delle immagini.
+                    pdf.addImage(imgData, 'JPEG', 0, 0, widthIn, heightIn, undefined, 'SLOW');
+                }
+
+                DOM.progressStatus.textContent = `Salvataggio e compressione file in corso...`;
+                // Attende un momento per permettere al browser di elaborare il salvataggio senza bloccare la UI
+                await delay(100); 
+                pdf.save(`KDP_Tarot_Pro_HD_${Date.now()}.pdf`);
+                
+                showToast("PDF ad Altissima Definizione salvato!", "success");
+
+            } catch (err) {
+                console.error(err);
+                showToast("Errore critico durante la generazione PDF.", "error");
+            } finally {
+                DOM.savePdfBtn.disabled = false;
+                DOM.savePdfBtn.innerHTML = originalText;
+                setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
+            }
         });
 
         DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
