@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;"><head>
+<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KDP Tarot Pro Studio | Master Edition</title>
@@ -7,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
     <style id="dynamicPrintStyle">@media print { @page { size: 6in 9in; margin: 0 !important; } .page-text, .page-bleed { width: 6in !important; height: 9in !important; overflow: hidden !important; } }</style>
 
@@ -59,14 +60,22 @@
             position: absolute; top: 7%; bottom: 7%; left: 9%; right: 9%; z-index: 3; background: #000; 
             border: 3px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); 
             overflow: hidden; border-radius: 2px;
+            display: flex; flex-direction: column; justify-content: flex-end; /* Align text overlay to bottom */
         }
-        .tarot-art-window::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(0,0,0,0.6); z-index: 10; pointer-events: none; }
+        .tarot-art-window::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(0,0,0,0.4); z-index: 10; pointer-events: none; }
         
         .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: transform 0.5s; }
         
-        .tarot-shield { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 18, 25, 0.95); border-top: 2px solid var(--gold); z-index: 4; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 5px; pointer-events: none; }
-        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); margin: 0 0 5px 0; }
-        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.2rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.9); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
+        /* New Elegant Overlay for text inside the frame */
+        .tarot-text-overlay { 
+            position: relative; z-index: 5; width: 100%; 
+            background: linear-gradient(to top, rgba(15, 18, 25, 0.95) 0%, rgba(15, 18, 25, 0.7) 40%, transparent 100%);
+            padding: 40px 10px 15px 10px; /* Extra padding top for smooth gradient */
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; 
+            pointer-events: none; 
+        }
+        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 6px rgba(0,0,0,1); margin: 0 0 2px 0; }
+        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.2rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,1); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
 
         .symbol-page { display: flex; flex-direction: column; height: 100%; }
         .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(12pt * var(--font-scale)); line-height: 1.7; color: #1e293b; margin-bottom: calc(2rem * var(--font-scale)); text-align: justify; }
@@ -95,11 +104,11 @@
         .pnp-container { width: 85%; height: 85%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; }
         .pnp-card { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
         
-        .pnp-card .tarot-shield { padding: 8px 2px; border-top-width: 1px; }
+        .pnp-card .tarot-text-overlay { padding: 25px 2px 5px 2px; }
         .pnp-card .tarot-num { font-size: 11px; margin-bottom: 2px; letter-spacing: 2px; }
-        .pnp-card .tarot-name { font-size: 13px; padding: 0 4px; line-height: 1.1; }
+        .pnp-card .tarot-name { font-size: 13px; padding: 0 4px; line-height: 1.1; text-align: center; }
 
-        .editable-image-container { position: relative; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; }
+        .editable-image-container { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; z-index: 1; }
         .editable-image-container::after { content: '✎ Rigenera Art'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 20; backdrop-filter: blur(2px); border-radius: inherit; font-family: 'Inter', sans-serif; }
         .editable-image-container:hover::after { opacity: 1; }
         
@@ -126,7 +135,7 @@
             .editable-image-container::after { display: none !important; }
         }
     </style>
-<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.z-10{z-index:10}.z-20{z-index:20}.col-span-2{grid-column:span 2 / span 2}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-4{margin-left:1rem}.mt-2{margin-top:0.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[2\.75\/4\.75\]{aspect-ratio:2.75/4.75}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-24{height:6rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-screen{height:100vh}.w-2{width:0.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-\[360px\]{width:360px}.w-full{width:100%}.max-w-\[200px\]{max-width:200px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.resize-none{resize:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-\[\#0f1219\]{--tw-border-opacity:1;border-color:rgb(15 18 25 / var(--tw-border-opacity, 1))}.border-\[\#1a1e29\]{--tw-border-opacity:1;border-color:rgb(26 30 41 / var(--tw-border-opacity, 1))}.border-\[\#d4af37\]\/30{border-color:rgb(212 175 55 / 0.3)}.border-\[\#d4af37\]\/50{border-color:rgb(212 175 55 / 0.5)}.border-red-900\/50{border-color:rgb(127 29 29 / 0.5)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.bg-\[\#0f1219\]{--tw-bg-opacity:1;background-color:rgb(15 18 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1e29\]{--tw-bg-opacity:1;background-color:rgb(26 30 41 / var(--tw-bg-opacity, 1))}.bg-\[\#d4af37\]{--tw-bg-opacity:1;background-color:rgb(212 175 55 / var(--tw-bg-opacity, 1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-red-900\/20{background-color:rgb(127 29 29 / 0.2)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-\[\#d4af37\]{--tw-gradient-from:#d4af37 var(--tw-gradient-from-position);--tw-gradient-to:rgb(212 175 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3e5ab\]{--tw-gradient-to:#f3e5ab var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-\[\#0f1219\]{--tw-text-opacity:1;color:rgb(15 18 25 / var(--tw-text-opacity, 1))}.text-\[\#d4af37\]{--tw-text-opacity:1;color:rgb(212 175 55 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.8\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.8);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(79\2c 70\2c 229\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(79,70,229,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.05\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.05);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-\[\#c5a028\]:hover{--tw-bg-opacity:1;background-color:rgb(197 160 40 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:bg-red-900\/40:hover{background-color:rgb(127 29 29 / 0.4)}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:from-\[\#c5a028\]:hover{--tw-gradient-from:#c5a028 var(--tw-gradient-from-position);--tw-gradient-to:rgb(197 160 40 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-\[\#d4af37\]:hover{--tw-gradient-to:#d4af37 var(--tw-gradient-to-position)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-\[\#d4af37\]:focus{--tw-border-opacity:1;border-color:rgb(212 175 55 / var(--tw-border-opacity, 1))}.disabled\:opacity-50:disabled{opacity:0.5}</style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.z-10{z-index:10}.z-20{z-index:20}.col-span-2{grid-column:span 2 / span 2}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-4{margin-left:1rem}.mt-2{margin-top:0.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[2\.75\/4\.75\]{aspect-ratio:2.75/4.75}.h-screen{height:100vh}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-24{height:6rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.w-2{width:0.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-\[360px\]{width:360px}.w-full{width:100%}.max-w-\[200px\]{max-width:200px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.resize-none{resize:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-\[\#0f1219\]{--tw-border-opacity:1;border-color:rgb(15 18 25 / var(--tw-border-opacity, 1))}.border-\[\#1a1e29\]{--tw-border-opacity:1;border-color:rgb(26 30 41 / var(--tw-border-opacity, 1))}.border-\[\#d4af37\]\/30{border-color:rgb(212 175 55 / 0.3)}.border-\[\#d4af37\]\/50{border-color:rgb(212 175 55 / 0.5)}.border-red-900\/50{border-color:rgb(127 29 29 / 0.5)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.bg-\[\#0f1219\]{--tw-bg-opacity:1;background-color:rgb(15 18 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1e29\]{--tw-bg-opacity:1;background-color:rgb(26 30 41 / var(--tw-bg-opacity, 1))}.bg-\[\#d4af37\]{--tw-bg-opacity:1;background-color:rgb(212 175 55 / var(--tw-bg-opacity, 1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-red-900\/20{background-color:rgb(127 29 29 / 0.2)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-\[\#d4af37\]{--tw-gradient-from:#d4af37 var(--tw-gradient-from-position);--tw-gradient-to:rgb(212 175 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3e5ab\]{--tw-gradient-to:#f3e5ab var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-\[\#0f1219\]{--tw-text-opacity:1;color:rgb(15 18 25 / var(--tw-text-opacity, 1))}.text-\[\#d4af37\]{--tw-text-opacity:1;color:rgb(212 175 55 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.8\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.8);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(79\2c 70\2c 229\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(79,70,229,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.05\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.05);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-\[\#c5a028\]:hover{--tw-bg-opacity:1;background-color:rgb(197 160 40 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:bg-red-900\/40:hover{background-color:rgb(127 29 29 / 0.4)}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:from-\[\#c5a028\]:hover{--tw-gradient-from:#c5a028 var(--tw-gradient-from-position);--tw-gradient-to:rgb(197 160 40 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-\[\#d4af37\]:hover{--tw-gradient-to:#d4af37 var(--tw-gradient-to-position)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-\[\#d4af37\]:focus{--tw-border-opacity:1;border-color:rgb(212 175 55 / var(--tw-border-opacity, 1))}.disabled\:opacity-50:disabled{opacity:0.5}</style></head>
+</head>
 
 <body class="h-screen flex flex-col overflow-hidden text-slate-200">
 
@@ -167,7 +176,9 @@
                             <option value="Celestial Astrological, stars and zodiac intricate patterns">Astrologico Celestiale</option>
                         </select>
                     </div>
-                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview"><img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/889f0f6d-3526-4b73-b800-312939227c30" style="width:100%; height:100%; object-fit:cover;"></div>
+                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview">
+                        <span class="text-xs text-slate-500">Nessuna Cornice</span>
+                    </div>
                     <button id="btnGenerateFrame" class="w-full bg-slate-700 hover:bg-slate-600 text-[#d4af37] font-bold py-2 rounded transition-all text-xs flex justify-center items-center gap-2 border border-[#d4af37]/50">
                         <span id="btnFrameText" class="">Evoca Texture Sfondo</span>
                         <div id="btnFrameLoader" class="loader hidden"></div>
@@ -204,7 +215,7 @@
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Lingua Target</label>
                             <select id="bookLanguage" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="English (US)" selected="">English (US)</option>
+                                <option value="English (US)" selected>English (US)</option>
                                 <option value="Italiano">Italiano</option>
                                 <option value="Deutsch">Deutsch</option>
                                 <option value="Français">Français</option>
@@ -217,7 +228,7 @@
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia Libro</label>
                             <select id="trimSize" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="6x9" selected="">6 x 9 in. (Standard)</option>
+                                <option value="6x9" selected>6 x 9 in. (Standard)</option>
                                 <option value="7x10">7 x 10 in. (Grande)</option>
                             </select>
                         </div>
@@ -232,12 +243,12 @@
                     </div>
                 </div>
 
-                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2 disabled:opacity-50" style="font-family: 'Cinzel', serif;" disabled="">
-                    <span id="btnStartText" class="flex items-center gap-2 hidden">Forgia Grimorio Completo</span>
-                    <span id="btnStartLoader" class=""><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione...</span>
+                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2 disabled:opacity-50" style="font-family: 'Cinzel', serif;">
+                    <span id="btnStartText" class="flex items-center gap-2">Forgia Grimorio Completo</span>
+                    <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione...</span>
                 </button>
                 
-                <button id="btnTranslate" class="w-full bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50 text-xs" disabled="">
+                <button id="btnTranslate" class="w-full bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50 text-xs">
                     <span id="btnTranslateText" class="flex items-center gap-2">Traduci Testi (Mantieni Arte)</span>
                     <span id="btnTranslateLoader" class="hidden"><div class="loader"></div></span>
                 </button>
@@ -249,13 +260,13 @@
                     <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded transition-all text-xs">Azzera Progetto</button>
                 </div>
 
-                <div id="progressSection" class="flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner">
+                <div id="progressSection" class="hidden flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner">
                     <div class="flex justify-between text-xs mb-1 text-slate-400">
-                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Illustrazione: I - The Magician...</span>
-                        <span id="progressCount" class="font-mono text-[10px]">2/22</span>
+                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Inizializzazione...</span>
+                        <span id="progressCount" class="font-mono text-[10px]">0/0</span>
                     </div>
                     <div class="w-full bg-[#1a1e29] rounded-full h-1.5 overflow-hidden">
-                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 4.54545%;"></div>
+                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 0%;"></div>
                     </div>
                 </div>
             </div>
@@ -275,111 +286,17 @@
             </div>
 
             <div id="editorWorkspace">
+                <!-- Spazio pulito di partenza: solo copertina -->
                 <div id="bookPage" contenteditable="true" spellcheck="false">
-                <div class="page-text no-page-num" style="padding: 0;">
-                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">Premium Edition</div>
-                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">The Tarot</h1>
-                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">Craft, Cut and&nbsp;<span style="color: var(--primary-dark); font-size: calc(14pt * var(--font-scale));">Read&nbsp; Your Esoteric Deck</span></p>
+                    <div class="page-text no-page-num" style="padding: 0;">
+                        <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
+                            <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;"></div>
+                            <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;"></h1>
+                            <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
+                            <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;"></p>
+                        </div>
                     </div>
                 </div>
-            
-                        <div class="page-bleed recipe-block no-page-num" data-idx="0">
-                            <div class="tarot-card-container">
-                                
-                                <img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/889f0f6d-3526-4b73-b800-312939227c30" class="tarot-master-bg">
-                                <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-art-window"><div class="editable-image-container" data-idx="0" data-prompt="A beautiful full-bleed tarot illustration of The Fool standing on a mountain peak under a golden sun. A young traveler looks toward the sky, holding a white rose and a staff, with a small white dog at their heels. ZERO text. ZERO numbers. Pure artwork. Style: Mystical realism." onclick="openRegenModal(this)"><img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/2a4cb762-f3b0-4217-be7f-d8446aff1d92" class="tarot-artwork"></div></div>
-                                <div class="tarot-shield">
-                                    <h3 class="tarot-num">0</h3>
-                                    <h2 class="tarot-name">The Fool</h2>
-                                </div>
-                            </div>
-                            <div class="action-overlay">
-                                <button class="btn-action" onclick="openTikTokStudio('The Fool', '0', 'blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/2a4cb762-f3b0-4217-be7f-d8446aff1d92')">🎬 Crea Video TikTok</button>
-                            </div>
-                        </div>
-                    
-                        <div class="page-text recipe-block" data-idx="0">
-                            <div class="symbol-page">
-                                <h1 class="doc-h1">Mystical Symbolism</h1>
-                                <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
-                                <p class="symbol-intro"><span class="drop-cap">T</span>he Fool represents the infinite potential of a soul embarking on a new cosmic journey. It signifies the leap of faith required to embrace the unknown with a pure and open heart.</p>
-                                <div class="symbol-grid">
-                                    
-                                        <div class="symbol-item">
-                                            <div class="symbol-title">The White Rose</div>
-                                            <p class="symbol-desc">Represents purity of intention and the innocence of the spirit.</p>
-                                        </div>
-                                    
-                                        <div class="symbol-item">
-                                            <div class="symbol-title">The Cliff's Edge</div>
-                                            <p class="symbol-desc">Symbolizes the precipice between the physical world and the boundless spiritual realm.</p>
-                                        </div>
-                                    
-                                        <div class="symbol-item">
-                                            <div class="symbol-title">The Knapsack</div>
-                                            <p class="symbol-desc">Contains the tools and lessons of previous incarnations, yet to be unpacked.</p>
-                                        </div>
-                                    
-                                        <div class="symbol-item">
-                                            <div class="symbol-title">The Sun</div>
-                                            <p class="symbol-desc">Radiates divine guidance and the optimism of a fresh beginning.</p>
-                                        </div>
-                                    
-                                </div>
-                                <div class="numerology-box">
-                                    <div class="numerology-title">Numerology &amp; Color</div>
-                                    <p class="numerology-text">The number zero symbolizes the void, the egg of the universe, and the circle of eternal return.</p>
-                                </div>
-                            </div>
-                        </div>
-                    
-                        <div class="page-text recipe-block" data-idx="0">
-                            <div class="oracle-wrapper">
-                                <h1 class="doc-h1">Oracle Dynamics</h1>
-                                <div style="margin-bottom: 20px;"></div>
-                                
-                                    <div class="reading-slot">
-                                        <div class="reading-content">
-                                            <h3 class="reading-archetype">Origin &amp; Roots</h3>
-                                            <span class="reading-position">Past</span>
-                                            <p class="reading-text">You recently stepped away from old structures to embrace total freedom. This foundation of innocence allowed you to shed heavy burdens from your history.</p>
-                                        </div>
-                                    </div>
-                                
-                                    <div class="reading-slot">
-                                        <div class="reading-content">
-                                            <h3 class="reading-archetype">Focus &amp; Manifestation</h3>
-                                            <span class="reading-position">Present</span>
-                                            <p class="reading-text">A significant opportunity for a fresh start is presenting itself right now. Trust your intuition and take the leap without overthinking the consequences.</p>
-                                        </div>
-                                    </div>
-                                
-                                    <div class="reading-slot">
-                                        <div class="reading-content">
-                                            <h3 class="reading-archetype">Projection &amp; Destiny</h3>
-                                            <span class="reading-position">Future</span>
-                                            <p class="reading-text">You are heading toward a period of profound personal discovery and spiritual awakening. Your path will lead to experiences that expand your consciousness beyond current limits.</p>
-                                        </div>
-                                    </div>
-                                
-                                    <div class="reading-slot">
-                                        <div class="reading-content">
-                                            <h3 class="reading-archetype">Shadow &amp; Crossroads</h3>
-                                            <span class="reading-position">Obstacle</span>
-                                            <p class="reading-text">Recklessness or a refusal to see reality might lead to a painful fall. Blind optimism becomes a hindrance if you ignore the practical warnings around you.</p>
-                                        </div>
-                                    </div>
-                                
-                                <div class="mantra-box">
-                                    <span class="mantra-ornament">✦</span>
-                                    <p class="mantra-text">"I trust the universe and step boldly into the unknown."</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
             </div>
         </div>
     </div>
@@ -402,9 +319,9 @@
         <div class="modal-content" style="max-width: 500px;">
             <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">🎬 TikTok Video Studio Pro</h2>
             <p class="text-xs text-slate-400">Copia questo prompt in Luma o Runway Gen3 assieme all'immagine esportata della carta.</p>
-            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly=""></textarea>
+            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly></textarea>
             <p class="text-xs text-slate-400 mt-2">Script Vocale (Tono: <span id="videoToneLabel" class="text-white font-bold"></span>)</p>
-            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly=""></textarea>
+            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly></textarea>
             <div class="flex justify-between items-center mt-2">
                 <button id="btnPlayTTS" class="text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm flex items-center gap-2"> Ascolta Voce </button>
                 <button id="closeVideoModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Chiudi Studio</button>
@@ -451,15 +368,33 @@
         const defaultArcana = ["0 - The Fool", "I - The Magician", "II - The High Priestess", "III - The Empress", "IV - The Emperor", "V - The Hierophant", "VI - The Lovers", "VII - The Chariot", "VIII - Strength", "IX - The Hermit", "X - Wheel of Fortune", "XI - Justice", "XII - The Hanged Man", "XIII - Death", "XIV - Temperance", "XV - The Devil", "XVI - The Tower", "XVII - The Star", "XVIII - The Moon", "XIX - The Sun", "XX - Judgement", "XXI - The World"];
 
         const dictUI = {
-            "English (US)": { ed: "Premium Edition", sub: "Craft, Read and Cut Your Esoteric Deck", sym: "Mystical Symbolism", ora: "Oracle Dynamics", pnp: "Print & Play (Extraction)", tutTitle: "Deck Extraction", tut: "Follow these steps to transform the pages into a physical deck.", step1: "Extract", step1Desc: "Carefully detach the Print & Play pages from the binding.", step2: "Laminate", step2Desc: "Apply clear adhesive film to BOTH sides of the extracted sheets to protect them.", step3: "Cut", step3Desc: "Cut along the margins. The cards will be flexible and perfectly aligned.", toc: "Table of Contents" },
-            "Italiano": { ed: "Edizione Premium", sub: "Crea, Leggi e Ritaglia il tuo Mazzo Esoterico", sym: "Simbolismo Mistico", ora: "Dinamiche dell'Oracolo", pnp: "Print & Play (Ritagliare)", tutTitle: "Estrazione del Mazzo", tut: "Segui questi passaggi per trasformare le pagine nel tuo grimorio fisico.", step1: "Estrai", step1Desc: "Stacca accuratamente i fogli Print & Play dalla rilegatura.", step2: "Plastifica", step2Desc: "Applica pellicola trasparente adesiva su AMBO I LATI dei fogli per proteggerli.", step3: "Ritaglia", step3Desc: "Ritaglia sui bordi delle carte. Fronte e retro combaceranno perfettamente.", toc: "Indice dei Contenuti" },
-            "Deutsch": { ed: "Premium-Ausgabe", sub: "Erstelle, Lese und Schneide dein Esoterisches Deck", sym: "Mystische Symbolik", ora: "Orakel-Dynamik", pnp: "Print & Play (Ausschneiden)", tutTitle: "Deck-Herstellung", tut: "Befolge diese Schritte, um die Seiten in ein echtes Deck zu verwandeln.", step1: "Entfernen", step1Desc: "Löse die Seiten vorsichtig aus der Bindung.", step2: "Laminieren", step2Desc: "Trage auf BEIDEN Seiten eine durchsichtige Klebefolie auf.", step3: "Schneiden", step3Desc: "Schneide entlang der Kanten. Die Karten sind perfekt ausgerichtet.", toc: "Inhaltsverzeichnis" },
-            "Français": { ed: "Édition Premium", sub: "Créez, Lisez et Découpez votre Jeu Ésotérique", sym: "Symbolisme Mystique", ora: "Dynamique de l'Oracle", pnp: "Print & Play (Découper)", tutTitle: "Création du Jeu", tut: "Suivez ces étapes pour extraire les cartes.", step1: "Extraire", step1Desc: "Détachez soigneusement les pages de la reliure.", step2: "Plastifier", step2Desc: "Appliquez un film adhésif transparent des DEUX côtés des feuilles.", step3: "Couper", step3Desc: "Coupez le long des marges. Le recto et le verso s'aligneront parfaitement.", toc: "Table des Matières" },
-            "Español": { ed: "Edición Premium", sub: "Crea, Lee y Recorta tu Mazo Esotérico", sym: "Simbolismo Místico", ora: "Dinámica del Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extracción del Mazo", tut: "Sigue estos pasos para transformar las páginas en tu mazo físico.", step1: "Extraer", step1Desc: "Desprende las hojas con cuidado de la encuadernación.", step2: "Plastificar", step2Desc: "Aplica película adhesiva transparente en AMBOS lados.", step3: "Recortar", step3Desc: "Recorta por los bordes. El anverso y reverso coincidirán perfectamente.", toc: "Índice de Contenidos" },
-            "日本語": { ed: "プレミアム版", sub: "あなたの秘教的なデッキを作成、解釈、切り取り", sym: "神秘的な象徴主義", ora: "オラクルの力学", pnp: "プリント＆プレイ", tutTitle: "デッキの抽出", tut: "これらの手順に従って、ページを実際のデッキに変えてください。", step1: "切り離す", step1Desc: "ページを綴じ込みから慎重に切り離します。", step2: "ラミネート", step2Desc: "シートの両面に透明な粘着フィルムを貼ります。", step3: "カット", step3Desc: "余白に沿って切ります。表と裏が完全に一致します。", toc: "目次" },
-            "Polski": { ed: "Edycja Premium", sub: "Stwórz, Czytaj i Wytnij Swój Ezoteryczny Talię", sym: "Mistyczna Symbolika", ora: "Dynamika Wyroczni", pnp: "Print & Play (Wycięcie)", tutTitle: "Wyodrębnianie Talii", tut: "Wykonaj te kroki, aby przekształcić strony w fizyczną talię.", step1: "Wytnij", step1Desc: "Ostrożnie oderwij arkusze od oprawy.", step2: "Laminuj", step2Desc: "Nałóż przezroczystą folię samoprzylepną z OBU stron arkuszy.", step3: "Tnij", step3Desc: "Tnij wzdłuż krawędzi. Przód i tył będą idealnie wyrównane.", toc: "Spis Treści" },
-            "Português": { ed: "Edição Premium", sub: "Crie, Leia e Recorte Seu Baralho Esotérico", sym: "Simbolismo Místico", ora: "Dinâmica do Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extração do Baralho", tut: "Siga estes passos para extrair suas cartas.", step1: "Extrair", step1Desc: "Destaque cuidadosamente as folhas da encadernação.", step2: "Plastificar", step2Desc: "Aplique película adesiva transparente de AMBOS os lados das folhas.", step3: "Recortar", step3Desc: "Corte ao longo das margens. A frente e o verso se alinharão perfeitamente.", toc: "Índice" }
+            "English (US)": { ed: "Premium Edition", subHtml: 'Craft, Cut and <span style="color: var(--primary-dark); font-size: inherit;">Read Your Esoteric Deck</span>', sym: "Mystical Symbolism", ora: "Oracle Dynamics", pnp: "Print & Play (Extraction)", tutTitle: "Deck Extraction", tut: "Follow these steps to transform the pages into a physical deck.", step1: "Extract", step1Desc: "Carefully detach the Print & Play pages from the binding.", step2: "Laminate", step2Desc: "Apply clear adhesive film to BOTH sides of the extracted sheets to protect them.", step3: "Cut", step3Desc: "Cut along the margins. The cards will be flexible and perfectly aligned.", toc: "Table of Contents", defTitle: "The Tarot" },
+            "Italiano": { ed: "Edizione Premium", subHtml: 'Crea, Ritaglia e <span style="color: var(--primary-dark); font-size: inherit;">Leggi il tuo Mazzo</span>', sym: "Simbolismo Mistico", ora: "Dinamiche dell'Oracolo", pnp: "Print & Play (Ritagliare)", tutTitle: "Estrazione del Mazzo", tut: "Segui questi passaggi per trasformare le pagine nel tuo grimorio fisico.", step1: "Estrai", step1Desc: "Stacca accuratamente i fogli Print & Play dalla rilegatura.", step2: "Plastifica", step2Desc: "Applica pellicola trasparente adesiva su AMBO I LATI dei fogli per proteggerli.", step3: "Ritaglia", step3Desc: "Ritaglia sui bordi delle carte. Fronte e retro combaceranno perfettamente.", toc: "Indice dei Contenuti", defTitle: "I Tarocchi" },
+            "Deutsch": { ed: "Premium-Ausgabe", subHtml: 'Erstelle, Schneide und <span style="color: var(--primary-dark); font-size: inherit;">Lese dein Deck</span>', sym: "Mystische Symbolik", ora: "Orakel-Dynamik", pnp: "Print & Play (Ausschneiden)", tutTitle: "Deck-Herstellung", tut: "Befolge diese Schritte, um die Seiten in ein echtes Deck zu verwandeln.", step1: "Entfernen", step1Desc: "Löse die Seiten vorsichtig aus der Bindung.", step2: "Laminieren", step2Desc: "Trage auf BEIDEN Seiten eine durchsichtige Klebefolie auf.", step3: "Schneiden", step3Desc: "Schneide entlang der Kanten. Die Karten sind perfekt ausgerichtet.", toc: "Inhaltsverzeichnis", defTitle: "Das Tarot" },
+            "Français": { ed: "Édition Premium", subHtml: 'Créez, Découpez et <span style="color: var(--primary-dark); font-size: inherit;">Lisez votre Jeu</span>', sym: "Symbolisme Mystique", ora: "Dynamique de l'Oracle", pnp: "Print & Play (Découper)", tutTitle: "Création du Jeu", tut: "Suivez ces étapes pour extraire les cartes.", step1: "Extraire", step1Desc: "Détachez soigneusement les pages de la reliure.", step2: "Plastifier", step2Desc: "Appliquez un film adhésif transparent des DEUX côtés des feuilles.", step3: "Couper", step3Desc: "Coupez le long des marges. Le recto et le verso s'aligneront parfaitement.", toc: "Table des Matières", defTitle: "Le Tarot" },
+            "Español": { ed: "Edición Premium", subHtml: 'Crea, Recorta y <span style="color: var(--primary-dark); font-size: inherit;">Lee tu Mazo</span>', sym: "Simbolismo Místico", ora: "Dinámica del Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extracción del Mazo", tut: "Sigue estos pasos para transformar las páginas en tu mazo físico.", step1: "Extraer", step1Desc: "Desprende las hojas con cuidado de la encuadernación.", step2: "Plastificar", step2Desc: "Aplica película adhesiva transparente en AMBOS lados.", step3: "Recortar", step3Desc: "Recorta por los bordes. El anverso y reverso coincidirán perfectamente.", toc: "Índice de Contenidos", defTitle: "El Tarot" },
+            "日本語": { ed: "プレミアム版", subHtml: 'あなたの秘教的なデッキを<span style="color: var(--primary-dark); font-size: inherit;">作成、解釈、切り取り</span>', sym: "神秘的な象徴主義", ora: "オラクルの力学", pnp: "プリント＆プレイ", tutTitle: "デッキの抽出", tut: "これらの手順に従って、ページを実際のデッキに変えてください。", step1: "切り離す", step1Desc: "ページを綴じ込みから慎重に切り離します。", step2: "ラミネート", step2Desc: "シートの両面に透明な粘着フィルムを貼ります。", step3: "カット", step3Desc: "余白に沿って切ります。表と裏が完全に一致します。", toc: "目次", defTitle: "タロット" },
+            "Polski": { ed: "Edycja Premium", subHtml: 'Stwórz, Wytnij i <span style="color: var(--primary-dark); font-size: inherit;">Czytaj Swoją Talię</span>', sym: "Mistyczna Symbolika", ora: "Dynamika Wyroczni", pnp: "Print & Play (Wycięcie)", tutTitle: "Wyodrębnianie Talii", tut: "Wykonaj te kroki, aby przekształcić strony w fizyczną talię.", step1: "Wytnij", step1Desc: "Ostrożnie oderwij arkusze od oprawy.", step2: "Laminuj", step2Desc: "Nałóż przezroczystą folię samoprzylepną z OBU stron arkuszy.", step3: "Tnij", step3Desc: "Tnij wzdłuż krawędzi. Przód i tył będą idealnie wyrównane.", toc: "Spis Treści", defTitle: "Tarot" },
+            "Português": { ed: "Edição Premium", subHtml: 'Crie, Recorte e <span style="color: var(--primary-dark); font-size: inherit;">Leia Seu Baralho</span>', sym: "Simbolismo Místico", ora: "Dinâmica do Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extração do Baralho", tut: "Siga estes passos para extrair suas cartas.", step1: "Extrair", step1Desc: "Destaque cuidadosamente as folhas da encadernação.", step2: "Plastificar", step2Desc: "Aplique película adesiva transparente de AMBOS os lados das folhas.", step3: "Recortar", step3Desc: "Corte ao longo das margens. A frente e o verso se alinharão perfeitamente.", toc: "Índice", defTitle: "O Tarot" }
         };
+
+        function updateCover() {
+            const lang = DOM.languageInput.value;
+            const t = dictUI[lang] || dictUI["English (US)"];
+            const rawTitle = DOM.topicInput.value.trim() || t.defTitle || "The Tarot";
+            
+            const coverEdition = document.getElementById('coverEdition');
+            const coverTitle = document.getElementById('coverTitle');
+            const coverSubtitle = document.getElementById('coverSubtitle');
+            
+            if (coverEdition) coverEdition.textContent = t.ed;
+            if (coverTitle) coverTitle.textContent = rawTitle;
+            if (coverSubtitle) coverSubtitle.innerHTML = t.subHtml;
+        }
+
+        DOM.languageInput.addEventListener('change', updateCover);
+        DOM.topicInput.addEventListener('input', updateCover);
+        updateCover();
 
         function showToast(message, type = 'info') {
             const toast = document.createElement('div'); toast.className = `toast ${type}`;
@@ -563,11 +498,12 @@
         DOM.trimSize.addEventListener('change', applyLayoutEngine);
 
         function wrapImageForEdit(imgHtml, originalPrompt, idx) {
-            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
+            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)"></div>${imgHtml}`;
         }
 
         window.openRegenModal = function(container) {
-            imageToRegenerate = container.querySelector('img.tarot-artwork') || container.querySelector('img');
+            // Because the container is now a sibling absolutely positioned over the img
+            imageToRegenerate = container.nextElementSibling;
             basePromptForRegen = container.dataset.prompt;
             currentEditingIdx = container.dataset.idx;
             DOM.regenPrompt.value = "";
@@ -640,15 +576,15 @@
             DOM.progressSection.classList.remove('hidden');
             
             const t = dictUI[lang] || dictUI["English (US)"];
-            const rawTitle = DOM.topicInput.value.trim() || "The Tarot";
+            const rawTitle = DOM.topicInput.value.trim() || t.defTitle || "The Tarot";
             
             DOM.bookPage.innerHTML = `
                 <div class="page-text no-page-num" style="padding: 0;">
                     <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">${t.ed}</div>
-                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">${rawTitle}</h1>
+                        <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">${t.ed}</div>
+                        <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">${rawTitle}</h1>
                         <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">${t.sub}</p>
+                        <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">${t.subHtml}</p>
                     </div>
                 </div>
             `;
@@ -659,13 +595,13 @@
             let currentLogicalPage = 1;
 
             const sysBase = `You are a Master Tarot Reader and Esoteric Publisher writing a premium book in ${lang.toUpperCase()}.
-CRITICAL: ALL text (including keys) must be strictly translated to ${lang.toUpperCase()}.
+CRITICAL: ALL text, INCLUDING THE CARD TITLE AND NUMBER, must be strictly translated to ${lang.toUpperCase()}.
 CRITICAL FORMATTING: Keep "intro" to exactly 2 sentences. "symbols" descriptions MUST be STRICTLY UNDER 20 WORDS each. "readings" text MUST be exactly 2 short sentences. "mantra" is a short affirmation in quotes.
 Interpret the card specifically through the lens of: "${readingTheme}".
 Output valid JSON:
 {
-  "title": "Translated Card Name",
-  "number": "Roman Numeral (e.g., 0, I, II, XXI)",
+  "title": "TRANSLATED Card Name in ${lang.toUpperCase()} (e.g. 'Il Matto' instead of 'The Fool')",
+  "number": "Number (Roman Numeral) OR Translated Number if applicable in ${lang.toUpperCase()} (e.g. '0' or 'Zero')",
   "intro": "2 sentences introduction.",
   "symbols": [{"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}],
   "numerology": "1 sentence on numerology/color.",
@@ -684,7 +620,9 @@ Output valid JSON:
                     const item = listToProcess[i];
                     updateStatus(`${isTranslation ? 'Traduzione' : 'Divinazione'}: ${item.baseName}...`, (i/listToProcess.length)*100, i+1, listToProcess.length);
                     
-                    const cardData = await callGemini(`Analyze the Tarot card: ${item.baseName}. Lens: ${readingTheme}. Language: ${lang.toUpperCase()}.`, sysBase);
+                    const callPrompt = `Analyze the Tarot card: ${item.baseName}. Lens: ${readingTheme}. Target Language: ${lang.toUpperCase()}. 
+CRITICAL INSTRUCTION: You MUST translate the card title (and number) into ${lang.toUpperCase()}! The fields "title" and "number" in the JSON must reflect the final target language.`;
+                    const cardData = await callGemini(callPrompt, sysBase);
 
                     let finalImg = item.image;
                     if (!finalImg) {
@@ -700,13 +638,14 @@ Output valid JSON:
                     DOM.bookPage.insertAdjacentHTML('beforeend', `
                         <div class="page-bleed recipe-block no-page-num" data-idx="${i}">
                             <div class="tarot-card-container">
-                                ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, cardData.visualPrompt, i)}
                                 <img src="${masterFrameBase64}" class="tarot-master-bg">
                                 <div class="tarot-css-frame-outer"></div>
-                                <div class="tarot-art-window"></div>
-                                <div class="tarot-shield">
-                                    <h3 class="tarot-num">${cardData.number}</h3>
-                                    <h2 class="tarot-name">${cardData.title}</h2>
+                                <div class="tarot-art-window">
+                                    ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, cardData.visualPrompt, i)}
+                                    <div class="tarot-text-overlay">
+                                        <h3 class="tarot-num">${cardData.number}</h3>
+                                        <h2 class="tarot-name">${cardData.title}</h2>
+                                    </div>
                                 </div>
                             </div>
                             <div class="action-overlay">
@@ -714,11 +653,6 @@ Output valid JSON:
                             </div>
                         </div>
                     `);
-                    // Sposta l'immagine dell'artwork visivamente DENTRO la finestra forzata matematicamente.
-                    // Il CSS maschera l'eccesso.
-                    document.querySelectorAll('.tarot-art-window')[i].appendChild(
-                        document.querySelectorAll(`.page-bleed[data-idx="${i}"] .editable-image-container`)[0]
-                    );
                     await delay(500);
 
                     currentPhysicalPage++;
@@ -774,10 +708,7 @@ Output valid JSON:
                 
                 generatedCards = tempGeneratedCards;
 
-                // Generate Edge-to-Edge Print and Play with immediate Back page
                 for(let i=0; i<generatedCards.length; i+=4) {
-                    
-                    // FRONTE DELLE 4 CARTE
                     currentPhysicalPage++;
                     let frontHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
                     for(let j=0; j<4; j++) {
@@ -788,10 +719,10 @@ Output valid JSON:
                                 <div class="tarot-css-frame-outer"></div>
                                 <div class="tarot-art-window" style="border-width: 2px;">
                                     <img src="${generatedCards[i+j].image}" id="pnp-img-${i+j}" class="tarot-artwork">
-                                </div>
-                                <div class="tarot-shield" style="padding: 6px 2px; border-top-width: 1px;">
-                                    <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 11px; font-weight: bold; margin-bottom: 2px;">${generatedCards[i+j].number}</div>
-                                    <div style="font-family: 'Cinzel', serif; color: white; font-size: 11px; font-weight: bold; text-transform: uppercase;">${generatedCards[i+j].title}</div>
+                                    <div class="tarot-text-overlay" style="padding: 25px 2px 5px 2px;">
+                                        <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 11px; font-weight: bold; margin-bottom: 2px; text-align: center; text-shadow: 0 1px 3px black;">${generatedCards[i+j].number}</div>
+                                        <div style="font-family: 'Cinzel', serif; color: white; font-size: 11px; font-weight: bold; text-transform: uppercase; text-align: center; text-shadow: 0 1px 4px black;">${generatedCards[i+j].title}</div>
+                                    </div>
                                 </div>
                             </div>`;
                         } else {
@@ -801,7 +732,6 @@ Output valid JSON:
                     frontHTML += '</div></div>';
                     DOM.bookPage.insertAdjacentHTML('beforeend', frontHTML);
 
-                    // RETRO DELLE 4 CARTE (Immediatamente pagina successiva per il fronte/retro perfetto)
                     currentPhysicalPage++;
                     let backHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
                     for(let j=0; j<4; j++) {
@@ -845,32 +775,35 @@ Output valid JSON:
                     </div>
                 `);
 
-                // TOC - Leader Dots (Premium Layout)
-                let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 2rem;">${t.toc}</h1><div style="display: flex; flex-direction: column; gap: 14px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
-                globalTocEntries.forEach(entry => {
-                    tocHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
-                            <span style="font-weight: 500; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
-                                ${entry.number ? entry.number + ' - ' : ''}${entry.title}
-                            </span>
-                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
-                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
-                                ${entry.pageNum}
-                            </span>
-                        </div>`;
-                });
-                tocHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative; margin-top: 15px;">
-                            <span style="font-weight: 700; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
-                                ${t.tutTitle}
-                            </span>
-                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
-                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
-                                ${currentLogicalPage}
-                            </span>
-                        </div>
-                    </div></div>`;
-                DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
+                let allTocItems = [...globalTocEntries];
+                allTocItems.push({ title: t.tutTitle, number: "", pageNum: currentLogicalPage });
+                
+                const ITEMS_PER_PAGE = 22; // Safe amount to fit 6x9 without overflow
+                for (let p = 0; p < allTocItems.length; p += ITEMS_PER_PAGE) {
+                    let chunk = allTocItems.slice(p, p + ITEMS_PER_PAGE);
+                    let pageTitleStr = p === 0 ? t.toc : `${t.toc} (Cont.)`;
+                    
+                    let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 2rem;">${pageTitleStr}</h1><div style="display: flex; flex-direction: column; gap: 14px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
+                    
+                    chunk.forEach(entry => {
+                        let numStr = entry.number ? entry.number + ' - ' : '';
+                        let isBoldTitle = !entry.number ? '700' : '500'; // Bold for Tutorial
+                        
+                        tocHTML += `
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
+                                <span style="font-weight: ${isBoldTitle}; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
+                                    ${numStr}${entry.title}
+                                </span>
+                                <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
+                                <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
+                                    ${entry.pageNum}
+                                </span>
+                            </div>`;
+                    });
+                    
+                    tocHTML += `</div></div>`;
+                    DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
+                }
 
                 updateStatus(isTranslation ? "Traduzione Completata!" : "Manoscritto Completato!", 100, listToProcess.length, listToProcess.length);
                 showToast("Libro elaborato con successo!", "success");
@@ -919,40 +852,48 @@ Output valid JSON:
                 for(let i = 0; i < generatedCards.length; i++) {
                     const card = generatedCards[i]; ctx.clearRect(0,0,w,h);
                     
+                    // Draw outer border (Bleed area)
                     ctx.drawImage(masterFrameImg, 0, 0, w, h);
                     ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,h);
 
+                    // Draw Inner window
                     ctx.save(); ctx.beginPath(); ctx.rect(insetX, insetY, innerW, innerH); ctx.clip();
                     ctx.fillStyle = '#000000'; ctx.fillRect(insetX, insetY, innerW, innerH);
 
+                    // Draw Artwork
                     const artImg = await loadImg(card.image);
                     const scale = Math.max(innerW / artImg.width, innerH / artImg.height);
                     const imgX = insetX + (innerW / 2) - (artImg.width / 2) * scale;
                     const imgY = insetY + (innerH / 2) - (artImg.height / 2) * scale;
                     ctx.drawImage(artImg, imgX, imgY, artImg.width * scale, artImg.height * scale);
 
-                    const shieldH = 150;
-                    ctx.fillStyle = 'rgba(15, 18, 25, 0.95)';
-                    ctx.fillRect(insetX, insetY + innerH - shieldH, innerW, shieldH);
-                    ctx.beginPath(); ctx.moveTo(insetX, insetY + innerH - shieldH); ctx.lineTo(insetX + innerW, insetY + innerH - shieldH);
-                    ctx.lineWidth = 4; ctx.strokeStyle = '#d4af37'; ctx.stroke();
-                    ctx.restore();
+                    // Draw elegant bottom gradient overlay
+                    const gradientH = 300; // Taller for smooth fade
+                    const grd = ctx.createLinearGradient(0, insetY + innerH - gradientH, 0, insetY + innerH);
+                    grd.addColorStop(0, "rgba(0,0,0,0)");
+                    grd.addColorStop(0.4, "rgba(15,18,25,0.7)");
+                    grd.addColorStop(1, "rgba(15,18,25,0.95)");
+                    ctx.fillStyle = grd;
+                    ctx.fillRect(insetX, insetY + innerH - gradientH, innerW, gradientH);
+                    ctx.restore(); // restore clip
 
+                    // Draw precise physical borders over everything
                     ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
                     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
                     ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
 
+                    // Draw Text inside the gradient
                     ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 45px "Cinzel", serif';
-                    ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
-                    ctx.fillText(card.number, w/2, insetY + innerH - 85);
+                    ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+                    ctx.fillText(card.number, w/2, insetY + innerH - 80); // Adjusted Y pos
                     
                     ctx.fillStyle = '#ffffff'; let fontSize = 60; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
                     while(ctx.measureText(card.title).width > innerW - 40) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
                     ctx.fillText(card.title.toUpperCase(), w/2, insetY + innerH - 25);
-                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; // reset
 
                     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-                    zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`, blob);
+                    zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.jpg`, blob);
                 }
 
                 ctx.clearRect(0,0,w,h); ctx.drawImage(masterFrameImg, 0,0,w,h);
@@ -1020,24 +961,31 @@ Output valid JSON:
                     const tempDiv = document.createElement('div'); tempDiv.innerHTML = data.html;
                     for(let img of tempDiv.querySelectorAll('img')) { if(img.src.startsWith('data:image')) img.src = await processImageToBlobUrl(img.src, 1500, 0.9); }
                     DOM.bookPage.innerHTML = tempDiv.innerHTML;
+                    
+                    updateCover(); 
                     showToast("Progetto ricaricato!", "success");
                 } catch(err) { showToast("File corrotto.", "error"); }
             }; reader.readAsText(file);
         });
 
-        DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
-        DOM.btnCancelReset.addEventListener('click', () => DOM.resetConfirmModal.classList.remove('show'));
-        DOM.btnConfirmReset.addEventListener('click', () => {
+        function resetWorkspaceToCover() {
             DOM.bookPage.innerHTML = `
                 <div class="page-text no-page-num" style="padding: 0;">
                     <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
-                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">Premium Edition</div>
-                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">Tarot Pro Studio</h1>
+                        <div id="coverEdition" style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;"></div>
+                        <h1 id="coverTitle" class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;"></h1>
                         <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
-                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-style: italic; text-align: center;">Forgia la Texture Maestra a sinistra per iniziare.</p>
+                        <p id="coverSubtitle" style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;"></p>
                     </div>
                 </div>
             `;
+            updateCover();
+        }
+
+        DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
+        DOM.btnCancelReset.addEventListener('click', () => DOM.resetConfirmModal.classList.remove('show'));
+        DOM.btnConfirmReset.addEventListener('click', () => {
+            resetWorkspaceToCover();
             generatedCards = []; masterFrameBase64 = null; DOM.masterFramePreview.innerHTML = '<span class="text-xs text-slate-500">Nessuna Cornice</span>';
             DOM.resetConfirmModal.classList.remove('show'); showToast("Progetto azzerato.", "success");
         });
@@ -1050,4 +998,5 @@ Output valid JSON:
         }
     </script>
 
-</body></html>
+</body>
+</html>
