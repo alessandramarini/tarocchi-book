@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;">
-<head>
+<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KDP Tarot Pro Studio | Master Edition</title>
     
-    <!-- Librerie Esterne -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Inter:wght@300;400;500&amp;display=swap" rel="stylesheet">
     
     <style id="dynamicPrintStyle">@media print { @page { size: 6in 9in; margin: 0 !important; } .page-text, .page-bleed { width: 6in !important; height: 9in !important; overflow: hidden !important; } }</style>
 
@@ -39,28 +37,36 @@
         #editorWorkspace { background-color: #111; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 4rem 2rem; flex: 1; scroll-behavior: smooth; }
         #bookPage { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3.5rem; outline: none; counter-reset: pdf-page; }
 
-        /* Struttura Base Pagine */
         .page-text, .page-bleed { background-color: var(--page-bg); box-shadow: 0 10px 25px rgba(0,0,0,0.8); width: var(--page-width-px); height: var(--page-height-px); position: relative; overflow: hidden; color: var(--text-main); box-sizing: border-box; flex-shrink: 0; counter-increment: pdf-page; }
         .page-text { padding: var(--safe-margin-px); display: flex; flex-direction: column; }
-        .page-bleed { padding: 0; display: flex; justify-content: center; align-items: center; border: none; }
+        .page-bleed { padding: 0; display: flex; justify-content: center; align-items: center; border: none; counter-increment: none; }
         .page-bleed img { width: 100%; height: 100%; object-fit: cover; }
 
-        .page-text::after, .page-bleed::after { content: counter(pdf-page); position: absolute; bottom: calc(var(--safe-margin-px) * 0.4); left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: calc(11pt * var(--font-scale)); font-weight: 600; pointer-events: none; z-index: 50; }
-        .page-text::after { color: #94a3b8; }
-        .page-bleed::after { color: #ffffff; text-shadow: 0px 1px 4px rgba(0,0,0,0.9); }
+        .page-text::after { content: counter(pdf-page); position: absolute; bottom: calc(var(--safe-margin-px) * 0.4); left: 0; width: 100%; text-align: center; font-family: 'Cinzel', serif; font-size: calc(11pt * var(--font-scale)); font-weight: 600; pointer-events: none; z-index: 50; color: #94a3b8; }
+        .no-page-num { counter-increment: none !important; }
+        .no-page-num::after { display: none !important; }
 
         .doc-title { font-family: 'Cinzel', serif; font-size: calc(3.5rem * var(--font-scale)); text-align: center; color: var(--primary-dark); line-height: 1.1; margin: 0; text-transform: uppercase; }
         .doc-h1 { font-family: 'Cinzel', serif; font-size: calc(2.2rem * var(--font-scale)); text-align: center; color: var(--primary-dark); margin: 0 0 calc(1.5rem * var(--font-scale)) 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
         .doc-h2 { font-family: 'Cinzel', serif; font-size: calc(1.5rem * var(--font-scale)); color: var(--primary-dark); text-align: center; margin-top: 0; margin-bottom: calc(1.5rem * var(--font-scale)); letter-spacing: 2px; }
         .drop-cap::first-letter { font-family: 'Cinzel', serif; font-size: 3.5em; float: left; margin-top: -0.1em; margin-right: 0.1em; color: var(--gold); line-height: 1; }
 
-        /* Smarginatura Carta + Scudo Tipografico (Come da regole Taschen/Lo Scarabeo) */
-        .tarot-card-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #fff; }
-        .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; }
-        .tarot-master-frame { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2; mix-blend-mode: multiply; pointer-events: none; }
-        .tarot-shield { position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0) 100%); z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: calc(var(--safe-margin-px) * 0.8); }
-        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0; }
-        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.4rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin: 0; text-align: center; padding: 0 20px; line-height: 1.1; }
+        .tarot-card-container { position: relative; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        .tarot-master-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; filter: brightness(0.65) contrast(1.2); }
+        .tarot-css-frame-outer { position: absolute; top: 3.5%; bottom: 3.5%; left: 4.5%; right: 4.5%; border: 1px solid rgba(212, 175, 55, 0.4); z-index: 2; pointer-events: none; border-radius: 4px; }
+        
+        .tarot-art-window { 
+            position: absolute; top: 7%; bottom: 7%; left: 9%; right: 9%; z-index: 3; background: #000; 
+            border: 3px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); 
+            overflow: hidden; border-radius: 2px;
+        }
+        .tarot-art-window::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(0,0,0,0.6); z-index: 10; pointer-events: none; }
+        
+        .tarot-artwork { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; transition: transform 0.5s; }
+        
+        .tarot-shield { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 18, 25, 0.95); border-top: 2px solid var(--gold); z-index: 4; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 5px; pointer-events: none; }
+        .tarot-num { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: calc(1.8rem * var(--font-scale)); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); margin: 0 0 5px 0; }
+        .tarot-name { font-family: 'Cinzel', serif; color: #fff; font-size: calc(2.2rem * var(--font-scale)); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,0.9); margin: 0; text-align: center; padding: 0 15px; line-height: 1.1; }
 
         .symbol-page { display: flex; flex-direction: column; height: 100%; }
         .symbol-intro { font-family: 'Playfair Display', serif; font-size: calc(12pt * var(--font-scale)); line-height: 1.7; color: #1e293b; margin-bottom: calc(2rem * var(--font-scale)); text-align: justify; }
@@ -76,8 +82,6 @@
 
         .oracle-wrapper { display: flex; flex-direction: column; height: 100%; }
         .reading-slot { display: flex; gap: calc(1.5rem * var(--font-scale)); margin-bottom: calc(1.5rem * var(--font-scale)); border-left: 2px solid var(--gold); padding-left: 15px; align-items: flex-start; }
-        .reading-thumb-box { width: calc(90px * var(--font-scale)); height: calc(135px * var(--font-scale)); flex-shrink: 0; border: 2px solid var(--gold); border-radius: 50px 50px 0 0; overflow: hidden; background: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
-        .reading-thumb { width: 100%; height: 100%; object-fit: cover; }
         .reading-content { flex: 1; min-width: 0; }
         .reading-archetype { font-family: 'Cinzel', serif; font-size: calc(13pt * var(--font-scale)); font-weight: 700; color: var(--primary-dark); text-transform: uppercase; margin: 0 0 4px 0; }
         .reading-position { font-family: 'Inter', sans-serif; font-size: calc(8.5pt * var(--font-scale)); font-weight: 600; letter-spacing: 1.5px; color: #94a3b8; text-transform: uppercase; margin: 0 0 8px 0; display: block; }
@@ -87,19 +91,22 @@
         .mantra-ornament { color: var(--gold); font-size: calc(14pt * var(--font-scale)); background: var(--page-bg); padding: 0 15px; position: relative; top: calc(-2.3rem * var(--font-scale)); display: inline-block; }
         .mantra-text { font-family: 'Cinzel', serif; font-size: calc(12.5pt * var(--font-scale)); font-weight: 600; font-style: italic; color: var(--primary-dark); letter-spacing: 0.5px; margin: 0; line-height: 1.4; }
 
-        .pnp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; width: 100%; height: 100%; border: 1px dashed #cbd5e1; }
-        .pnp-card { width: 100%; height: 100%; border: 1px dashed #94a3b8; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #fff; }
-        .pnp-img { width: 100%; height: 100%; object-fit: contain; }
-        .pnp-label { position: absolute; bottom: 5px; background: rgba(255,255,255,0.9); padding: 2px 8px; font-family: 'Cinzel', serif; font-size: 8pt; font-weight: bold; border-radius: 4px;}
+        .pnp-sheet { padding: 0 !important; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; }
+        .pnp-container { width: 85%; height: 85%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; }
+        .pnp-card { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #000; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2); }
+        
+        .pnp-card .tarot-shield { padding: 8px 2px; border-top-width: 1px; }
+        .pnp-card .tarot-num { font-size: 11px; margin-bottom: 2px; letter-spacing: 2px; }
+        .pnp-card .tarot-name { font-size: 13px; padding: 0 4px; line-height: 1.1; }
 
         .editable-image-container { position: relative; width: 100%; height: 100%; cursor: pointer; border-radius: inherit; }
-        .editable-image-container::after { content: '✎ Rigenera'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 10; backdrop-filter: blur(2px); border-radius: inherit; font-family: 'Inter', sans-serif; }
+        .editable-image-container::after { content: '✎ Rigenera Art'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1rem; opacity: 0; transition: opacity 0.2s; z-index: 20; backdrop-filter: blur(2px); border-radius: inherit; font-family: 'Inter', sans-serif; }
         .editable-image-container:hover::after { opacity: 1; }
         
-        .action-overlay { position: absolute; bottom: -40px; right: 10px; z-index: 100; transition: 0.3s; opacity: 0; display: flex; gap: 8px; }
-        .page-text:hover .action-overlay, .page-bleed:hover .action-overlay { bottom: 10px; opacity: 1; }
-        .btn-action { background: var(--primary-dark); color: var(--gold); border: 1px solid var(--gold); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 5px; }
-        .btn-action:hover { background: var(--gold); color: var(--primary-dark); }
+        .action-overlay { position: absolute; bottom: -50px; right: 10px; z-index: 100; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; display: flex; gap: 8px; }
+        .page-text:hover .action-overlay, .page-bleed:hover .action-overlay { bottom: 15px; opacity: 1; }
+        .btn-action { background: var(--primary-dark); color: var(--gold); border: 1px solid var(--gold); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.8); display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn-action:hover { background: var(--gold); color: var(--primary-dark); transform: translateY(-2px); }
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal.show { display: flex; }
@@ -119,7 +126,8 @@
             .editable-image-container::after { display: none !important; }
         }
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.z-10{z-index:10}.z-20{z-index:20}.col-span-2{grid-column:span 2 / span 2}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-4{margin-left:1rem}.mt-2{margin-top:0.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[2\.75\/4\.75\]{aspect-ratio:2.75/4.75}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-24{height:6rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-screen{height:100vh}.w-2{width:0.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-\[360px\]{width:360px}.w-full{width:100%}.max-w-\[200px\]{max-width:200px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.resize-none{resize:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-\[\#0f1219\]{--tw-border-opacity:1;border-color:rgb(15 18 25 / var(--tw-border-opacity, 1))}.border-\[\#1a1e29\]{--tw-border-opacity:1;border-color:rgb(26 30 41 / var(--tw-border-opacity, 1))}.border-\[\#d4af37\]\/30{border-color:rgb(212 175 55 / 0.3)}.border-\[\#d4af37\]\/50{border-color:rgb(212 175 55 / 0.5)}.border-red-900\/50{border-color:rgb(127 29 29 / 0.5)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.bg-\[\#0f1219\]{--tw-bg-opacity:1;background-color:rgb(15 18 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1e29\]{--tw-bg-opacity:1;background-color:rgb(26 30 41 / var(--tw-bg-opacity, 1))}.bg-\[\#d4af37\]{--tw-bg-opacity:1;background-color:rgb(212 175 55 / var(--tw-bg-opacity, 1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-red-900\/20{background-color:rgb(127 29 29 / 0.2)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-\[\#d4af37\]{--tw-gradient-from:#d4af37 var(--tw-gradient-from-position);--tw-gradient-to:rgb(212 175 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3e5ab\]{--tw-gradient-to:#f3e5ab var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-\[\#0f1219\]{--tw-text-opacity:1;color:rgb(15 18 25 / var(--tw-text-opacity, 1))}.text-\[\#d4af37\]{--tw-text-opacity:1;color:rgb(212 175 55 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.8\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.8);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(79\2c 70\2c 229\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(79,70,229,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.05\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.05);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-\[\#c5a028\]:hover{--tw-bg-opacity:1;background-color:rgb(197 160 40 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:bg-red-900\/40:hover{background-color:rgb(127 29 29 / 0.4)}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:from-\[\#c5a028\]:hover{--tw-gradient-from:#c5a028 var(--tw-gradient-from-position);--tw-gradient-to:rgb(197 160 40 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-\[\#d4af37\]:hover{--tw-gradient-to:#d4af37 var(--tw-gradient-to-position)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-\[\#d4af37\]:focus{--tw-border-opacity:1;border-color:rgb(212 175 55 / var(--tw-border-opacity, 1))}.disabled\:opacity-50:disabled{opacity:0.5}</style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.relative{position:relative}.z-10{z-index:10}.z-20{z-index:20}.col-span-2{grid-column:span 2 / span 2}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.ml-4{margin-left:1rem}.mt-2{margin-top:0.5rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[2\.75\/4\.75\]{aspect-ratio:2.75/4.75}.h-screen{height:100vh}.h-1\.5{height:0.375rem}.h-12{height:3rem}.h-2{height:0.5rem}.h-24{height:6rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.w-2{width:0.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-\[360px\]{width:360px}.w-full{width:100%}.max-w-\[200px\]{max-width:200px}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.resize-none{resize:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-\[\#0f1219\]{--tw-border-opacity:1;border-color:rgb(15 18 25 / var(--tw-border-opacity, 1))}.border-\[\#1a1e29\]{--tw-border-opacity:1;border-color:rgb(26 30 41 / var(--tw-border-opacity, 1))}.border-\[\#d4af37\]\/30{border-color:rgb(212 175 55 / 0.3)}.border-\[\#d4af37\]\/50{border-color:rgb(212 175 55 / 0.5)}.border-red-900\/50{border-color:rgb(127 29 29 / 0.5)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.bg-\[\#0f1219\]{--tw-bg-opacity:1;background-color:rgb(15 18 25 / var(--tw-bg-opacity, 1))}.bg-\[\#1a1e29\]{--tw-bg-opacity:1;background-color:rgb(26 30 41 / var(--tw-bg-opacity, 1))}.bg-\[\#d4af37\]{--tw-bg-opacity:1;background-color:rgb(212 175 55 / var(--tw-bg-opacity, 1))}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-red-900\/20{background-color:rgb(127 29 29 / 0.2)}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-\[\#d4af37\]{--tw-gradient-from:#d4af37 var(--tw-gradient-from-position);--tw-gradient-to:rgb(212 175 55 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-\[\#f3e5ab\]{--tw-gradient-to:#f3e5ab var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wider{letter-spacing:0.05em}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-\[\#0f1219\]{--tw-text-opacity:1;color:rgb(15 18 25 / var(--tw-text-opacity, 1))}.text-\[\#d4af37\]{--tw-text-opacity:1;color:rgb(212 175 55 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(212\2c 175\2c 55\2c 0\.8\)\]{--tw-shadow:0 0 10px rgba(212,175,55,0.8);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_10px_rgba\(79\2c 70\2c 229\2c 0\.4\)\]{--tw-shadow:0 0 10px rgba(79,70,229,0.4);--tw-shadow-colored:0 0 10px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.05\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.05);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_15px_rgba\(212\2c 175\2c 55\2c 0\.4\)\]{--tw-shadow:0 0 15px rgba(212,175,55,0.4);--tw-shadow-colored:0 0 15px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-\[\#c5a028\]:hover{--tw-bg-opacity:1;background-color:rgb(197 160 40 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:bg-red-900\/40:hover{background-color:rgb(127 29 29 / 0.4)}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:from-\[\#c5a028\]:hover{--tw-gradient-from:#c5a028 var(--tw-gradient-from-position);--tw-gradient-to:rgb(197 160 40 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-\[\#d4af37\]:hover{--tw-gradient-to:#d4af37 var(--tw-gradient-to-position)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-\[\#d4af37\]:focus{--tw-border-opacity:1;border-color:rgb(212 175 55 / var(--tw-border-opacity, 1))}.disabled\:opacity-50:disabled{opacity:0.5}</style></head>
+
 <body class="h-screen flex flex-col overflow-hidden text-slate-200">
 
     <header class="bg-[#0f1219] border-b border-[#1a1e29] p-4 flex justify-between items-center z-20 shrink-0 shadow-lg">
@@ -143,122 +151,111 @@
             <div class="p-5 overflow-y-auto flex-1 custom-scrollbar">
                 
                 <div class="mb-4">
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key (Opzionale nel Web)</label>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Gemini API Key</label>
                     <input type="password" id="apiKeyInput" class="w-full p-2 bg-[#1a1e29] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]" placeholder="Lascia vuoto per ambiente Immersive">
                 </div>
 
                 <div class="bg-[#1a1e29] rounded-lg p-4 mb-5 border border-[#d4af37]/30 shadow-[0_0_15px_rgba(212,175,55,0.05)]">
                     <h3 class="text-[#d4af37] font-bold mb-3 flex items-center gap-2 text-xs uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
-                        1. Forgia Cornice Maestra
+                        1. Forgia Texture Maestra
                     </h3>
                     <div class="mb-3">
                         <select id="frameStyle" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded text-xs text-slate-200 outline-none focus:border-[#d4af37]">
-                            <option value="Classic Golden Renaissance, highly ornate gold borders">Rinascimento Dorato</option>
-                            <option value="Dark Gothic, silver thorns and obsidian borders">Gotico Oscuro</option>
-                            <option value="Art Nouveau, elegant flowing floral borders">Art Nouveau</option>
-                            <option value="Celestial Astrological, stars and zodiac borders">Astrologico Celestiale</option>
+                            <option value="Classic Golden Renaissance, highly ornate gold symmetrical patterns">Rinascimento Dorato</option>
+                            <option value="Dark Gothic, silver thorns and obsidian symmetrical textures">Gotico Oscuro</option>
+                            <option value="Art Nouveau, elegant flowing floral symmetrical patterns">Art Nouveau</option>
+                            <option value="Celestial Astrological, stars and zodiac intricate patterns">Astrologico Celestiale</option>
                         </select>
                     </div>
-                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview">
-                        <span class="text-xs text-slate-500">Nessuna Cornice</span>
-                    </div>
+                    <div class="w-full aspect-[2.75/4.75] bg-[#0f1219] border border-dashed border-slate-600 rounded flex items-center justify-center mb-3 relative overflow-hidden" id="masterFramePreview"><img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/889f0f6d-3526-4b73-b800-312939227c30" style="width:100%; height:100%; object-fit:cover;"></div>
                     <button id="btnGenerateFrame" class="w-full bg-slate-700 hover:bg-slate-600 text-[#d4af37] font-bold py-2 rounded transition-all text-xs flex justify-center items-center gap-2 border border-[#d4af37]/50">
-                        <span id="btnFrameText">Evoca Nuova Cornice</span>
+                        <span id="btnFrameText" class="">Evoca Texture Sfondo</span>
                         <div id="btnFrameLoader" class="loader hidden"></div>
                     </button>
-                    <p class="text-[9px] text-slate-400 mt-2 text-center leading-tight">La cornice generata qui verrà applicata matematicamente a tutte le carte del mazzo per garantirne l'uniformità.</p>
+                    <p class="text-[9px] text-slate-400 mt-2 text-center leading-tight">L'IA genererà un pattern solido. Il motore CSS intaglierà la finestra per le carte.</p>
                 </div>
 
                 <div class="bg-[#1a1e29] rounded-lg p-5 mb-4 border border-slate-700/50">
                     <h3 class="text-slate-300 font-semibold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider" style="font-family: 'Cinzel', serif;">
-                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                         2. Tarot Settings
                     </h3>
-                    
                     <div class="mb-3">
                         <label class="block text-xs font-medium text-slate-400 mb-1">Argomento / Titolo Libro</label>
-                        <input type="text" id="bookTopic" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. I Tarocchi di Cristallo">
+                        <input type="text" id="bookTopic" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. The Crystal Tarot">
                     </div>
-
                     <div class="mb-3">
                         <label class="block text-xs font-medium text-slate-400 mb-1">Tema Lettura (Croce Celtica)</label>
                         <select id="readingTheme" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200">
-                            <option value="Generale">Significato Generale Universale</option>
-                            <option value="Amore e Relazioni">Focalizzato su Amore e Relazioni</option>
-                            <option value="Lavoro e Carriera">Focalizzato su Lavoro e Finanze</option>
-                            <option value="Salute e Benessere">Focalizzato su Salute e Benessere</option>
-                            <option value="Crescita Spirituale">Focalizzato su Crescita Spirituale</option>
+                            <option value="Universal Meaning">Significato Generale Universale</option>
+                            <option value="Love and Relationships">Focalizzato su Amore e Relazioni</option>
+                            <option value="Career and Wealth">Focalizzato su Lavoro e Finanze</option>
                         </select>
                     </div>
-
                     <div class="mb-3">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Stile Artistico IA (Es. Gatti, Manga, Manara)</label>
-                        <input type="text" id="visualSetting" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. 'Stile Acquerello, gatti neri'">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Stile Artistico IA (Es. Manga, Acquerello)</label>
+                        <input type="text" id="visualSetting" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-sm text-slate-200" placeholder="es. 'Watercolor style, black cats'">
                     </div>
-
                     <div class="mb-3">
                         <label class="block text-xs font-medium text-slate-400 mb-1">Lista Personalizzata (Opzionale)</label>
-                        <textarea id="customRecipeList" class="w-full h-12 p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-[11px] resize-none text-slate-200" placeholder="Lascia vuoto per i 22 Arcani Maggiori completi"></textarea>
+                        <textarea id="customRecipeList" class="w-full h-12 p-2 bg-[#0f1219] border border-slate-700 rounded focus:border-[#d4af37] outline-none text-[11px] resize-none text-slate-200" placeholder="Lascia vuoto per i 22 Arcani Maggiori"></textarea>
                     </div>
-
+                    
                     <div class="grid grid-cols-2 gap-2 mb-3">
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Lingua Target</label>
                             <select id="bookLanguage" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="Italiano" selected>Italiano</option>
-                                <option value="English (US)">English</option>
+                                <option value="English (US)" selected="">English (US)</option>
+                                <option value="Italiano">Italiano</option>
+                                <option value="Deutsch">Deutsch</option>
                                 <option value="Français">Français</option>
                                 <option value="Español">Español</option>
-                                <option value="Deutsch">Deutsch</option>
+                                <option value="日本語">日本語</option>
+                                <option value="Polski">Polski</option>
+                                <option value="Português">Português</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia Libro</label>
                             <select id="trimSize" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="6x9" selected>6 x 9 in. (Standard)</option>
+                                <option value="6x9" selected="">6 x 9 in. (Standard)</option>
                                 <option value="7x10">7 x 10 in. (Grande)</option>
                             </select>
                         </div>
                     </div>
-                    
                     <div class="mb-4">
                         <label class="block text-xs font-medium text-slate-400 mb-1">Tono Voce Video (TikTok)</label>
                         <select id="voiceTone" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
                             <option value="Mistico e Solenne">Mistico e Solenne</option>
                             <option value="Intimidatorio e Oscuro">Intimidatorio e Oscuro</option>
                             <option value="Dolce e Rassicurante">Dolce e Rassicurante</option>
-                            <option value="Ammiccante e Misterioso">Ammiccante e Misterioso</option>
-                            <option value="Perentorio e Severo">Perentorio e Severo</option>
                         </select>
                     </div>
                 </div>
+
+                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-2 disabled:opacity-50" style="font-family: 'Cinzel', serif;" disabled="">
+                    <span id="btnStartText" class="flex items-center gap-2 hidden">Forgia Grimorio Completo</span>
+                    <span id="btnStartLoader" class=""><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione...</span>
+                </button>
                 
-                <button id="btnStartAutoPilot" class="w-full bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] hover:from-[#c5a028] hover:to-[#d4af37] text-[#0f1219] font-bold py-3.5 rounded shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50" style="font-family: 'Cinzel', serif;">
-                    <span id="btnStartText" class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg> Forgia Grimorio Completo</span>
-                    <span id="btnStartLoader" class="hidden"><div class="loader border-[#0f1219] border-top-transparent"></div> Invocazione in corso...</span>
+                <button id="btnTranslate" class="w-full bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 mb-4 disabled:opacity-50 text-xs" disabled="">
+                    <span id="btnTranslateText" class="flex items-center gap-2">Traduci Testi (Mantieni Arte)</span>
+                    <span id="btnTranslateLoader" class="hidden"><div class="loader"></div></span>
                 </button>
 
                 <div class="grid grid-cols-2 gap-2 mb-4">
-                    <button id="btnSaveProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex flex-col justify-center items-center gap-1 text-[11px]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg> Salva Book
-                    </button>
-                    <button id="btnLoadProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all flex flex-col justify-center items-center gap-1 text-[11px]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg> Carica Book
-                    </button>
+                    <button id="btnSaveProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all text-[11px]">Salva Book</button>
+                    <button id="btnLoadProject" class="bg-[#1a1e29] hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold py-2.5 rounded transition-all text-[11px]">Carica Book</button>
                     <input type="file" id="fileLoadProject" accept=".kdp" class="hidden">
-                    <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded transition-all flex justify-center items-center gap-2 text-xs">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Azzera Progetto
-                    </button>
+                    <button id="btnResetProject" class="col-span-2 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 font-bold py-2.5 rounded transition-all text-xs">Azzera Progetto</button>
                 </div>
 
-                <div id="progressSection" class="flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner hidden">
+                <div id="progressSection" class="flex-col gap-4 bg-[#0f1219] p-4 rounded border border-[#1a1e29] shadow-inner">
                     <div class="flex justify-between text-xs mb-1 text-slate-400">
-                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Elaborazione...</span>
-                        <span id="progressCount" class="font-mono text-[10px]">0/0</span>
+                        <span id="progressStatus" class="truncate max-w-[200px] font-medium text-[#d4af37]">Illustrazione: I - The Magician...</span>
+                        <span id="progressCount" class="font-mono text-[10px]">2/22</span>
                     </div>
                     <div class="w-full bg-[#1a1e29] rounded-full h-1.5 overflow-hidden">
-                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 0%;"></div>
+                        <div id="progressBar" class="bg-[#d4af37] h-1.5 transition-all duration-300 shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 4.54545%;"></div>
                     </div>
                 </div>
             </div>
@@ -267,23 +264,122 @@
         <div id="editorContainer">
             <div id="toolbar">
                 <div class="toolbar-group">
-                    <button class="tool-btn" title="Riduci Font" onclick="adjustFontSize(-1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg></button>
-                    <button class="tool-btn" title="Aumenta Font" onclick="adjustFontSize(1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
+                    <button class="tool-btn" title="Riduci Font" onclick="adjustFontSize(-1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg></button>
+                    <button class="tool-btn" title="Aumenta Font" onclick="adjustFontSize(1)"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></button>
                 </div>
                 <div class="toolbar-group">
                     <button class="tool-btn" title="Grassetto" onclick="document.execCommand('bold', false, null)"><span class="font-bold text-sm">B</span></button>
                     <button class="tool-btn" title="Corsivo" onclick="document.execCommand('italic', false, null)"><span class="italic text-sm font-serif">I</span></button>
                 </div>
-                <div class="text-xs text-slate-400 font-medium ml-4">Evidenzia il testo per formattare. Clicca un'immagine per modificarla.</div>
+                <div class="text-xs text-slate-400 font-medium ml-4">Evidenzia il testo per formattare. Clicca un'illustrazione per rigenerarla.</div>
             </div>
 
             <div id="editorWorkspace">
                 <div id="bookPage" contenteditable="true" spellcheck="false">
-                    <div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder">
-                        <h1 class="doc-title" style="color: var(--primary-dark); font-size: calc(3.5rem * var(--font-scale)); font-weight: 700; border-bottom: 2px solid var(--gold); padding-bottom: 20px;">Tarot Pro Studio</h1>
-                        <p style="font-family: 'Inter', sans-serif; color: #64748b; font-size: calc(12pt * var(--font-scale)); margin-top: 20px; font-style: italic; text-align: center;">Forgia la Cornice Maestra a sinistra per iniziare il Viaggio.</p>
+                <div class="page-text no-page-num" style="padding: 0;">
+                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
+                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">Premium Edition</div>
+                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">The Tarot</h1>
+                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
+                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">Craft, Cut and&nbsp;<span style="color: var(--primary-dark); font-size: calc(14pt * var(--font-scale));">Read&nbsp; Your Esoteric Deck</span></p>
                     </div>
                 </div>
+            
+                        <div class="page-bleed recipe-block no-page-num" data-idx="0">
+                            <div class="tarot-card-container">
+                                
+                                <img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/889f0f6d-3526-4b73-b800-312939227c30" class="tarot-master-bg">
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-art-window"><div class="editable-image-container" data-idx="0" data-prompt="A beautiful full-bleed tarot illustration of The Fool standing on a mountain peak under a golden sun. A young traveler looks toward the sky, holding a white rose and a staff, with a small white dog at their heels. ZERO text. ZERO numbers. Pure artwork. Style: Mystical realism." onclick="openRegenModal(this)"><img src="blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/2a4cb762-f3b0-4217-be7f-d8446aff1d92" class="tarot-artwork"></div></div>
+                                <div class="tarot-shield">
+                                    <h3 class="tarot-num">0</h3>
+                                    <h2 class="tarot-name">The Fool</h2>
+                                </div>
+                            </div>
+                            <div class="action-overlay">
+                                <button class="btn-action" onclick="openTikTokStudio('The Fool', '0', 'blob:https://545vhh5xxctjbhi6ahxc1xbdk1o08ezzmpfx3scniqkfsign8v-h990329232.scf.usercontent.goog/2a4cb762-f3b0-4217-be7f-d8446aff1d92')">🎬 Crea Video TikTok</button>
+                            </div>
+                        </div>
+                    
+                        <div class="page-text recipe-block" data-idx="0">
+                            <div class="symbol-page">
+                                <h1 class="doc-h1">Mystical Symbolism</h1>
+                                <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
+                                <p class="symbol-intro"><span class="drop-cap">T</span>he Fool represents the infinite potential of a soul embarking on a new cosmic journey. It signifies the leap of faith required to embrace the unknown with a pure and open heart.</p>
+                                <div class="symbol-grid">
+                                    
+                                        <div class="symbol-item">
+                                            <div class="symbol-title">The White Rose</div>
+                                            <p class="symbol-desc">Represents purity of intention and the innocence of the spirit.</p>
+                                        </div>
+                                    
+                                        <div class="symbol-item">
+                                            <div class="symbol-title">The Cliff's Edge</div>
+                                            <p class="symbol-desc">Symbolizes the precipice between the physical world and the boundless spiritual realm.</p>
+                                        </div>
+                                    
+                                        <div class="symbol-item">
+                                            <div class="symbol-title">The Knapsack</div>
+                                            <p class="symbol-desc">Contains the tools and lessons of previous incarnations, yet to be unpacked.</p>
+                                        </div>
+                                    
+                                        <div class="symbol-item">
+                                            <div class="symbol-title">The Sun</div>
+                                            <p class="symbol-desc">Radiates divine guidance and the optimism of a fresh beginning.</p>
+                                        </div>
+                                    
+                                </div>
+                                <div class="numerology-box">
+                                    <div class="numerology-title">Numerology &amp; Color</div>
+                                    <p class="numerology-text">The number zero symbolizes the void, the egg of the universe, and the circle of eternal return.</p>
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="page-text recipe-block" data-idx="0">
+                            <div class="oracle-wrapper">
+                                <h1 class="doc-h1">Oracle Dynamics</h1>
+                                <div style="margin-bottom: 20px;"></div>
+                                
+                                    <div class="reading-slot">
+                                        <div class="reading-content">
+                                            <h3 class="reading-archetype">Origin &amp; Roots</h3>
+                                            <span class="reading-position">Past</span>
+                                            <p class="reading-text">You recently stepped away from old structures to embrace total freedom. This foundation of innocence allowed you to shed heavy burdens from your history.</p>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="reading-slot">
+                                        <div class="reading-content">
+                                            <h3 class="reading-archetype">Focus &amp; Manifestation</h3>
+                                            <span class="reading-position">Present</span>
+                                            <p class="reading-text">A significant opportunity for a fresh start is presenting itself right now. Trust your intuition and take the leap without overthinking the consequences.</p>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="reading-slot">
+                                        <div class="reading-content">
+                                            <h3 class="reading-archetype">Projection &amp; Destiny</h3>
+                                            <span class="reading-position">Future</span>
+                                            <p class="reading-text">You are heading toward a period of profound personal discovery and spiritual awakening. Your path will lead to experiences that expand your consciousness beyond current limits.</p>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="reading-slot">
+                                        <div class="reading-content">
+                                            <h3 class="reading-archetype">Shadow &amp; Crossroads</h3>
+                                            <span class="reading-position">Obstacle</span>
+                                            <p class="reading-text">Recklessness or a refusal to see reality might lead to a painful fall. Blind optimism becomes a hindrance if you ignore the practical warnings around you.</p>
+                                        </div>
+                                    </div>
+                                
+                                <div class="mantra-box">
+                                    <span class="mantra-ornament">✦</span>
+                                    <p class="mantra-text">"I trust the universe and step boldly into the unknown."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -291,12 +387,12 @@
     <div id="regenModal" class="modal">
         <div class="modal-content">
             <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">✎ Modifica Illustrazione</h2>
-            <p class="text-xs text-slate-400">Aggiungi istruzioni magiche (es. "aggiungi un gatto nero") o lascia vuoto per rimpiazzo casuale.</p>
+            <p class="text-xs text-slate-400">Aggiungi istruzioni (es. "aggiungi un lupo") o lascia vuoto per rimpiazzo casuale.</p>
             <textarea id="regenPrompt" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none"></textarea>
             <div class="flex justify-end gap-3 mt-2">
                 <button id="closeRegenModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Annulla</button>
                 <button id="btnConfirmRegen" class="bg-[#d4af37] hover:bg-[#c5a028] text-[#0f1219] font-bold py-2 px-6 rounded flex items-center gap-2 shadow text-sm">
-                    <span id="btnRegenText">Applica</span><div id="btnRegenLoader" class="loader hidden border-[#0f1219] border-top-transparent"></div>
+                    <span id="btnRegenText">Evoca Nuova Visione</span><div id="btnRegenLoader" class="loader hidden border-[#0f1219] border-top-transparent"></div>
                 </button>
             </div>
         </div>
@@ -305,16 +401,12 @@
     <div id="videoModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <h2 class="text-lg font-serif text-white flex items-center gap-2" style="font-family: 'Cinzel', serif;">🎬 TikTok Video Studio Pro</h2>
-            <p class="text-xs text-slate-400">Copia questo prompt e incollalo su Luma, Runway o Kling AI assieme alla foto della carta per animarla in formato verticale.</p>
-            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly></textarea>
-            
-            <p class="text-xs text-slate-400 mt-2">Script Vocale generato (Tono: <span id="videoToneLabel" class="text-white font-bold"></span>)</p>
-            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly></textarea>
-            
+            <p class="text-xs text-slate-400">Copia questo prompt in Luma o Runway Gen3 assieme all'immagine esportata della carta.</p>
+            <textarea id="videoPromptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-[11px] text-emerald-400 outline-none resize-none font-mono" readonly=""></textarea>
+            <p class="text-xs text-slate-400 mt-2">Script Vocale (Tono: <span id="videoToneLabel" class="text-white font-bold"></span>)</p>
+            <textarea id="videoScriptCopy" class="w-full h-24 p-3 bg-[#0f1219] border border-slate-700 rounded text-sm text-slate-200 outline-none resize-none" readonly=""></textarea>
             <div class="flex justify-between items-center mt-2">
-                <button id="btnPlayTTS" class="text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Ascolta Voce
-                </button>
+                <button id="btnPlayTTS" class="text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded text-sm flex items-center gap-2"> Ascolta Voce </button>
                 <button id="closeVideoModal" class="px-4 py-2 text-slate-400 hover:text-white transition text-sm">Chiudi Studio</button>
             </div>
         </div>
@@ -323,7 +415,7 @@
     <div id="resetConfirmModal" class="modal">
         <div class="modal-content" style="max-width: 400px; text-align: center; border-color: #7f1d1d;">
             <h2 class="text-xl font-serif text-red-400 mb-2 flex justify-center items-center gap-2" style="font-family: 'Cinzel', serif;">Attenzione!</h2>
-            <p class="text-sm text-slate-300 mb-6">Sei sicuro di voler azzerare l'intero progetto? Tutte le carte, le immagini e le modifiche non salvate andranno perse.</p>
+            <p class="text-sm text-slate-300 mb-6">Vuoi azzerare l'intero progetto? Tutte le carte generate andranno perse.</p>
             <div class="flex justify-center gap-3">
                 <button id="btnCancelReset" class="px-5 py-2.5 text-slate-400 hover:text-white bg-slate-800 rounded transition text-sm">Annulla</button>
                 <button id="btnConfirmReset" class="bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-5 rounded shadow flex items-center gap-2 text-sm">Azzera Tutto</button>
@@ -336,6 +428,7 @@
     <script>
         const DOM = {
             btnStart: document.getElementById('btnStartAutoPilot'), btnText: document.getElementById('btnStartText'), btnLoader: document.getElementById('btnStartLoader'),
+            btnTranslate: document.getElementById('btnTranslate'), btnTranslateText: document.getElementById('btnTranslateText'), btnTranslateLoader: document.getElementById('btnTranslateLoader'),
             topicInput: document.getElementById('bookTopic'), readingTheme: document.getElementById('readingTheme'), languageInput: document.getElementById('bookLanguage'), trimSize: document.getElementById('trimSize'),
             customList: document.getElementById('customRecipeList'), visualSetting: document.getElementById('visualSetting'), voiceTone: document.getElementById('voiceTone'),
             bookPage: document.getElementById('bookPage'), apiKeyInput: document.getElementById('apiKeyInput'),
@@ -353,15 +446,24 @@
         let masterFrameBase64 = null;
         let generatedCards = [];
         let globalTocEntries = [];
-        let imageToRegenerate = null, basePromptForRegen = "";
+        let imageToRegenerate = null, basePromptForRegen = "", currentEditingIdx = null;
 
-        const defaultArcana = ["0 - Il Matto", "I - Il Bagatto", "II - La Papessa", "III - L'Imperatrice", "IV - L'Imperatore", "V - Il Papa", "VI - Gli Amanti", "VII - Il Carro", "VIII - La Forza", "IX - L'Eremita", "X - La Ruota della Fortuna", "XI - La Giustizia", "XII - L'Appeso", "XIII - La Morte", "XIV - La Temperanza", "XV - Il Diavolo", "XVI - La Torre", "XVII - La Stella", "XVIII - La Luna", "XIX - Il Sole", "XX - Il Giudizio", "XXI - Il Mondo"];
+        const defaultArcana = ["0 - The Fool", "I - The Magician", "II - The High Priestess", "III - The Empress", "IV - The Emperor", "V - The Hierophant", "VI - The Lovers", "VII - The Chariot", "VIII - Strength", "IX - The Hermit", "X - Wheel of Fortune", "XI - Justice", "XII - The Hanged Man", "XIII - Death", "XIV - Temperance", "XV - The Devil", "XVI - The Tower", "XVII - The Star", "XVIII - The Moon", "XIX - The Sun", "XX - Judgement", "XXI - The World"];
+
+        const dictUI = {
+            "English (US)": { ed: "Premium Edition", sub: "Craft, Read and Cut Your Esoteric Deck", sym: "Mystical Symbolism", ora: "Oracle Dynamics", pnp: "Print & Play (Extraction)", tutTitle: "Deck Extraction", tut: "Follow these steps to transform the pages into a physical deck.", step1: "Extract", step1Desc: "Carefully detach the Print & Play pages from the binding.", step2: "Laminate", step2Desc: "Apply clear adhesive film to BOTH sides of the extracted sheets to protect them.", step3: "Cut", step3Desc: "Cut along the margins. The cards will be flexible and perfectly aligned.", toc: "Table of Contents" },
+            "Italiano": { ed: "Edizione Premium", sub: "Crea, Leggi e Ritaglia il tuo Mazzo Esoterico", sym: "Simbolismo Mistico", ora: "Dinamiche dell'Oracolo", pnp: "Print & Play (Ritagliare)", tutTitle: "Estrazione del Mazzo", tut: "Segui questi passaggi per trasformare le pagine nel tuo grimorio fisico.", step1: "Estrai", step1Desc: "Stacca accuratamente i fogli Print & Play dalla rilegatura.", step2: "Plastifica", step2Desc: "Applica pellicola trasparente adesiva su AMBO I LATI dei fogli per proteggerli.", step3: "Ritaglia", step3Desc: "Ritaglia sui bordi delle carte. Fronte e retro combaceranno perfettamente.", toc: "Indice dei Contenuti" },
+            "Deutsch": { ed: "Premium-Ausgabe", sub: "Erstelle, Lese und Schneide dein Esoterisches Deck", sym: "Mystische Symbolik", ora: "Orakel-Dynamik", pnp: "Print & Play (Ausschneiden)", tutTitle: "Deck-Herstellung", tut: "Befolge diese Schritte, um die Seiten in ein echtes Deck zu verwandeln.", step1: "Entfernen", step1Desc: "Löse die Seiten vorsichtig aus der Bindung.", step2: "Laminieren", step2Desc: "Trage auf BEIDEN Seiten eine durchsichtige Klebefolie auf.", step3: "Schneiden", step3Desc: "Schneide entlang der Kanten. Die Karten sind perfekt ausgerichtet.", toc: "Inhaltsverzeichnis" },
+            "Français": { ed: "Édition Premium", sub: "Créez, Lisez et Découpez votre Jeu Ésotérique", sym: "Symbolisme Mystique", ora: "Dynamique de l'Oracle", pnp: "Print & Play (Découper)", tutTitle: "Création du Jeu", tut: "Suivez ces étapes pour extraire les cartes.", step1: "Extraire", step1Desc: "Détachez soigneusement les pages de la reliure.", step2: "Plastifier", step2Desc: "Appliquez un film adhésif transparent des DEUX côtés des feuilles.", step3: "Couper", step3Desc: "Coupez le long des marges. Le recto et le verso s'aligneront parfaitement.", toc: "Table des Matières" },
+            "Español": { ed: "Edición Premium", sub: "Crea, Lee y Recorta tu Mazo Esotérico", sym: "Simbolismo Místico", ora: "Dinámica del Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extracción del Mazo", tut: "Sigue estos pasos para transformar las páginas en tu mazo físico.", step1: "Extraer", step1Desc: "Desprende las hojas con cuidado de la encuadernación.", step2: "Plastificar", step2Desc: "Aplica película adhesiva transparente en AMBOS lados.", step3: "Recortar", step3Desc: "Recorta por los bordes. El anverso y reverso coincidirán perfectamente.", toc: "Índice de Contenidos" },
+            "日本語": { ed: "プレミアム版", sub: "あなたの秘教的なデッキを作成、解釈、切り取り", sym: "神秘的な象徴主義", ora: "オラクルの力学", pnp: "プリント＆プレイ", tutTitle: "デッキの抽出", tut: "これらの手順に従って、ページを実際のデッキに変えてください。", step1: "切り離す", step1Desc: "ページを綴じ込みから慎重に切り離します。", step2: "ラミネート", step2Desc: "シートの両面に透明な粘着フィルムを貼ります。", step3: "カット", step3Desc: "余白に沿って切ります。表と裏が完全に一致します。", toc: "目次" },
+            "Polski": { ed: "Edycja Premium", sub: "Stwórz, Czytaj i Wytnij Swój Ezoteryczny Talię", sym: "Mistyczna Symbolika", ora: "Dynamika Wyroczni", pnp: "Print & Play (Wycięcie)", tutTitle: "Wyodrębnianie Talii", tut: "Wykonaj te kroki, aby przekształcić strony w fizyczną talię.", step1: "Wytnij", step1Desc: "Ostrożnie oderwij arkusze od oprawy.", step2: "Laminuj", step2Desc: "Nałóż przezroczystą folię samoprzylepną z OBU stron arkuszy.", step3: "Tnij", step3Desc: "Tnij wzdłuż krawędzi. Przód i tył będą idealnie wyrównane.", toc: "Spis Treści" },
+            "Português": { ed: "Edição Premium", sub: "Crie, Leia e Recorte Seu Baralho Esotérico", sym: "Simbolismo Místico", ora: "Dinâmica do Oráculo", pnp: "Print & Play (Recortar)", tutTitle: "Extração do Baralho", tut: "Siga estes passos para extrair suas cartas.", step1: "Extrair", step1Desc: "Destaque cuidadosamente as folhas da encadernação.", step2: "Plastificar", step2Desc: "Aplique película adesiva transparente de AMBOS os lados das folhas.", step3: "Recortar", step3Desc: "Corte ao longo das margens. A frente e o verso se alinharão perfeitamente.", toc: "Índice" }
+        };
 
         function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            let icon = type === 'success' ? '✔' : type === 'error' ? '✖' : 'ℹ';
-            toast.innerHTML = `<span style="font-weight:bold; font-size: 16px;">${icon}</span> <span>${message}</span>`;
+            const toast = document.createElement('div'); toast.className = `toast ${type}`;
+            toast.innerHTML = `<span style="font-weight:bold; font-size: 16px;">${type === 'success' ? '✔' : type === 'error' ? '✖' : 'ℹ'}</span> <span>${message}</span>`;
             DOM.toastContainer.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 5000);
@@ -372,7 +474,6 @@
             if(percent !== null) DOM.progressBar.style.width = `${percent}%`;
             if(current !== null && total !== null) DOM.progressCount.textContent = `${current}/${total}`;
         }
-        
         const delay = ms => new Promise(res => setTimeout(res, ms));
 
         function extractJSON(text) {
@@ -385,25 +486,22 @@
                     if (end !== -1) return JSON.parse(text.substring(start, end + 1));
                 }
                 return JSON.parse(text); 
-            } catch(e) { throw new Error("JSON format error from AI."); }
+            } catch(e) { throw new Error("Errore formattazione JSON dall'IA."); }
         }
 
-        const fetchWithRetry = async (urlGenerator, optionsGenerator, maxRetries = 3) => {
-            for (let retries = 0; retries < maxRetries; retries++) {
+        const fetchWithRetry = async (urlGen, optGen, maxRetries = 3) => {
+            for (let i = 0; i < maxRetries; i++) {
                 try {
-                    const response = await fetch(urlGenerator(), optionsGenerator());
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response;
-                } catch (error) {
-                    if (retries === maxRetries - 1) throw error;
-                    await delay(3000); 
-                }
+                    const res = await fetch(urlGen(), optGen());
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res;
+                } catch (e) { if (i === maxRetries - 1) throw e; await delay(3000); }
             }
         };
 
         async function callGemini(prompt, systemInstruction) {
-            const urlGen = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
-            const optGen = () => ({
+            const url = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getAPIKey()}`;
+            const opt = () => ({
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -411,14 +509,14 @@
                     systemInstruction: { parts: [{ text: systemInstruction }] }
                 })
             });
-            const response = await fetchWithRetry(urlGen, optGen);
-            const data = await response.json();
+            const res = await fetchWithRetry(url, opt);
+            const data = await res.json();
             return extractJSON(data.candidates[0].content.parts[0].text);
         }
 
         async function callGeminiImage(prompt, aspect = '3:4', maxWidth = 1000) {
-            const urlGen = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
-            const optGen = () => ({
+            const url = () => `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${getAPIKey()}`;
+            const opt = () => ({
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     contents: [{ role: 'user', parts: [{ text: prompt }] }], 
@@ -426,11 +524,11 @@
                 })
             });
             try {
-                const response = await fetchWithRetry(urlGen, optGen);
-                const data = await response.json();
+                const res = await fetchWithRetry(url, opt);
+                const data = await res.json();
                 const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
                 if (part) return await processImageToBlobUrl(`data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, maxWidth, 0.9); 
-            } catch(e) { console.warn("Image gen failed:", e); }
+            } catch(e) { console.warn("Image gen fail:", e); }
             return null;
         }
 
@@ -453,9 +551,7 @@
         function applyLayoutEngine() {
             const val = DOM.trimSize.value;
             const [wStr, hStr] = val.split('x');
-            const widthIn = parseFloat(wStr); 
-            const heightIn = parseFloat(hStr);
-
+            const widthIn = parseFloat(wStr); const heightIn = parseFloat(hStr);
             let fontScale = (widthIn <= 6) ? 0.85 : 1.0;
             document.documentElement.style.setProperty('--page-width-px', `${widthIn * 96}px`);
             document.documentElement.style.setProperty('--page-height-px', `${heightIn * 96}px`);
@@ -466,26 +562,35 @@
         }
         DOM.trimSize.addEventListener('change', applyLayoutEngine);
 
-        function wrapImageForEdit(imgHtml, originalPrompt) {
-            return `<div class="editable-image-container" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
+        function wrapImageForEdit(imgHtml, originalPrompt, idx) {
+            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
         }
 
         window.openRegenModal = function(container) {
             imageToRegenerate = container.querySelector('img.tarot-artwork') || container.querySelector('img');
             basePromptForRegen = container.dataset.prompt;
+            currentEditingIdx = container.dataset.idx;
             DOM.regenPrompt.value = "";
             DOM.regenModal.classList.add('show');
         }
         DOM.closeRegenModal.addEventListener('click', () => DOM.regenModal.classList.remove('show'));
         
         DOM.btnConfirmRegen.addEventListener('click', async () => {
-            const modifier = DOM.regenPrompt.value.trim();
-            const finalPrompt = modifier ? `${basePromptForRegen}. User specific modification: ${modifier}` : basePromptForRegen;
+            const mod = DOM.regenPrompt.value.trim();
+            const finalPrompt = mod ? `${basePromptForRegen}. User specific modification: ${mod}` : basePromptForRegen;
             DOM.btnRegenText.classList.add('hidden'); DOM.btnRegenLoader.classList.remove('hidden'); DOM.btnConfirmRegen.disabled = true;
             try {
                 const aspect = imageToRegenerate.classList.contains('tarot-artwork') || imageToRegenerate.parentElement.parentElement.classList.contains('page-bleed') ? '9:16' : '3:4';
                 const newImgUrl = await callGeminiImage(finalPrompt, aspect, 1500);
-                if(newImgUrl) { imageToRegenerate.src = newImgUrl; showToast("Immagine rigenerata!", "success"); }
+                if(newImgUrl) { 
+                    imageToRegenerate.src = newImgUrl; 
+                    if(currentEditingIdx !== null && generatedCards[currentEditingIdx]) {
+                        generatedCards[currentEditingIdx].image = newImgUrl;
+                        const pnpImg = document.getElementById(`pnp-img-${currentEditingIdx}`);
+                        if(pnpImg) pnpImg.src = newImgUrl;
+                    }
+                    showToast("Immagine rigenerata ovunque!", "success"); 
+                }
             } catch(e) { showToast(e.message, "error"); } finally {
                 DOM.btnRegenText.classList.remove('hidden'); DOM.btnRegenLoader.classList.add('hidden'); DOM.btnConfirmRegen.disabled = false;
                 DOM.regenModal.classList.remove('show');
@@ -496,35 +601,65 @@
             DOM.btnGenerateFrame.disabled = true; DOM.btnFrameText.classList.add('hidden'); DOM.btnFrameLoader.classList.remove('hidden');
             try {
                 const style = DOM.frameStyle.value;
-                const prompt = `A perfect, perfectly symmetrical, highly ornate rectangular border frame for a Tarot card. Style: ${style}. The absolutely central area MUST be pure, stark, solid 100% white (#FFFFFF), empty, with no textures inside the middle. The intricate borders should be on the outer edges only. Perfect 9:16 ratio. White background inside.`;
+                const prompt = `A flawless, seamless, symmetrical, highly detailed, very ornate esoteric background texture and pattern. Perfect for the back of a luxury Tarot card or a solid background frame. Style: ${style}. Rich, premium, magical, intricate details covering the whole image evenly. NO text, NO empty spaces in the middle, full solid texture.`;
                 const frameUrl = await callGeminiImage(prompt, '9:16', 1500);
                 if(frameUrl) {
                     masterFrameBase64 = frameUrl;
                     DOM.masterFramePreview.innerHTML = `<img src="${frameUrl}" style="width:100%; height:100%; object-fit:cover;">`;
-                    showToast("Cornice Maestra forgiata con successo!", "success");
+                    showToast("Texture Maestra forgiata! Sarà applicata a tutte le carte (Fronte e Retro).", "success");
                 }
-            } catch(e) { showToast("Errore cornice: " + e.message, "error"); } finally {
+            } catch(e) { showToast("Errore Texture: " + e.message, "error"); } finally {
                 DOM.btnGenerateFrame.disabled = false; DOM.btnFrameText.classList.remove('hidden'); DOM.btnFrameLoader.classList.add('hidden');
             }
         });
 
-        DOM.btnStart.addEventListener('click', async () => {
-            if(!masterFrameBase64) return showToast("Devi prima FORGIARE LA CORNICE MAESTRA (Step 1) a sinistra.", "warning");
+        DOM.btnStart.addEventListener('click', () => generateBookLogic(false));
+        DOM.btnTranslate.addEventListener('click', () => generateBookLogic(true));
+
+        async function generateBookLogic(isTranslation = false) {
+            if(!masterFrameBase64) return showToast("Devi prima FORGIARE LA TEXTURE MAESTRA (Step 1).", "warning");
+            if(isTranslation && generatedCards.length === 0) return showToast("Genera prima il libro per poterlo tradurre.", "warning");
             
             const customListStr = DOM.customList.value.trim();
-            const arcanaList = customListStr ? customListStr.split(',').map(s => s.trim()).filter(s => s) : defaultArcana;
             const lang = DOM.languageInput.value;
             const visualSetting = DOM.visualSetting.value.trim();
             const readingTheme = DOM.readingTheme.value;
             
-            DOM.btnStart.disabled = true; DOM.btnText.classList.add('hidden'); DOM.btnLoader.classList.remove('hidden');
-            DOM.progressSection.classList.remove('hidden');
-            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title">${DOM.topicInput.value || "I Tarocchi"}</h1></div>`; 
+            let listToProcess = [];
+            if (isTranslation) {
+                listToProcess = [...generatedCards];
+            } else {
+                let arcanaList = customListStr ? customListStr.split(',').map(s => s.trim()).filter(s => s) : defaultArcana;
+                listToProcess = arcanaList.map(name => ({ baseName: name, image: null }));
+            }
             
-            generatedCards = []; globalTocEntries = []; let currentPhysicalPage = 1; 
+            DOM.btnStart.disabled = true; DOM.btnTranslate.disabled = true;
+            if(isTranslation) { DOM.btnTranslateText.classList.add('hidden'); DOM.btnTranslateLoader.classList.remove('hidden'); }
+            else { DOM.btnText.classList.add('hidden'); DOM.btnLoader.classList.remove('hidden'); }
+            
+            DOM.progressSection.classList.remove('hidden');
+            
+            const t = dictUI[lang] || dictUI["English (US)"];
+            const rawTitle = DOM.topicInput.value.trim() || "The Tarot";
+            
+            DOM.bookPage.innerHTML = `
+                <div class="page-text no-page-num" style="padding: 0;">
+                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
+                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">${t.ed}</div>
+                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">${rawTitle}</h1>
+                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
+                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(14pt * var(--font-scale)); font-style: italic; text-align: center;">${t.sub}</p>
+                    </div>
+                </div>
+            `;
+            
+            let tempGeneratedCards = [];
+            globalTocEntries = []; 
+            let currentPhysicalPage = 1; 
+            let currentLogicalPage = 1;
 
             const sysBase = `You are a Master Tarot Reader and Esoteric Publisher writing a premium book in ${lang.toUpperCase()}.
-CRITICAL: ALL text must be strictly in ${lang.toUpperCase()}.
+CRITICAL: ALL text (including keys) must be strictly translated to ${lang.toUpperCase()}.
 CRITICAL FORMATTING: Keep "intro" to exactly 2 sentences. "symbols" descriptions MUST be STRICTLY UNDER 20 WORDS each. "readings" text MUST be exactly 2 short sentences. "mantra" is a short affirmation in quotes.
 Interpret the card specifically through the lens of: "${readingTheme}".
 Output valid JSON:
@@ -532,40 +667,43 @@ Output valid JSON:
   "title": "Translated Card Name",
   "number": "Roman Numeral (e.g., 0, I, II, XXI)",
   "intro": "2 sentences introduction.",
-  "symbols": [{"name":"Symbol 1", "desc":"Short desc"}, {"name":"Symbol 2", "desc":"Short desc"}, {"name":"Symbol 3", "desc":"Short desc"}, {"name":"Symbol 4", "desc":"Short desc"}],
+  "symbols": [{"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}],
   "numerology": "1 sentence on numerology/color.",
   "readings": [
-    {"archetype":"Origine & Radici", "position":"Il Passato", "text":"..."},
-    {"archetype":"Fulcro & Manifestazione", "position":"Il Presente", "text":"..."},
-    {"archetype":"Proiezione & Destino", "position":"Il Futuro", "text":"..."},
-    {"archetype":"L'Ombra & L'Incrocio", "position":"L'Ostacolo", "text":"..."}
+    {"archetype":"Translated term for 'Origin & Roots'", "position":"Translated term for 'Past'", "text":"..."},
+    {"archetype":"Translated term for 'Focus & Manifestation'", "position":"Translated term for 'Present'", "text":"..."},
+    {"archetype":"Translated term for 'Projection & Destiny'", "position":"Translated term for 'Future'", "text":"..."},
+    {"archetype":"Translated term for 'Shadow & Crossroads'", "position":"Translated term for 'Obstacle'", "text":"..."}
   ],
   "mantra": "Affirmation quote",
   "visualPrompt": "ENGLISH visual prompt. A beautiful full-bleed tarot illustration of [Card]. ZERO text. ZERO numbers. Pure artwork. Style: ${visualSetting || 'Mystical realism'}."
 }`;
 
             try {
-                for(let i = 0; i < arcanaList.length; i++) {
-                    const cardName = arcanaList[i];
-                    updateStatus(`Divinazione: ${cardName}...`, (i/arcanaList.length)*100, i+1, arcanaList.length);
+                for(let i = 0; i < listToProcess.length; i++) {
+                    const item = listToProcess[i];
+                    updateStatus(`${isTranslation ? 'Traduzione' : 'Divinazione'}: ${item.baseName}...`, (i/listToProcess.length)*100, i+1, listToProcess.length);
                     
-                    const cardData = await callGemini(`Analyze the Tarot card: ${cardName}. Lens: ${readingTheme}.`, sysBase);
+                    const cardData = await callGemini(`Analyze the Tarot card: ${item.baseName}. Lens: ${readingTheme}. Language: ${lang.toUpperCase()}.`, sysBase);
 
-                    // Generazione Arte (Full Bleed)
-                    updateStatus(`Illustrazione: ${cardName}...`, null, i+1, arcanaList.length);
-                    const artPrompt = `${cardData.visualPrompt}. NO TEXT. NO NUMBERS. Pure art.`;
-                    const imgArt = await callGeminiImage(artPrompt, '9:16', 1500);
-                    const finalImg = imgArt || `https://placehold.co/900x1600/1a1e29/d4af37?text=${encodeURIComponent(cardName)}`;
+                    let finalImg = item.image;
+                    if (!finalImg) {
+                        updateStatus(`Illustrazione: ${item.baseName}...`, null, i+1, listToProcess.length);
+                        const artPrompt = `${cardData.visualPrompt}. NO TEXT. NO NUMBERS. Pure art.`;
+                        const imgArt = await callGeminiImage(artPrompt, '9:16', 1500);
+                        finalImg = imgArt || `https://placehold.co/900x1600/1a1e29/d4af37?text=${encodeURIComponent(item.baseName)}`;
+                    }
                     
-                    generatedCards.push({ title: cardData.title, number: cardData.number, image: finalImg });
+                    tempGeneratedCards.push({ title: cardData.title, number: cardData.number, image: finalImg, baseName: item.baseName });
 
-                    // Pagina 1: La Carta
                     currentPhysicalPage++;
                     DOM.bookPage.insertAdjacentHTML('beforeend', `
-                        <div class="page-bleed recipe-block" data-idx="${i}">
+                        <div class="page-bleed recipe-block no-page-num" data-idx="${i}">
                             <div class="tarot-card-container">
-                                ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, artPrompt)}
-                                <img src="${masterFrameBase64}" class="tarot-master-frame">
+                                ${wrapImageForEdit(`<img src="${finalImg}" class="tarot-artwork">`, cardData.visualPrompt, i)}
+                                <img src="${masterFrameBase64}" class="tarot-master-bg">
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-art-window"></div>
                                 <div class="tarot-shield">
                                     <h3 class="tarot-num">${cardData.number}</h3>
                                     <h2 class="tarot-name">${cardData.title}</h2>
@@ -576,15 +714,20 @@ Output valid JSON:
                             </div>
                         </div>
                     `);
-                    await delay(2000);
+                    // Sposta l'immagine dell'artwork visivamente DENTRO la finestra forzata matematicamente.
+                    // Il CSS maschera l'eccesso.
+                    document.querySelectorAll('.tarot-art-window')[i].appendChild(
+                        document.querySelectorAll(`.page-bleed[data-idx="${i}"] .editable-image-container`)[0]
+                    );
+                    await delay(500);
 
-                    // Pagina 2: Simbolismo Mistico (Stile Taschen)
                     currentPhysicalPage++;
-                    globalTocEntries.push({ title: cardData.title, pageNum: currentPhysicalPage-1 });
+                    globalTocEntries.push({ title: cardData.title, number: cardData.number, pageNum: currentLogicalPage });
+                    
                     DOM.bookPage.insertAdjacentHTML('beforeend', `
                         <div class="page-text recipe-block" data-idx="${i}">
                             <div class="symbol-page">
-                                <h1 class="doc-h1">Simbolismo Mistico</h1>
+                                <h1 class="doc-h1">${t.sym}</h1>
                                 <div style="text-align:center; color: var(--gold); margin-bottom: 20px; font-size:1.5rem;">✦ ✧ ✦</div>
                                 <p class="symbol-intro"><span class="drop-cap">${cardData.intro.charAt(0)}</span>${cardData.intro.substring(1)}</p>
                                 <div class="symbol-grid">
@@ -596,19 +739,19 @@ Output valid JSON:
                                     `).join('')}
                                 </div>
                                 <div class="numerology-box">
-                                    <div class="numerology-title">Codice Numerologico e Cromatico</div>
+                                    <div class="numerology-title">Numerology & Color</div>
                                     <p class="numerology-text">${cardData.numerology}</p>
                                 </div>
                             </div>
                         </div>
                     `);
 
-                    // Pagina 3: Dinamiche dell'Oracolo (Zero Overflow)
                     currentPhysicalPage++;
+                    currentLogicalPage++;
                     DOM.bookPage.insertAdjacentHTML('beforeend', `
                         <div class="page-text recipe-block" data-idx="${i}">
                             <div class="oracle-wrapper">
-                                <h1 class="doc-h1">Dinamiche dell'Oracolo</h1>
+                                <h1 class="doc-h1">${t.ora}</h1>
                                 <div style="margin-bottom: 20px;"></div>
                                 ${cardData.readings.map(r => `
                                     <div class="reading-slot">
@@ -626,169 +769,214 @@ Output valid JSON:
                             </div>
                         </div>
                     `);
+                    currentLogicalPage++;
                 }
+                
+                generatedCards = tempGeneratedCards;
 
-                // Appendice: Print & Play a grandezza naturale (2.75" x 4.75" a slot)
-                currentPhysicalPage++;
-                let pnpGrids = "";
+                // Generate Edge-to-Edge Print and Play with immediate Back page
                 for(let i=0; i<generatedCards.length; i+=4) {
-                    let gridHTML = '<div class="page-text" style="padding: 10px;"><h2 class="doc-h2" style="margin-bottom:10px; font-size: 1rem;">Print & Play (Ritagliare)</h2><div class="pnp-grid">';
+                    
+                    // FRONTE DELLE 4 CARTE
+                    currentPhysicalPage++;
+                    let frontHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
                     for(let j=0; j<4; j++) {
                         if(generatedCards[i+j]) {
-                            gridHTML += `
+                            frontHTML += `
                             <div class="pnp-card">
-                                <img src="${generatedCards[i+j].image}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:1;">
-                                <img src="${masterFrameBase64}" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:2; mix-blend-mode:multiply;">
-                                <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 35%; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 15px;">
-                                    <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 14px; font-weight: bold;">${generatedCards[i+j].number}</div>
-                                    <div style="font-family: 'Cinzel', serif; color: white; font-size: 16px; font-weight: bold; text-transform: uppercase;">${generatedCards[i+j].title}</div>
+                                <img src="${masterFrameBase64}" class="tarot-master-bg">
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-art-window" style="border-width: 2px;">
+                                    <img src="${generatedCards[i+j].image}" id="pnp-img-${i+j}" class="tarot-artwork">
+                                </div>
+                                <div class="tarot-shield" style="padding: 6px 2px; border-top-width: 1px;">
+                                    <div style="font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 11px; font-weight: bold; margin-bottom: 2px;">${generatedCards[i+j].number}</div>
+                                    <div style="font-family: 'Cinzel', serif; color: white; font-size: 11px; font-weight: bold; text-transform: uppercase;">${generatedCards[i+j].title}</div>
                                 </div>
                             </div>`;
                         } else {
-                            gridHTML += `<div class="pnp-card" style="background:#e2e8f0;"></div>`;
+                            frontHTML += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
                         }
                     }
-                    gridHTML += '</div></div>';
-                    DOM.bookPage.insertAdjacentHTML('beforeend', gridHTML);
+                    frontHTML += '</div></div>';
+                    DOM.bookPage.insertAdjacentHTML('beforeend', frontHTML);
+
+                    // RETRO DELLE 4 CARTE (Immediatamente pagina successiva per il fronte/retro perfetto)
+                    currentPhysicalPage++;
+                    let backHTML = `<div class="page-text no-page-num pnp-sheet"><div class="pnp-container">`;
+                    for(let j=0; j<4; j++) {
+                        if(generatedCards[i+j]) {
+                            backHTML += `
+                            <div class="pnp-card">
+                                <img src="${masterFrameBase64}" class="tarot-master-bg" style="filter: brightness(0.4) contrast(1.2);">
+                                <div class="tarot-css-frame-outer"></div>
+                                <div class="tarot-art-window" style="border-width: 2px; display: flex; justify-content: center; align-items: center; background: #0f1219;">
+                                    <img src="${masterFrameBase64}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.25; position: absolute;">
+                                    <div style="font-family: 'Cinzel', serif; font-size: 40px; color: #d4af37; z-index: 5;">✦</div>
+                                </div>
+                            </div>`;
+                        } else {
+                            backHTML += `<div class="pnp-card" style="background:#fff; border:none; box-shadow:none;"></div>`;
+                        }
+                    }
+                    backHTML += '</div></div>';
+                    DOM.bookPage.insertAdjacentHTML('beforeend', backHTML);
                 }
 
-                // Tutorial Artigianale
+                // Tutorial
                 DOM.bookPage.insertAdjacentHTML('beforeend', `
                     <div class="page-text">
-                        <h1 class="doc-h1">Creazione del Mazzo</h1>
-                        <p class="symbol-intro">Stampa le pagine precedenti. Incolla i fogli su cartoncino leggero (es. scatole di cereali). Proteggi fronte e retro con nastro adesivo da imballaggio trasparente, stendendolo lentamente per evitare bolle. Infine, ritaglia lungo i bordi tratteggiati. Il tuo grimorio fisico è pronto.</p>
+                        <h1 class="doc-h1">${t.tutTitle}</h1>
+                        <p class="symbol-intro" style="margin-bottom: 1rem;">${t.tut}</p>
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1rem;">
+                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
+                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">1</div>
+                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step1}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step1Desc}</p></div>
+                            </div>
+                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
+                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">2</div>
+                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step2}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step2Desc}</p></div>
+                            </div>
+                            <div style="display: flex; gap: 20px; align-items: center; background: var(--page-bg); border: 1px solid #cbd5e1; padding: 20px; border-radius: 8px;">
+                                <div style="width: 50px; height: 50px; background: var(--primary-dark); color: var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; font-family: 'Cinzel', serif; flex-shrink: 0;">3</div>
+                                <div><h4 style="font-family: 'Cinzel', serif; margin: 0 0 5px 0; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-weight: bold;">${t.step3}</h4><p style="font-family: 'Inter', sans-serif; margin: 0; font-size: calc(10pt * var(--font-scale)); color: #475569;">${t.step3Desc}</p></div>
+                            </div>
+                        </div>
                     </div>
                 `);
 
-                updateStatus("Manoscritto Completato!", 100, arcanaList.length, arcanaList.length);
-                showToast("Libro generato con successo!", "success");
+                // TOC - Leader Dots (Premium Layout)
+                let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 2rem;">${t.toc}</h1><div style="display: flex; flex-direction: column; gap: 14px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
+                globalTocEntries.forEach(entry => {
+                    tocHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
+                            <span style="font-weight: 500; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
+                                ${entry.number ? entry.number + ' - ' : ''}${entry.title}
+                            </span>
+                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
+                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
+                                ${entry.pageNum}
+                            </span>
+                        </div>`;
+                });
+                tocHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative; margin-top: 15px;">
+                            <span style="font-weight: 700; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
+                                ${t.tutTitle}
+                            </span>
+                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
+                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
+                                ${currentLogicalPage}
+                            </span>
+                        </div>
+                    </div></div>`;
+                DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
+
+                updateStatus(isTranslation ? "Traduzione Completata!" : "Manoscritto Completato!", 100, listToProcess.length, listToProcess.length);
+                showToast("Libro elaborato con successo!", "success");
             } catch(e) { showToast(e.message, "error"); } finally {
-                DOM.btnStart.disabled = false; DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden');
+                DOM.btnStart.disabled = false; DOM.btnTranslate.disabled = false;
+                DOM.btnText.classList.remove('hidden'); DOM.btnLoader.classList.add('hidden');
+                DOM.btnTranslateText.classList.remove('hidden'); DOM.btnTranslateLoader.classList.add('hidden');
                 setTimeout(() => DOM.progressSection.classList.add('hidden'), 2000);
             }
-        });
+        }
 
         window.openTikTokStudio = async function(title, num, imageSrc) {
-            DOM.videoModal.classList.add('show');
-            DOM.videoPromptCopy.value = "Generazione prompt in corso...";
-            DOM.videoScriptCopy.value = "Generazione script in corso...";
-            DOM.videoToneLabel.innerText = DOM.voiceTone.value;
+            DOM.videoModal.classList.add('show'); DOM.videoPromptCopy.value = "Scrittura copione in corso...";
+            DOM.videoScriptCopy.value = "Elaborazione..."; DOM.videoToneLabel.innerText = DOM.voiceTone.value;
             DOM.btnPlayTTS.onclick = null; 
 
-            const sys = `You are a TikTok Video Director. Generate a dynamic prompt for AI video generators (Runway Gen3, Luma) to animate a static tarot card. Then, write a 15-second emotional voiceover script in Italian matching the tone "${DOM.voiceTone.value}". JSON format: {"videoPrompt": "English prompt describing the camera movement and particle effects for a vertical video...", "script": "Italian script..."}`;
-            
+            const sys = `You are a TikTok Video Director. Generate a dynamic prompt for AI video generators (Runway Gen3, Luma) to animate a static tarot card. Then, write a 15-second emotional voiceover script in Italian matching the tone "${DOM.voiceTone.value}". JSON format: {"videoPrompt": "English prompt describing camera movement, parallax effect...", "script": "Italian script..."}`;
             try {
                 const data = await callGemini(`Create video prompt and script for Tarot Card: ${num} ${title}.`, sys);
-                DOM.videoPromptCopy.value = data.videoPrompt;
-                DOM.videoScriptCopy.value = data.script;
-                
+                DOM.videoPromptCopy.value = data.videoPrompt; DOM.videoScriptCopy.value = data.script;
                 DOM.btnPlayTTS.onclick = () => {
-                    const utterance = new SpeechSynthesisUtterance(data.script);
-                    utterance.lang = 'it-IT';
-                    utterance.rate = 0.9;
+                    const utterance = new SpeechSynthesisUtterance(data.script); utterance.lang = 'it-IT'; utterance.rate = 0.9;
                     if(DOM.voiceTone.value.includes('Dolce')) utterance.pitch = 1.2;
                     else if(DOM.voiceTone.value.includes('Oscuro')) utterance.pitch = 0.6;
-                    window.speechSynthesis.cancel();
-                    window.speechSynthesis.speak(utterance);
+                    window.speechSynthesis.cancel(); window.speechSynthesis.speak(utterance);
                 };
-            } catch(e) {
-                DOM.videoPromptCopy.value = "Errore nella generazione.";
-                DOM.videoScriptCopy.value = "Errore nella generazione.";
-            }
+            } catch(e) { DOM.videoPromptCopy.value = "Errore di connessione."; DOM.videoScriptCopy.value = "Errore."; }
         }
         DOM.closeVideoModal.addEventListener('click', () => { window.speechSynthesis.cancel(); DOM.videoModal.classList.remove('show'); });
 
         DOM.saveMpcBtn.addEventListener('click', async () => {
-            if(generatedCards.length === 0 || !masterFrameBase64) return showToast("Genera prima le carte e la cornice.", "warning");
-            showToast("Estrazione e ritaglio carte per MPC in corso...", "info");
+            if(generatedCards.length === 0 || !masterFrameBase64) return showToast("Genera prima le carte e la texture.", "warning");
+            showToast("Taglio geometrico carte per MPC in corso...", "info");
             DOM.saveMpcBtn.disabled = true;
 
             try {
-                const zip = new JSZip();
-                const w = 900;  // 76mm @ 300dpi approx
-                const h = 1500; // 127mm @ 300dpi approx
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = w; canvas.height = h;
-                const ctx = canvas.getContext('2d');
+                const zip = new JSZip(); const w = 825; const h = 1425; 
+                const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d');
 
                 const loadImg = (src) => new Promise(res => { const i = new Image(); i.crossOrigin="anonymous"; i.onload = ()=>res(i); i.src = src; });
                 const masterFrameImg = await loadImg(masterFrameBase64);
 
+                const insetX = w * 0.09; const insetY = h * 0.07;
+                const innerW = w - (insetX * 2); const innerH = h - (insetY * 2);
+
                 for(let i = 0; i < generatedCards.length; i++) {
-                    const card = generatedCards[i];
-                    ctx.clearRect(0,0,w,h);
+                    const card = generatedCards[i]; ctx.clearRect(0,0,w,h);
                     
-                    // 1. Sfondo Bianco Base
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0,0,w,h);
-
-                    // 2. Artwork Full Bleed (ritagliato centralmente)
-                    const artImg = await loadImg(card.image);
-                    const scale = Math.max(w / artImg.width, h / artImg.height);
-                    const x = (w / 2) - (artImg.width / 2) * scale;
-                    const y = (h / 2) - (artImg.height / 2) * scale;
-                    ctx.drawImage(artImg, x, y, artImg.width * scale, artImg.height * scale);
-
-                    // 3. Maschera Multiply (Applica la cornice preservando il centro)
-                    ctx.globalCompositeOperation = 'multiply';
                     ctx.drawImage(masterFrameImg, 0, 0, w, h);
-                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,h);
 
-                    // 4. Scudo Tipografico (Gradiente scuro alla base)
-                    const grd = ctx.createLinearGradient(0, h, 0, h - 450);
-                    grd.addColorStop(0, "rgba(0,0,0,0.95)");
-                    grd.addColorStop(0.4, "rgba(0,0,0,0.7)");
-                    grd.addColorStop(1, "rgba(0,0,0,0)");
-                    ctx.fillStyle = grd;
-                    ctx.fillRect(0, h - 450, w, 450);
+                    ctx.save(); ctx.beginPath(); ctx.rect(insetX, insetY, innerW, innerH); ctx.clip();
+                    ctx.fillStyle = '#000000'; ctx.fillRect(insetX, insetY, innerW, innerH);
 
-                    // 5. Tipografia Vettoriale in "Safe Area"
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = '#f3e5ab';
-                    ctx.font = 'bold 50px "Cinzel", serif';
-                    ctx.fillText(card.number, w/2, h - 180);
+                    const artImg = await loadImg(card.image);
+                    const scale = Math.max(innerW / artImg.width, innerH / artImg.height);
+                    const imgX = insetX + (innerW / 2) - (artImg.width / 2) * scale;
+                    const imgY = insetY + (innerH / 2) - (artImg.height / 2) * scale;
+                    ctx.drawImage(artImg, imgX, imgY, artImg.width * scale, artImg.height * scale);
+
+                    const shieldH = 150;
+                    ctx.fillStyle = 'rgba(15, 18, 25, 0.95)';
+                    ctx.fillRect(insetX, insetY + innerH - shieldH, innerW, shieldH);
+                    ctx.beginPath(); ctx.moveTo(insetX, insetY + innerH - shieldH); ctx.lineTo(insetX + innerW, insetY + innerH - shieldH);
+                    ctx.lineWidth = 4; ctx.strokeStyle = '#d4af37'; ctx.stroke();
+                    ctx.restore();
+
+                    ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
+                    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
+                    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
+
+                    ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 45px "Cinzel", serif';
+                    ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+                    ctx.fillText(card.number, w/2, insetY + innerH - 85);
                     
-                    ctx.fillStyle = '#ffffff';
-                    let fontSize = 75;
-                    ctx.font = `bold ${fontSize}px "Cinzel", serif`;
-                    // Rimpicciolisce il font se esce dalla safe area
-                    while(ctx.measureText(card.title).width > w - 120) {
-                        fontSize -= 2;
-                        ctx.font = `bold ${fontSize}px "Cinzel", serif`;
-                    }
-                    ctx.fillText(card.title.toUpperCase(), w/2, h - 90);
+                    ctx.fillStyle = '#ffffff'; let fontSize = 60; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
+                    while(ctx.measureText(card.title).width > innerW - 40) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
+                    ctx.fillText(card.title.toUpperCase(), w/2, insetY + innerH - 25);
+                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
-                    // Aggiunge allo ZIP
                     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-                    let fileIdx = i < 10 ? `0${i}` : `${i}`;
-                    let safeName = card.title.replace(/[^a-zA-Z0-9]/g, '_');
-                    zip.file(`${fileIdx}_${safeName}.jpg`, blob);
+                    zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`, blob);
                 }
 
-                // Generazione Retro Mazzo (Generico)
-                ctx.fillStyle = '#1a1e29'; ctx.fillRect(0,0,w,h);
-                ctx.globalCompositeOperation = 'multiply';
-                ctx.drawImage(masterFrameImg, 0,0,w,h);
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.fillStyle = '#d4af37';
-                ctx.textAlign = 'center';
-                ctx.font = 'bold 150px "Cinzel", serif';
-                ctx.fillText("✦", w/2, h/2 + 50);
+                ctx.clearRect(0,0,w,h); ctx.drawImage(masterFrameImg, 0,0,w,h);
+                ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,h);
+                ctx.save(); ctx.beginPath(); ctx.rect(insetX, insetY, innerW, innerH); ctx.clip();
+                ctx.fillStyle = '#0f1219'; ctx.fillRect(insetX, insetY, innerW, innerH);
+                ctx.globalAlpha = 0.25; ctx.drawImage(masterFrameImg, insetX, insetY, innerW, innerH); ctx.globalAlpha = 1.0; ctx.restore();
+                
+                ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
+                ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
+                ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
+                ctx.fillStyle = '#d4af37'; ctx.textAlign = 'center'; ctx.font = 'bold 150px "Cinzel", serif'; ctx.fillText("✦", w/2, h/2 + 50);
+                
                 const backBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
                 zip.file(`Retro_Mazzo.jpg`, backBlob);
-
-                // Scarica
                 const zipContent = await zip.generateAsync({type:"blob"});
                 const a = document.createElement('a'); a.href = URL.createObjectURL(zipContent); a.download = `MPC_Tarot_Deck.zip`; a.click();
-                showToast("File ZIP per MPC scaricato!", "success");
+                showToast("File ZIP geometricamente perfetto pronto!", "success");
             } catch(e) { showToast("Errore Export MPC: " + e.message, "error"); } finally { DOM.saveMpcBtn.disabled = false; }
         });
 
         DOM.savePdfBtn.addEventListener('click', () => {
             if(!document.querySelector('.tarot-card-container')) return showToast("Genera prima un libro.", "warning");
-            showToast("Stampa: Margini 'Nessuno', attiva 'Grafica in background'.", "info");
-            setTimeout(() => window.print(), 1000);
+            showToast("Stampa: Margini 'Nessuno', attiva 'Grafica in background'.", "info"); setTimeout(() => window.print(), 1000);
         });
 
         DOM.btnSaveProject.addEventListener('click', async () => {
@@ -824,16 +1012,13 @@ Output valid JSON:
                 try {
                     const data = JSON.parse(event.target.result);
                     DOM.topicInput.value = data.topic || ""; DOM.readingTheme.value = data.readingTheme || "Generale";
-                    DOM.languageInput.value = data.language || "Italiano"; DOM.customList.value = data.customList || "";
+                    DOM.languageInput.value = data.language || "English (US)"; DOM.customList.value = data.customList || "";
                     DOM.visualSetting.value = data.visualSetting || "";
                     masterFrameBase64 = data.frameBase64 || null;
                     if(masterFrameBase64) DOM.masterFramePreview.innerHTML = `<img src="${masterFrameBase64}" style="width:100%; height:100%; object-fit:cover;">`;
-                    generatedCards = data.generatedCards || [];
-                    
+                    generatedCards = data.generatedCards || []; generatedCards.forEach(c => { if(!c.baseName) c.baseName = c.title; });
                     const tempDiv = document.createElement('div'); tempDiv.innerHTML = data.html;
-                    for(let img of tempDiv.querySelectorAll('img')) {
-                        if(img.src.startsWith('data:image')) img.src = await processImageToBlobUrl(img.src, 1500, 0.9);
-                    }
+                    for(let img of tempDiv.querySelectorAll('img')) { if(img.src.startsWith('data:image')) img.src = await processImageToBlobUrl(img.src, 1500, 0.9); }
                     DOM.bookPage.innerHTML = tempDiv.innerHTML;
                     showToast("Progetto ricaricato!", "success");
                 } catch(err) { showToast("File corrotto.", "error"); }
@@ -843,7 +1028,16 @@ Output valid JSON:
         DOM.btnResetProject.addEventListener('click', () => DOM.resetConfirmModal.classList.add('show'));
         DOM.btnCancelReset.addEventListener('click', () => DOM.resetConfirmModal.classList.remove('show'));
         DOM.btnConfirmReset.addEventListener('click', () => {
-            DOM.bookPage.innerHTML = `<div class="page-text" style="justify-content: center; align-items: center;" id="welcomePlaceholder"><h1 class="doc-title">Tarot Pro Studio</h1></div>`;
+            DOM.bookPage.innerHTML = `
+                <div class="page-text no-page-num" style="padding: 0;">
+                    <div style="margin: var(--safe-margin-px); height: calc(100% - (var(--safe-margin-px) * 2)); border: 4px solid var(--primary-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; box-sizing: border-box; position: relative;">
+                        <div style="font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 4px; font-size: calc(9pt * var(--font-scale)); color: #64748b; margin-bottom: 2rem; text-align: center;">Premium Edition</div>
+                        <h1 class="doc-title" style="border-bottom: none; padding-bottom: 0; line-height: 1.2;">Tarot Pro Studio</h1>
+                        <div style="color: var(--gold); font-size: 2rem; margin: 1.5rem 0;">✦ ✧ ✦</div>
+                        <p style="font-family: 'Playfair Display', serif; color: var(--primary-dark); font-size: calc(12pt * var(--font-scale)); font-style: italic; text-align: center;">Forgia la Texture Maestra a sinistra per iniziare.</p>
+                    </div>
+                </div>
+            `;
             generatedCards = []; masterFrameBase64 = null; DOM.masterFramePreview.innerHTML = '<span class="text-xs text-slate-500">Nessuna Cornice</span>';
             DOM.resetConfirmModal.classList.remove('show'); showToast("Progetto azzerato.", "success");
         });
@@ -855,5 +1049,5 @@ Output valid JSON:
             node.style.fontSize = (parseFloat(window.getComputedStyle(node).fontSize) + delta) + 'px';
         }
     </script>
-</body>
-</html>
+
+</body></html>
