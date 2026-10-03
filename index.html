@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" style="--page-width-px: 576px; --page-height-px: 864px; --safe-margin-px: 72px; --font-scale: 0.85;">
+<html lang="it" style="--page-width-px: 816px; --page-height-px: 1056px; --safe-margin-px: 72px; --font-scale: 1.0;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <style id="dynamicPrintStyle">@media print { @page { size: 6in 9in; margin: 0 !important; } .page-text, .page-bleed { width: 6in !important; height: 9in !important; overflow: hidden !important; } }</style>
+    <style id="dynamicPrintStyle">@media print { @page { size: 8.5in 11in; margin: 0 !important; } .page-text, .page-bleed { width: 8.5in !important; height: 11in !important; overflow: hidden !important; } }</style>
 
     <style>
         :root {
@@ -60,7 +60,6 @@
             position: absolute; top: 7%; bottom: 7%; left: 9%; right: 9%; z-index: 3; background: #000; 
             border: 3px solid var(--gold); box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 0 20px rgba(0,0,0,0.5); 
             overflow: hidden; border-radius: 2px;
-            display: flex; flex-direction: column; justify-content: flex-end; /* Align text overlay to bottom */
         }
         .tarot-art-window::before { content: ''; position: absolute; inset: 0; border: 2px solid rgba(0,0,0,0.4); z-index: 10; pointer-events: none; }
         
@@ -68,9 +67,9 @@
         
         /* New Elegant Overlay for text inside the frame */
         .tarot-text-overlay { 
-            position: relative; z-index: 5; width: 100%; 
-            background: linear-gradient(to top, rgba(15, 18, 25, 0.95) 0%, rgba(15, 18, 25, 0.7) 40%, transparent 100%);
-            padding: 40px 10px 15px 10px; /* Extra padding top for smooth gradient */
+            position: absolute; bottom: 0; left: 0; width: 100%; z-index: 5; 
+            background: linear-gradient(to top, rgba(15, 18, 25, 0.98) 0%, rgba(15, 18, 25, 0.7) 50%, transparent 100%);
+            padding: 50px 10px 15px 10px; /* Extra padding top for smooth gradient */
             display: flex; flex-direction: column; justify-content: flex-end; align-items: center; 
             pointer-events: none; 
         }
@@ -127,11 +126,16 @@
         
         @media print {
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; overflow: visible !important; }
+            
+            /* FIX CRITICO PDF: Neutralizza Flexbox, h-screen e overflow che bloccavano l'impaginazione in Chrome/Edge */
+            body, html { background: white !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; position: static !important; }
             header, .w-\[360px\], #toolbar, #toast-container, .modal, .action-overlay { display: none !important; }
-            #editorContainer, #editorWorkspace { padding: 0 !important; margin: 0 !important; height: auto !important; overflow: visible !important; display: block !important; background: none !important; }
-            #bookPage { gap: 0 !important; display: block !important; }
-            .page-text, .page-bleed { box-shadow: none !important; border: none !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            
+            /* Sblocchiamo tutti i wrapper principali forzandoli in display: block */
+            #mainContentWrapper, #editorContainer, #editorWorkspace { padding: 0 !important; margin: 0 !important; height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; background: transparent !important; position: static !important; width: 100% !important; flex: none !important; }
+            
+            #bookPage { gap: 0 !important; display: block !important; height: auto !important; overflow: visible !important; }
+            .page-text, .page-bleed { box-shadow: none !important; border: none !important; margin: 0 !important; page-break-after: always !important; break-after: page !important; page-break-inside: avoid !important; break-inside: avoid !important; float: none !important; }
             .editable-image-container::after { display: none !important; }
         }
     </style>
@@ -145,7 +149,7 @@
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#d4af37] to-[#f3e5ab]" style="font-family: 'Cinzel', serif;">KDP Tarot Pro Studio</span>
         </h1>
         <div class="flex items-center gap-3">
-            <div id="headerTrimLabel" class="text-[11px] font-medium bg-[#1a1e29] py-1.5 px-3 rounded text-slate-400 border border-slate-700 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 6" x 9" Bleed</div>
+            <div id="headerTrimLabel" class="text-[11px] font-medium bg-[#1a1e29] py-1.5 px-3 rounded text-slate-400 border border-slate-700 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 8.5" x 11" Bleed</div>
             <button id="saveMpcBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded flex items-center gap-2 transition-all shadow-[0_0_10px_rgba(79,70,229,0.4)]">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg> Esporta Mazzo (MPC Zip)
             </button>
@@ -155,7 +159,7 @@
         </div>
     </header>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div id="mainContentWrapper" class="flex flex-1 overflow-hidden">
         <div class="w-[360px] bg-[#0f1219] border-r border-[#1a1e29] flex flex-col shrink-0 z-10 shadow-2xl">
             <div class="p-5 overflow-y-auto flex-1 custom-scrollbar">
                 
@@ -228,8 +232,8 @@
                         <div>
                             <label class="block text-[10px] font-medium text-slate-400 mb-1">Gabbia Libro</label>
                             <select id="trimSize" class="w-full p-2 bg-[#0f1219] border border-slate-700 rounded outline-none text-xs text-slate-200">
-                                <option value="6x9" selected>6 x 9 in. (Standard)</option>
-                                <option value="7x10">7 x 10 in. (Grande)</option>
+                                <option value="8.5x11" selected>8.5 x 11 in. (A4 / KDP Large)</option>
+                                <option value="6x9">6 x 9 in. (Standard)</option>
                             </select>
                         </div>
                     </div>
@@ -498,12 +502,11 @@
         DOM.trimSize.addEventListener('change', applyLayoutEngine);
 
         function wrapImageForEdit(imgHtml, originalPrompt, idx) {
-            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)"></div>${imgHtml}`;
+            return `<div class="editable-image-container" data-idx="${idx}" data-prompt="${originalPrompt.replace(/"/g, '&quot;')}" onclick="openRegenModal(this)">${imgHtml}</div>`;
         }
 
         window.openRegenModal = function(container) {
-            // Because the container is now a sibling absolutely positioned over the img
-            imageToRegenerate = container.nextElementSibling;
+            imageToRegenerate = container.querySelector('img.tarot-artwork') || container.nextElementSibling;
             basePromptForRegen = container.dataset.prompt;
             currentEditingIdx = container.dataset.idx;
             DOM.regenPrompt.value = "";
@@ -601,7 +604,7 @@ Interpret the card specifically through the lens of: "${readingTheme}".
 Output valid JSON:
 {
   "title": "TRANSLATED Card Name in ${lang.toUpperCase()} (e.g. 'Il Matto' instead of 'The Fool')",
-  "number": "Number (Roman Numeral) OR Translated Number if applicable in ${lang.toUpperCase()} (e.g. '0' or 'Zero')",
+  "number": "STRICTLY use ONLY the universal Roman Numeral or numeric digit (e.g., '0', 'I', 'II', 'III', 'X'). NEVER write the number as a word in any language.",
   "intro": "2 sentences introduction.",
   "symbols": [{"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}, {"name":"Translated Symbol Name", "desc":"Short desc"}],
   "numerology": "1 sentence on numerology/color.",
@@ -612,7 +615,7 @@ Output valid JSON:
     {"archetype":"Translated term for 'Shadow & Crossroads'", "position":"Translated term for 'Obstacle'", "text":"..."}
   ],
   "mantra": "Affirmation quote",
-  "visualPrompt": "ENGLISH visual prompt. A beautiful full-bleed tarot illustration of [Card]. ZERO text. ZERO numbers. Pure artwork. Style: ${visualSetting || 'Mystical realism'}."
+  "visualPrompt": "ENGLISH visual prompt. A beautiful full-bleed tarot illustration of [Card]. The main subject MUST be centered. Leave generous empty negative space at the very bottom of the image so text can be safely overlaid without covering the subject. ZERO text. ZERO numbers. Pure artwork. Style: ${visualSetting || 'Mystical realism'}."
 }`;
 
             try {
@@ -621,7 +624,7 @@ Output valid JSON:
                     updateStatus(`${isTranslation ? 'Traduzione' : 'Divinazione'}: ${item.baseName}...`, (i/listToProcess.length)*100, i+1, listToProcess.length);
                     
                     const callPrompt = `Analyze the Tarot card: ${item.baseName}. Lens: ${readingTheme}. Target Language: ${lang.toUpperCase()}. 
-CRITICAL INSTRUCTION: You MUST translate the card title (and number) into ${lang.toUpperCase()}! The fields "title" and "number" in the JSON must reflect the final target language.`;
+CRITICAL INSTRUCTION: You MUST translate the card title into ${lang.toUpperCase()}! The field "title" must reflect the final target language. The field "number" MUST remain a universal symbol (like '0', 'I', 'II') and NEVER be written as a word.`;
                     const cardData = await callGemini(callPrompt, sysBase);
 
                     let finalImg = item.image;
@@ -775,35 +778,32 @@ CRITICAL INSTRUCTION: You MUST translate the card title (and number) into ${lang
                     </div>
                 `);
 
-                let allTocItems = [...globalTocEntries];
-                allTocItems.push({ title: t.tutTitle, number: "", pageNum: currentLogicalPage });
-                
-                const ITEMS_PER_PAGE = 22; // Safe amount to fit 6x9 without overflow
-                for (let p = 0; p < allTocItems.length; p += ITEMS_PER_PAGE) {
-                    let chunk = allTocItems.slice(p, p + ITEMS_PER_PAGE);
-                    let pageTitleStr = p === 0 ? t.toc : `${t.toc} (Cont.)`;
-                    
-                    let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 2rem;">${pageTitleStr}</h1><div style="display: flex; flex-direction: column; gap: 14px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
-                    
-                    chunk.forEach(entry => {
-                        let numStr = entry.number ? entry.number + ' - ' : '';
-                        let isBoldTitle = !entry.number ? '700' : '500'; // Bold for Tutorial
-                        
-                        tocHTML += `
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
-                                <span style="font-weight: ${isBoldTitle}; color: var(--primary-dark); font-size: calc(11pt * var(--font-scale)); background: var(--page-bg); padding-right: 10px; z-index: 2;">
-                                    ${numStr}${entry.title}
-                                </span>
-                                <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 5px; z-index: 1;"></div>
-                                <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(12pt * var(--font-scale)); background: var(--page-bg); padding-left: 10px; z-index: 2;">
-                                    ${entry.pageNum}
-                                </span>
-                            </div>`;
-                    });
-                    
-                    tocHTML += `</div></div>`;
-                    DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
-                }
+                // TOC - Leader Dots (Premium Layout in One Strict Page)
+                let tocHTML = `<div class="page-text"><h1 class="doc-h1" style="margin-bottom: 1.5rem;">${t.toc}</h1><div style="display: flex; flex-direction: column; gap: 8px; font-family: 'Inter', sans-serif; width: 100%; padding: 0 10px;">`;
+                globalTocEntries.forEach(entry => {
+                    tocHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative;">
+                            <span style="font-weight: 500; color: var(--primary-dark); font-size: calc(9.5pt * var(--font-scale)); background: var(--page-bg); padding-right: 8px; z-index: 2; line-height: 1;">
+                                ${entry.number ? entry.number + ' - ' : ''}${entry.title}
+                            </span>
+                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 4px; opacity: 0.7; z-index: 1;"></div>
+                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(10pt * var(--font-scale)); background: var(--page-bg); padding-left: 8px; z-index: 2; line-height: 1;">
+                                ${entry.pageNum}
+                            </span>
+                        </div>`;
+                });
+                tocHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative; margin-top: 10px;">
+                            <span style="font-weight: 700; color: var(--primary-dark); font-size: calc(9.5pt * var(--font-scale)); background: var(--page-bg); padding-right: 8px; z-index: 2; line-height: 1;">
+                                ${t.tutTitle}
+                            </span>
+                            <div style="flex-grow: 1; border-bottom: 2px dotted #cbd5e1; margin-bottom: 4px; opacity: 0.7; z-index: 1;"></div>
+                            <span style="font-family: 'Cinzel', serif; font-weight: bold; color: var(--gold); font-size: calc(10pt * var(--font-scale)); background: var(--page-bg); padding-left: 8px; z-index: 2; line-height: 1;">
+                                ${currentLogicalPage}
+                            </span>
+                        </div>
+                    </div></div>`;
+                DOM.bookPage.insertAdjacentHTML('beforeend', tocHTML);
 
                 updateStatus(isTranslation ? "Traduzione Completata!" : "Manoscritto Completato!", 100, listToProcess.length, listToProcess.length);
                 showToast("Libro elaborato con successo!", "success");
@@ -867,33 +867,31 @@ CRITICAL INSTRUCTION: You MUST translate the card title (and number) into ${lang
                     const imgY = insetY + (innerH / 2) - (artImg.height / 2) * scale;
                     ctx.drawImage(artImg, imgX, imgY, artImg.width * scale, artImg.height * scale);
 
-                    // Draw elegant bottom gradient overlay
-                    const gradientH = 300; // Taller for smooth fade
+                    // Elegante Gradiente Sfumato dal basso (risolve la riga tagliata)
+                    const gradientH = innerH * 0.45; 
                     const grd = ctx.createLinearGradient(0, insetY + innerH - gradientH, 0, insetY + innerH);
-                    grd.addColorStop(0, "rgba(0,0,0,0)");
-                    grd.addColorStop(0.4, "rgba(15,18,25,0.7)");
-                    grd.addColorStop(1, "rgba(15,18,25,0.95)");
+                    grd.addColorStop(0, "rgba(15,18,25,0)");
+                    grd.addColorStop(0.5, "rgba(15,18,25,0.7)");
+                    grd.addColorStop(1, "rgba(15,18,25,0.98)");
                     ctx.fillStyle = grd;
                     ctx.fillRect(insetX, insetY + innerH - gradientH, innerW, gradientH);
-                    ctx.restore(); // restore clip
+                    ctx.restore(); // ripristina la clip per disegnare i bordi INTATTI SOPRA il gradiente
 
-                    // Draw precise physical borders over everything
                     ctx.lineWidth = 6; ctx.strokeStyle = '#d4af37'; ctx.strokeRect(insetX, insetY, innerW, innerH);
                     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.strokeRect(insetX + 3, insetY + 3, innerW - 6, innerH - 6);
                     ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)'; ctx.strokeRect(w * 0.045, h * 0.035, w - (w * 0.09), h - (h * 0.07));
 
-                    // Draw Text inside the gradient
                     ctx.textAlign = 'center'; ctx.fillStyle = '#f3e5ab'; ctx.font = 'bold 45px "Cinzel", serif';
-                    ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
-                    ctx.fillText(card.number, w/2, insetY + innerH - 80); // Adjusted Y pos
+                    ctx.shadowColor = "rgba(0,0,0,0.9)"; ctx.shadowBlur = 4; ctx.shadowOffsetY = 2;
+                    ctx.fillText(card.number, w/2, insetY + innerH - 85);
                     
                     ctx.fillStyle = '#ffffff'; let fontSize = 60; ctx.font = `bold ${fontSize}px "Cinzel", serif`;
                     while(ctx.measureText(card.title).width > innerW - 40) { fontSize -= 2; ctx.font = `bold ${fontSize}px "Cinzel", serif`; }
                     ctx.fillText(card.title.toUpperCase(), w/2, insetY + innerH - 25);
-                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; // reset
+                    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
                     const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
-                    zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_')}.jpg`, blob);
+                    zip.file(`${i < 10 ? `0${i}` : `${i}`}_${card.title.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`, blob);
                 }
 
                 ctx.clearRect(0,0,w,h); ctx.drawImage(masterFrameImg, 0,0,w,h);
@@ -909,9 +907,16 @@ CRITICAL INSTRUCTION: You MUST translate the card title (and number) into ${lang
                 
                 const backBlob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.95));
                 zip.file(`Retro_Mazzo.jpg`, backBlob);
-                const zipContent = await zip.generateAsync({type:"blob"});
+                
+                // Generazione ZIP compresso per salvaguardare memoria e dimensione (Algoritmo DEFLATE)
+                const zipContent = await zip.generateAsync({
+                    type: "blob", 
+                    compression: "DEFLATE", 
+                    compressionOptions: { level: 6 }
+                });
+                
                 const a = document.createElement('a'); a.href = URL.createObjectURL(zipContent); a.download = `MPC_Tarot_Deck.zip`; a.click();
-                showToast("File ZIP geometricamente perfetto pronto!", "success");
+                showToast("File ZIP geometricamente perfetto e compresso pronto!", "success");
             } catch(e) { showToast("Errore Export MPC: " + e.message, "error"); } finally { DOM.saveMpcBtn.disabled = false; }
         });
 
